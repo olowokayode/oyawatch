@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0c0c0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Oya Watch — What Are You Watching Tonight?</title>
+<meta name="description" content="Oya Watch helps you decide what to watch tonight. Pick a mood, get picks you can actually stream — no more 40-minute scroll.">
+<meta property="og:title" content="Oya Watch">
+<meta property="og:description" content="Pick a mood. Get picks you can actually stream. Stop scrolling, start watching.">
+<meta property="og:image" content="https://images.pexels.com/photos/1117132/pexels-photo-1117132.jpeg?auto=compress&cs=tinysrgb&w=1200&h=630&fit=crop">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0c0c0c;--surface:#161616;--surface2:#202020;--surface3:#2a2a2a;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f0f0;--muted:rgba(240,240,240,0.4);--muted2:rgba(240,240,240,0.65);
+  --red:#E50914;--gold:#C9A84C;
+  --fd:'Syne',sans-serif;--fb:'Inter',sans-serif;
+  --rpill:100px;--rcard:16px;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100dvh;overscroll-behavior:none}
+.screen{display:none;flex-direction:column;min-height:100dvh}
+.screen.active{display:flex}
+
+/* ── ONBOARDING ── */
+#screen-onboard{background:var(--bg);justify-content:flex-end;position:relative;overflow:hidden}
+/* soft cinematic spotlight behind the hero/headline */
+#screen-onboard::before{content:'';position:absolute;top:-8%;left:50%;transform:translateX(-50%);width:120%;height:52%;background:radial-gradient(ellipse at center,rgba(229,9,20,0.18),rgba(229,9,20,0.05)45%,transparent 70%);pointer-events:none;z-index:0}
+.onboard-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px 20px;text-align:center;position:relative;z-index:1}
+
+/* mood-coloured poster marquee — previews the app's palette, pure CSS */
+.onboard-hero{width:100vw;max-width:520px;margin-bottom:26px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+.poster-marquee{display:flex;gap:12px;width:max-content;animation:posterDrift 34s linear infinite}
+.poster-chip{width:46px;height:69px;border-radius:9px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 6px 16px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.14);position:relative}
+.poster-chip::after{content:'';position:absolute;inset:0;border-radius:9px;background:linear-gradient(160deg,rgba(255,255,255,0.16),transparent 42%)}
+.pc1{background:linear-gradient(150deg,#2d6a4f,#0d2b1a)}
+.pc2{background:linear-gradient(150deg,#b84c00,#1a0800)}
+.pc3{background:linear-gradient(150deg,#8b2050,#1a0410)}
+.pc4{background:linear-gradient(150deg,#1e1e6e,#05050f)}
+.pc5{background:linear-gradient(150deg,#3d185a,#0c0514)}
+.pc6{background:linear-gradient(150deg,#6b0000,#0d0000)}
+.pc7{background:linear-gradient(150deg,#1a4a8a,#050f1a)}
+.pc8{background:linear-gradient(150deg,#6a5400,#141000)}
+@keyframes posterDrift{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 6px))}}
+@media (prefers-reduced-motion:reduce){.poster-marquee{animation:none}}
+@media (max-height:600px){.onboard-hero{display:none}}
+.reel-strip{display:flex;gap:6px;margin-bottom:24px;opacity:0.2}
+.reel-hole{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--text)}
+.step-label{font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;font-family:var(--fb)}
+.onboard-headline{font-family:var(--fd);font-size:30px;font-weight:800;line-height:1.12;color:var(--text);margin-bottom:10px}
+.onboard-headline em{font-style:normal;color:var(--red)}
+.onboard-sub{font-size:14px;color:var(--muted2);line-height:1.6;max-width:272px}
+.progress-dots{display:flex;gap:6px;margin-top:20px;justify-content:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border2);transition:all 0.3s}
+.dot.active{width:20px;border-radius:3px;background:var(--red)}
+.dot.done{background:var(--muted)}
+.onboard-form{flex-shrink:0;padding:20px 24px env(safe-area-inset-bottom,24px);position:relative;z-index:1}
+
+/* inputs — 16px prevents iOS zoom */
+.name-input{width:100%;padding:16px 18px;border-radius:var(--rcard);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--fb);font-size:16px;font-weight:500;outline:none;-webkit-appearance:none;margin-bottom:12px;display:block;transition:border-color 0.2s}
+.name-input::placeholder{color:var(--muted)}
+.name-input:focus{border-color:rgba(255,255,255,0.3)}
+
+/* Platform select — single select, 2 options only */
+.platform-list{display:flex;flex-direction:column;gap:10px;width:100%;margin-bottom:4px}
+.platform-opt{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--rcard);border:1.5px solid var(--border2);background:var(--surface);cursor:pointer;transition:all 0.18s;-webkit-user-select:none;user-select:none}
+.platform-opt.selected{border-color:var(--red);background:var(--surface2)}
+.platform-opt-icon{font-size:22px;flex-shrink:0}
+.platform-opt-name{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--text)}
+.platform-opt-check{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;transition:all 0.2s}
+.platform-opt.selected .platform-opt-check{background:var(--red);border-color:var(--red)}
+
+.option-grid{display:flex;flex-direction:column;gap:9px;width:100%}
+.option-btn{width:100%;padding:14px 18px;border-radius:var(--rcard);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;text-align:left;transition:all 0.18s;display:flex;align-items:center;justify-content:space-between}
+.option-btn.selected{background:var(--surface2);border-color:rgba(255,255,255,0.28)}
+.option-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all 0.2s}
+.option-btn.selected .option-check{background:var(--red);border-color:var(--red);color:#fff}
+
+.primary-btn{width:100%;padding:16px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:16px;font-weight:800;cursor:pointer;transition:opacity 0.2s,transform 0.15s;margin-top:12px;display:block;letter-spacing:0.02em}
+.primary-btn:disabled{opacity:0.25;cursor:not-allowed}
+.primary-btn:not(:disabled):active{transform:scale(0.97)}
+.skip-link{text-align:center;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* ── PICK SCREEN ── */
+#screen-pick{background:var(--bg)}
+.pick-header{padding:48px 24px 0;flex-shrink:0}
+.wordmark-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.wordmark{font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;font-family:var(--fb)}
+.wordmark::before{content:'';display:block;width:14px;height:1px;background:var(--red)}
+.platform-pill-btn{font-size:11px;color:var(--muted2);font-family:var(--fb);font-weight:600;background:var(--surface);border:1px solid var(--border2);border-radius:var(--rpill);padding:5px 12px;cursor:pointer;transition:all 0.2s;flex-shrink:0;white-space:nowrap}
+.platform-pill-btn:active{background:var(--surface2)}
+.pick-greeting{font-family:var(--fd);font-size:24px;font-weight:800;line-height:1.15;color:var(--text)}
+.pick-greeting em{font-style:normal;color:var(--red)}
+
+/* Type toggle — pill style, proper sizing */
+.type-toggle{display:flex;gap:6px;padding:14px 24px 0;flex-shrink:0}
+.type-toggle-btn{flex:1;padding:9px 4px;border-radius:var(--rpill);border:1px solid var(--border2);background:var(--surface);color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;white-space:nowrap}
+.type-toggle-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+/* Similar search — visual hierarchy: less prominent than mood grid */
+.similar-section{padding:10px 24px 0;flex-shrink:0}
+.similar-inner{background:var(--surface);border:1px solid var(--border);border-radius:var(--rcard);padding:11px 12px;display:flex;align-items:center;gap:8px}
+.similar-input{flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-family:var(--fb);font-size:16px;outline:none;-webkit-appearance:none}
+.similar-input::placeholder{color:var(--muted);font-size:14px}
+.similar-go{padding:8px 14px;border-radius:8px;border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;transition:opacity 0.2s}
+.similar-go:disabled{opacity:0.3;cursor:not-allowed}
+.similar-go:not(:disabled):active{opacity:0.85}
+
+.section-rule{display:flex;align-items:center;gap:12px;padding:10px 24px 10px;flex-shrink:0}
+.section-rule span{font-size:10px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);white-space:nowrap;font-family:var(--fb)}
+.section-rule::before,.section-rule::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Mood scroll */
+.mood-scroll-outer{flex:1;position:relative;overflow:hidden;min-height:0}
+.mood-fade{position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to top,var(--bg) 30%,transparent);pointer-events:none;z-index:5;transition:opacity 0.3s}
+.mood-fade.hidden{opacity:0}
+.mood-scroll{height:100%;overflow-y:auto;padding:0 24px 110px;-webkit-overflow-scrolling:touch}
+.mood-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Cards */
+.mood-card{border-radius:var(--rcard);cursor:pointer;position:relative;overflow:hidden;aspect-ratio:2/3;max-height:200px;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid var(--border);transition:transform 0.2s,border-color 0.25s,box-shadow 0.25s;-webkit-user-select:none;user-select:none}
+.mood-card:active{transform:scale(0.96)}
+.card-notch-row{position:absolute;top:0;left:0;right:0;height:12px;display:flex;align-items:center;justify-content:space-around;padding:0 4px;z-index:4;background:rgba(0,0,0,0.7)}
+.card-notch{width:5px;height:4px;border-radius:1px;background:rgba(255,255,255,0.1)}
+.card-img{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;transition:filter 0.3s ease,transform 0.3s ease;background-color:var(--surface2)}
+.card-color-wash{position:absolute;inset:0;z-index:1;mix-blend-mode:color;opacity:0;transition:opacity 0.3s ease}
+.card-dark{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,0.72);transition:opacity 0.3s ease}
+.card-gradient{position:absolute;inset:0;z-index:3;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.1) 55%,transparent 100%)}
+.mood-card .card-img{filter:saturate(0.3) brightness(0.5)}
+.mood-card .card-dark{opacity:1}
+.mood-grid.has-selection .mood-card:not(.selected) .card-img{filter:saturate(0.15) brightness(0.28)}
+.mood-card.selected .card-img{filter:saturate(1.1) brightness(1)!important;transform:scale(1.03)}
+.mood-card.selected .card-dark{opacity:0!important}
+.mood-card.selected .card-color-wash{opacity:0.3}
+
+/* Glow — movies */
+.mood-no-wahala.selected{border-color:#2d6a4f;box-shadow:0 0 0 1.5px #2d6a4f,0 0 18px rgba(45,106,79,0.4)}
+.mood-e-choke.selected{border-color:#c85000;box-shadow:0 0 0 1.5px #c85000,0 0 18px rgba(200,80,0,0.4)}
+.mood-chop-breakfast.selected{border-color:#9b2455;box-shadow:0 0 0 1.5px #9b2455,0 0 18px rgba(155,36,85,0.4)}
+.mood-dey-play.selected{border-color:#8a7a00;box-shadow:0 0 0 1.5px #8a7a00,0 0 18px rgba(138,122,0,0.4)}
+.mood-vawulence.selected{border-color:#cc1111;box-shadow:0 0 0 1.5px #cc1111,0 0 18px rgba(204,17,17,0.4)}
+.mood-after-dark.selected{border-color:#2a2a9e;box-shadow:0 0 0 1.5px #2a2a9e,0 0 18px rgba(42,42,158,0.4)}
+.mood-lights-down.selected{border-color:#2a5a2a;box-shadow:0 0 0 1.5px #2a5a2a,0 0 18px rgba(42,90,42,0.4)}
+.mood-deep-feels.selected{border-color:#6a2a9a;box-shadow:0 0 0 1.5px #6a2a9a,0 0 18px rgba(106,42,154,0.4)}
+/* Glow — TV */
+.mood-binge-worthy.selected{border-color:#c85000;box-shadow:0 0 0 1.5px #c85000,0 0 18px rgba(200,80,0,0.4)}
+.mood-addicted.selected{border-color:#cc1111;box-shadow:0 0 0 1.5px #cc1111,0 0 18px rgba(204,17,17,0.4)}
+.mood-heartstrings.selected{border-color:#9b2455;box-shadow:0 0 0 1.5px #9b2455,0 0 18px rgba(155,36,85,0.4)}
+.mood-laugh-track.selected{border-color:#8a7a00;box-shadow:0 0 0 1.5px #8a7a00,0 0 18px rgba(138,122,0,0.4)}
+.mood-whodunit.selected{border-color:#2a2a9e;box-shadow:0 0 0 1.5px #2a2a9e,0 0 18px rgba(42,42,158,0.4)}
+.mood-night-mode.selected{border-color:#6a2a9a;box-shadow:0 0 0 1.5px #6a2a9a,0 0 18px rgba(106,42,154,0.4)}
+.mood-docu.selected{border-color:#2d6a4f;box-shadow:0 0 0 1.5px #2d6a4f,0 0 18px rgba(45,106,79,0.4)}
+.mood-comfort-tv.selected{border-color:#2a5a2a;box-shadow:0 0 0 1.5px #2a5a2a,0 0 18px rgba(42,90,42,0.4)}
+/* Glow — anime */
+.mood-shonen.selected{border-color:#e85d00;box-shadow:0 0 0 1.5px #e85d00,0 0 18px rgba(232,93,0,0.4)}
+.mood-isekai.selected{border-color:#4a90e2;box-shadow:0 0 0 1.5px #4a90e2,0 0 18px rgba(74,144,226,0.4)}
+.mood-seinen.selected{border-color:#8b0000;box-shadow:0 0 0 1.5px #8b0000,0 0 18px rgba(139,0,0,0.4)}
+.mood-slice.selected{border-color:#5a9e5a;box-shadow:0 0 0 1.5px #5a9e5a,0 0 18px rgba(90,158,90,0.4)}
+.mood-shoujo.selected{border-color:#c44a8a;box-shadow:0 0 0 1.5px #c44a8a,0 0 18px rgba(196,74,138,0.4)}
+.mood-dark-fantasy.selected{border-color:#6a0aaa;box-shadow:0 0 0 1.5px #6a0aaa,0 0 18px rgba(106,10,170,0.4)}
+.mood-mindtrip.selected{border-color:#0a8a8a;box-shadow:0 0 0 1.5px #0a8a8a,0 0 18px rgba(10,138,138,0.4)}
+.mood-mecha.selected{border-color:#2a5abb;box-shadow:0 0 0 1.5px #2a5abb,0 0 18px rgba(42,90,187,0.4)}
+
+/* Colour washes */
+.mood-no-wahala .card-color-wash,.mood-comfort-tv .card-color-wash{background:#00ff88}
+.mood-e-choke .card-color-wash,.mood-binge-worthy .card-color-wash{background:#ff4400}
+.mood-chop-breakfast .card-color-wash,.mood-heartstrings .card-color-wash{background:#ff0066}
+.mood-dey-play .card-color-wash,.mood-laugh-track .card-color-wash{background:#ffcc00}
+.mood-vawulence .card-color-wash,.mood-addicted .card-color-wash{background:#ff0000}
+.mood-after-dark .card-color-wash,.mood-whodunit .card-color-wash{background:#0000ff}
+.mood-lights-down .card-color-wash,.mood-docu .card-color-wash{background:#00ff44}
+.mood-deep-feels .card-color-wash,.mood-night-mode .card-color-wash{background:#8800ff}
+.mood-shonen .card-color-wash{background:#ff6600}
+.mood-isekai .card-color-wash{background:#4488ff}
+.mood-seinen .card-color-wash{background:#aa0000}
+.mood-slice .card-color-wash{background:#44cc44}
+.mood-shoujo .card-color-wash{background:#ff44aa}
+.mood-dark-fantasy .card-color-wash{background:#8800cc}
+.mood-mindtrip .card-color-wash{background:#00aaaa}
+.mood-mecha .card-color-wash{background:#2255cc}
+
+/* Movie card images */
+.mood-no-wahala .card-img{background-image:url('https://images.pexels.com/photos/4997840/pexels-photo-4997840.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-e-choke .card-img{background-image:url('https://images.pexels.com/photos/3756165/pexels-photo-3756165.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-chop-breakfast .card-img{background-image:url('https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-dey-play .card-img{background-image:url('https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-vawulence .card-img{background-image:url('https://images.pexels.com/photos/3052361/pexels-photo-3052361.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-after-dark .card-img{background-image:url('https://images.pexels.com/photos/3617457/pexels-photo-3617457.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-lights-down .card-img{background-image:url('https://images.pexels.com/photos/1117132/pexels-photo-1117132.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-deep-feels .card-img{background-image:url('https://images.pexels.com/photos/1172207/pexels-photo-1172207.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+/* TV card images — all different from movies */
+.mood-binge-worthy .card-img{background-image:url('https://images.pexels.com/photos/6899764/pexels-photo-6899764.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-addicted .card-img{background-image:url('https://images.pexels.com/photos/2873486/pexels-photo-2873486.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-heartstrings .card-img{background-image:url('https://images.pexels.com/photos/5617699/pexels-photo-5617699.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-laugh-track .card-img{background-image:url('https://images.pexels.com/photos/7015034/pexels-photo-7015034.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-whodunit .card-img{background-image:url('https://images.pexels.com/photos/8369648/pexels-photo-8369648.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-night-mode .card-img{background-image:url('https://images.pexels.com/photos/1820770/pexels-photo-1820770.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-docu .card-img{background-image:url('https://images.pexels.com/photos/3568520/pexels-photo-3568520.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-comfort-tv .card-img{background-image:url('https://images.pexels.com/photos/6444/pencil-typography-black-design.jpg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+/* Anime card images */
+.mood-shonen .card-img{background-image:url('https://images.pexels.com/photos/3355788/pexels-photo-3355788.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-isekai .card-img{background-image:url('https://images.pexels.com/photos/1252869/pexels-photo-1252869.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-seinen .card-img{background-image:url('https://images.pexels.com/photos/949587/pexels-photo-949587.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-slice .card-img{background-image:url('https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-shoujo .card-img{background-image:url('https://images.pexels.com/photos/931177/pexels-photo-931177.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-dark-fantasy .card-img{background-image:url('https://images.pexels.com/photos/1820770/pexels-photo-1820770.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-mindtrip .card-img{background-image:url('https://images.pexels.com/photos/2156/sky-earth-space-working.jpg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-mecha .card-img{background-image:url('https://images.pexels.com/photos/586344/pexels-photo-586344.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+
+.card-check{position:absolute;top:16px;right:10px;z-index:6;display:none;width:20px;height:20px;background:var(--red);border-radius:50%;align-items:center;justify-content:center}
+.card-check svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none}
+.mood-card.selected .card-check{display:flex}
+.card-content{position:relative;z-index:5;padding:8px 10px 12px}
+.card-tag{font-size:8px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;display:block;font-family:var(--fb)}
+.card-name{font-family:var(--fd);font-size:13px;font-weight:800;line-height:1.2;color:#fff;display:block;white-space:normal;word-break:break-word}
+.card-desc{display:none}
+
+/* Sticky spin */
+.sticky-spin{position:fixed;bottom:0;left:0;right:0;padding:12px 20px env(safe-area-inset-bottom,14px);background:linear-gradient(to top,var(--bg) 55%,transparent);z-index:100}
+.spin-btn{width:100%;padding:0 24px;height:52px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s,transform 0.15s;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.spin-btn:disabled{opacity:0.22;cursor:not-allowed}
+.spin-btn:not(:disabled):active{transform:scale(0.97);opacity:0.9}
+
+/* ── WHEEL ── */
+#screen-wheel{align-items:center;justify-content:center;background:var(--bg)}
+.wheel-wrap{text-align:center;padding:40px 24px;width:100%}
+.wheel-eyebrow{font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;font-family:var(--fb)}
+.wheel-pointer-wrap{position:relative;display:inline-block}
+.wheel-triangle{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid var(--text);z-index:11}
+#wheelCanvas{display:block;margin:0 auto;max-width:280px;width:85vw;height:auto;border-radius:50%}
+.wheel-center-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;background:var(--bg);border-radius:50%;border:2px solid rgba(255,255,255,0.15);z-index:10}
+.wheel-caption{font-size:14px;color:var(--muted2);margin-top:28px;font-style:italic;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.3}50%{opacity:0.9}}
+
+/* ── CURTAIN ── */
+#screen-curtain{overflow:hidden;background:var(--bg)}
+.curtain-container{position:relative;width:100%;height:100dvh;overflow:hidden}
+.curtain-left,.curtain-right{position:absolute;top:0;bottom:0;width:50%;z-index:10;transition:transform 0.8s cubic-bezier(0.86,0,0.07,1);background:#0f0f0f}
+.curtain-left{left:0}.curtain-right{right:0}
+.curtain-left.open{transform:translateX(-100%)}.curtain-right.open{transform:translateX(100%)}
+.curtain-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;gap:8px;padding:0 32px;text-align:center}
+.curtain-label{font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);opacity:0;transition:opacity 0.4s ease;font-family:var(--fb)}
+.curtain-msg{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--text);opacity:0;line-height:1.2;transition:opacity 0.4s ease 0.1s}
+.curtain-label.show,.curtain-msg.show{opacity:1}
+
+/* ── RESULTS ── */
+#screen-results{background:var(--bg)}
+.results-header{padding:48px 24px 0;flex-shrink:0}
+.results-wordmark{font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;font-family:var(--fb)}
+.results-wordmark::before{content:'';display:block;width:14px;height:1px;background:var(--red)}
+.results-pill{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--muted2);border:1px solid var(--border2);letter-spacing:0.04em;font-family:var(--fb)}
+.results-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0}
+.results-title{font-family:var(--fd);font-size:22px;font-weight:800;line-height:1.2;margin-top:10px;color:var(--text)}
+.results-scroll{flex:1;overflow-y:auto;padding:16px 24px 0;-webkit-overflow-scrolling:touch}
+
+/* ── RESULT CARDS ── */
+.pick-card{border-radius:var(--rcard);background:var(--surface);border:1px solid var(--border);margin-bottom:14px;opacity:0;transform:translateY(16px);transition:opacity 0.4s ease,transform 0.4s ease;position:relative;overflow:hidden}
+.pick-card.visible{opacity:1;transform:none}
+.pick-card.top-pick{border-color:rgba(201,168,76,0.35);background:linear-gradient(160deg,#111008,#161616)}
+.pick-card.top-pick::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.card-poster-row{display:flex}
+.card-poster{width:90px;flex-shrink:0;overflow:hidden;background:var(--surface2);border-radius:var(--rcard) 0 0 0}
+.card-poster img{width:100%;height:135px;object-fit:cover;display:block}
+.card-poster-ph{width:90px;height:135px;display:flex;align-items:center;justify-content:center;background:var(--surface2)}
+.card-poster-ph svg{width:24px;height:24px;stroke:var(--muted);stroke-width:1.5;fill:none;opacity:0.35}
+.card-body{flex:1;padding:14px;display:flex;flex-direction:column;min-width:0}
+.top-badge{display:inline-flex;align-items:center;gap:5px;color:var(--gold);font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;align-self:flex-start;font-family:var(--fb)}
+.top-badge::before{content:'';width:14px;height:1px;background:var(--gold)}
+.card-title{font-family:var(--fd);font-size:16px;font-weight:800;color:var(--text);line-height:1.2;white-space:normal;word-break:break-word}
+.card-meta{font-size:11px;color:var(--muted);margin-top:5px;font-weight:500}
+.card-rating{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;color:var(--text);margin-top:10px;align-self:flex-start;font-family:var(--fb)}
+.star{color:var(--gold)}
+.card-synopsis{padding:12px 14px;border-top:1px solid var(--border)}
+.card-synopsis p{font-size:13px;color:var(--muted2);line-height:1.7}
+.card-action-primary{padding:10px 14px 0}
+.watch-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px;border-radius:10px;background:var(--red);border:none;color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.04em;cursor:pointer;transition:opacity 0.15s}
+.watch-btn:active{opacity:0.85}
+.watch-btn svg{width:9px;height:11px;fill:#fff;flex-shrink:0}
+.card-action-trailer{padding:8px 14px 0}
+.trailer-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.trailer-btn:active{background:var(--surface3)}
+.trailer-btn svg{flex-shrink:0}
+.card-action-tertiary{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 14px 14px}
+.action-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 8px;border-radius:10px;font-family:var(--fb);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;border:1px solid var(--border2);background:transparent;color:var(--muted2);white-space:nowrap}
+.action-btn:active{background:var(--surface2)}
+.action-btn svg{flex-shrink:0}
+.action-btn.copied{color:#4ade80;border-color:rgba(74,222,128,0.3)}
+
+.results-actions{padding:12px 24px env(safe-area-inset-bottom,16px);display:flex;gap:8px;flex-shrink:0;background:linear-gradient(to top,var(--bg) 75%,transparent)}
+.btn-ghost{flex:1;padding:14px;border-radius:var(--rpill);border:1px solid var(--border2);background:transparent;color:var(--text);font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn-ghost:active{background:var(--surface)}
+.btn-prim{flex:2;padding:14px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:14px;font-weight:800;cursor:pointer}
+.btn-prim:active{opacity:0.85}
+
+.skel-card{border-radius:var(--rcard);background:var(--surface);border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+.skel{background:var(--surface2);animation:shimmer 1.5s infinite;border-radius:4px}
+@keyframes shimmer{0%{opacity:0.35}50%{opacity:0.7}100%{opacity:0.35}}
+.error-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rcard);padding:24px;text-align:center;margin-bottom:16px}
+.error-box strong{font-family:var(--fd);font-size:16px;color:var(--text);display:block;margin-bottom:8px}
+.error-box p{font-size:13px;color:var(--muted2);line-height:1.7}
+.attribution{text-align:center;font-size:10px;color:rgba(240,240,240,0.12);padding:8px 0 4px;letter-spacing:0.06em}
+.reset-link{display:block;text-align:center;font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding-bottom:env(safe-area-inset-bottom,12px)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:13px;font-weight:500;padding:10px 20px;border-radius:var(--rpill);opacity:0;transition:all 0.22s;z-index:999;white-space:nowrap;pointer-events:none;font-family:var(--fb)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+::-webkit-scrollbar{display:none}
+
+/* ── SHARE POPUP ── */
+.share-popup-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  opacity:0;pointer-events:none;transition:opacity 0.3s ease;
+}
+.share-popup-overlay.active{opacity:1;pointer-events:all}
+.share-popup{
+  width:100%;max-width:340px;
+  background:#161616;border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;padding:20px;
+  transform:scale(0.92) translateY(10px);
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative;pointer-events:all;
+}
+.share-popup-overlay.active .share-popup{transform:scale(1) translateY(0)}
+.share-popup-close{
+  position:absolute;top:14px;right:14px;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--surface2);border:none;
+  color:var(--muted2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:background 0.15s;
+}
+.share-popup-close:active{background:var(--surface3)}
+.share-popup-handle{display:none}
+.share-popup-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;padding-right:24px}
+.share-popup-icon{width:42px;height:42px;background:var(--surface2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.share-popup-headline{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--text);line-height:1.25;margin-bottom:3px}
+.share-popup-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.share-link-box{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.share-link-text{font-size:12px;color:var(--muted2);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.share-link-copy{font-size:11px;font-weight:700;color:var(--red);cursor:pointer;flex-shrink:0;letter-spacing:0.06em;background:none;border:none;padding:0}
+.share-popup-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0}
+.share-btn-primary{padding:12px;border-radius:10px;background:var(--red);border:none;color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:100%}
+.share-btn-primary:active{opacity:0.85}
+.share-btn-secondary{padding:12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:100%}
+.share-btn-secondary:active{background:var(--surface3)}
+.share-dismiss{display:none}
+
+/* ── ADDED: keyboard focus visibility (a11y) ── */
+:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:4px}
+.mood-card:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* ── ADDED: mood card descriptor line ── */
+.card-desc{font-size:9px;line-height:1.35;color:rgba(255,255,255,0.62);margin-top:4px;display:block;font-family:var(--fb);font-weight:500}
+
+/* ── ADDED: star rating (0–5, overlay technique for exact fractional fill) ── */
+.rating-row{display:inline-flex;align-items:center;gap:8px;margin-top:10px;align-self:flex-start}
+.stars{position:relative;display:inline-block;font-size:14px;line-height:1;letter-spacing:2px;font-family:var(--fb)}
+.stars-bg{color:rgba(255,255,255,0.22)}
+.stars-fg{position:absolute;top:0;left:0;overflow:hidden;white-space:nowrap;color:var(--gold)}
+.rating-num{font-size:11px;font-weight:700;color:var(--muted2);font-family:var(--fb)}
+.rating-num b{color:var(--text)}
+
+/* ── ADDED: expandable pick card ── */
+.card-body{cursor:pointer}
+.pick-card .expand-hint{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:0.04em;display:flex;align-items:center;gap:4px}
+.pick-card .expand-hint svg{width:9px;height:9px;transition:transform 0.2s}
+.pick-card.expanded .expand-hint svg{transform:rotate(180deg)}
+.card-details{display:none;padding:0 14px 12px;border-top:1px solid var(--border);margin-top:0}
+.pick-card.expanded .card-details{display:block;padding-top:12px}
+.card-details .detail-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.detail-chip{font-size:10px;font-weight:600;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:var(--fb)}
+.card-details .detail-overview{font-size:13px;color:var(--muted2);line-height:1.7}
+.card-details .detail-tagline{font-style:italic;color:var(--muted);font-size:12px;margin-bottom:8px}
+
+/* ── ADDED: honest watch-button states ── */
+.watch-btn.checking{background:var(--surface2);color:var(--muted2);cursor:default;pointer-events:none}
+.watch-btn.elsewhere{background:var(--surface2);border:1px solid var(--border2);color:var(--text)}
+.watch-btn.elsewhere svg{fill:var(--text)}
+
+/* ── ADDED: show-more button ── */
+.show-more-btn{width:100%;padding:13px;margin:4px 0 2px;border-radius:12px;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.03em;transition:background 0.15s}
+.show-more-btn:active{background:var(--surface2)}
+
+/* ── ADDED: settings sheet ── */
+.sheet-overlay{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s}
+.sheet-overlay.active{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:460px;background:#161616;border:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;padding:22px 22px calc(env(safe-area-inset-bottom,16px) + 16px);transform:translateY(24px);transition:transform 0.28s cubic-bezier(0.34,1.4,0.64,1);max-height:88dvh;overflow-y:auto}
+.sheet-overlay.active .sheet{transform:translateY(0)}
+.sheet-grip{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 16px}
+.sheet-title{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px}
+.sheet-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.sheet-label{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;display:block}
+.sheet .name-input{margin-bottom:0}
+.sheet-choice-row{display:flex;flex-direction:column;gap:8px}
+.sheet-choice{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:12px;border:1.5px solid var(--border2);background:var(--surface);cursor:pointer;transition:all 0.15s;-webkit-user-select:none;user-select:none;font-family:var(--fb);font-size:14px;font-weight:600;color:var(--text)}
+.sheet-choice.selected{border-color:var(--red);background:var(--surface2)}
+.sheet-choice .chk{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+.sheet-choice.selected .chk{background:var(--red);border-color:var(--red)}
+.sheet-save{width:100%;padding:15px;margin-top:22px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer}
+.sheet-save:active{opacity:0.9}
+.sheet-reset{width:100%;text-align:center;background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;text-underline-offset:3px;padding:16px 0 2px;cursor:pointer}
+.sheet-reset.confirming{color:var(--red);font-weight:700;text-decoration:none}
+
+/* ── ADDED: non-blocking share banner (replaces blocking modal) ── */
+.share-popup-overlay{background:none;backdrop-filter:none;-webkit-backdrop-filter:none;align-items:flex-end;padding:0 12px calc(env(safe-area-inset-bottom,12px) + 12px);pointer-events:none}
+.share-popup-overlay.active{opacity:1;pointer-events:none}
+.share-popup{max-width:460px;transform:translateY(140%);transition:transform 0.36s cubic-bezier(0.34,1.4,0.64,1);pointer-events:auto;box-shadow:0 12px 40px rgba(0,0,0,0.55)}
+.share-popup-overlay.active .share-popup{transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- ONBOARDING -->
+<section id="screen-onboard" class="screen active">
+  <div class="onboard-top">
+    <div class="onboard-hero" aria-hidden="true">
+      <div class="poster-marquee">
+        <span class="poster-chip pc1"></span><span class="poster-chip pc2"></span><span class="poster-chip pc3"></span><span class="poster-chip pc4"></span><span class="poster-chip pc5"></span><span class="poster-chip pc6"></span><span class="poster-chip pc7"></span><span class="poster-chip pc8"></span><span class="poster-chip pc1"></span><span class="poster-chip pc2"></span><span class="poster-chip pc3"></span><span class="poster-chip pc4"></span><span class="poster-chip pc5"></span><span class="poster-chip pc6"></span><span class="poster-chip pc7"></span><span class="poster-chip pc8"></span>
+      </div>
+    </div>
+    <div class="step-label" id="stepLabel">Step 1 of 3</div>
+    <h1 class="onboard-headline" id="onboardHeadline">Welcome to<br><em>Oya Watch.</em></h1>
+    <p class="onboard-sub" id="onboardSub">Your personal guide to what's worth watching. What's your name?</p>
+    <div class="progress-dots" id="progressDots">
+      <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+  <div class="onboard-form" id="onboardForm">
+    <input class="name-input" id="nameInput" type="text" placeholder="Your first name" maxlength="24"
+      autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+    <button class="primary-btn" id="onboardNext" disabled>Continue</button>
+    <div class="skip-link" id="skipLink">Skip setup</div>
+  </div>
+</section>
+
+<!-- PICK SCREEN -->
+<section id="screen-pick" class="screen">
+  <div class="pick-header">
+    <div class="wordmark-row">
+      <div class="wordmark">Oya Watch</div>
+      <button class="platform-pill-btn" id="platformPillBtn">Netflix · Change</button>
+    </div>
+    <h1 class="pick-greeting" id="pickGreeting">What are you<br>watching <em>tonight?</em></h1>
+  </div>
+  <div class="type-toggle">
+    <button class="type-toggle-btn active" data-mode="movies">Movies</button>
+    <button class="type-toggle-btn" data-mode="tv">TV Shows</button>
+    <button class="type-toggle-btn" data-mode="anime">Anime</button>
+  </div>
+  <div class="similar-section">
+    <div class="similar-inner">
+      <input class="similar-input" id="similarInput" type="text" placeholder="Type a movie you love..." autocorrect="off" autocomplete="off" spellcheck="false">
+      <button class="similar-go" id="similarGo" disabled>Go</button>
+    </div>
+  </div>
+  <div class="section-rule"><span>Or pick a mood</span></div>
+  <div class="mood-scroll-outer">
+    <div class="mood-scroll" id="moodScroll">
+
+      <!-- MOVIES grid -->
+      <div class="mood-grid" id="moviesGrid">
+        <div class="mood-card mood-no-wahala" data-mood="No Wahala" data-tag="Relaxed" data-genres="18|10751" data-sort="vote_average.desc" data-vote-min="100">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Relaxed</span><span class="card-name">No Wahala</span></div>
+        </div>
+        <div class="mood-card mood-e-choke" data-mood="E Choke!" data-tag="Intense" data-genres="18|53" data-sort="vote_average.desc" data-vote-min="200">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Intense</span><span class="card-name">E Choke!</span></div>
+        </div>
+        <div class="mood-card mood-chop-breakfast" data-mood="Chop Bfast" data-tag="Romance" data-genres="10749|18" data-sort="vote_average.desc" data-vote-min="100">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Romance</span><span class="card-name">Chop Bfast</span></div>
+        </div>
+        <div class="mood-card mood-dey-play" data-mood="Dey Play" data-tag="Comedy" data-genres="35" data-sort="vote_average.desc" data-vote-min="150">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Comedy</span><span class="card-name">Dey Play</span></div>
+        </div>
+        <div class="mood-card mood-vawulence" data-mood="Vawulence" data-tag="Thriller" data-genres="53|80|28" data-sort="vote_average.desc" data-vote-min="200">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Thriller</span><span class="card-name">Vawulence</span></div>
+        </div>
+        <div class="mood-card mood-after-dark" data-mood="After Dark" data-tag="Horror" data-genres="27|9648" data-sort="vote_average.desc" data-vote-min="100">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Horror</span><span class="card-name">After Dark</span></div>
+        </div>
+        <div class="mood-card mood-lights-down" data-mood="Lights Down" data-tag="Cinematic" data-genres="28|12|878" data-sort="vote_average.desc" data-vote-min="300">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Cinematic</span><span class="card-name">Lights Down</span></div>
+        </div>
+        <div class="mood-card mood-deep-feels" data-mood="Deep Feels" data-tag="Drama" data-genres="18" data-sort="vote_average.desc" data-vote-min="500">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Drama</span><span class="card-name">Deep Feels</span></div>
+        </div>
+      </div>
+
+      <!-- TV grid — different names, different images -->
+      <div class="mood-grid" id="tvGrid" style="display:none">
+        <div class="mood-card mood-binge-worthy" data-mood="Binge It" data-tag="Can't Stop" data-genres="18|80" data-sort="vote_average.desc" data-vote-min="200">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Can't Stop</span><span class="card-name">Binge It</span></div>
+        </div>
+        <div class="mood-card mood-addicted" data-mood="Addicted" data-tag="Thriller" data-genres="80|9648|53" data-sort="vote_average.desc" data-vote-min="150">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Thriller</span><span class="card-name">Addicted</span></div>
+        </div>
+        <div class="mood-card mood-heartstrings" data-mood="Heartstrings" data-tag="Romance" data-genres="10749|18|10766" data-sort="vote_average.desc" data-vote-min="100">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Romance</span><span class="card-name">Heartstrings</span></div>
+        </div>
+        <div class="mood-card mood-laugh-track" data-mood="Laugh Track" data-tag="Comedy" data-genres="35|10751" data-sort="vote_average.desc" data-vote-min="100">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Comedy</span><span class="card-name">Laugh Track</span></div>
+        </div>
+        <div class="mood-card mood-whodunit" data-mood="Whodunit" data-tag="Mystery" data-genres="9648|80|18" data-sort="vote_average.desc" data-vote-min="100">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Mystery</span><span class="card-name">Whodunit</span></div>
+        </div>
+        <div class="mood-card mood-night-mode" data-mood="Night Mode" data-tag="Dark Drama" data-genres="18|27" data-sort="vote_average.desc" data-vote-min="100">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Dark Drama</span><span class="card-name">Night Mode</span></div>
+        </div>
+        <div class="mood-card mood-docu" data-mood="Real Talk" data-tag="Documentary" data-genres="99" data-sort="vote_average.desc" data-vote-min="80">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Documentary</span><span class="card-name">Real Talk</span></div>
+        </div>
+        <div class="mood-card mood-comfort-tv" data-mood="Comfort TV" data-tag="Feel Good" data-genres="18|10751|10766" data-sort="vote_average.desc" data-vote-min="80">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Feel Good</span><span class="card-name">Comfort TV</span></div>
+        </div>
+      </div>
+
+      <!-- ANIME grid -->
+      <div class="mood-grid" id="animeGrid" style="display:none">
+        <div class="mood-card mood-shonen" data-mood="Shonen" data-tag="Action" data-genres="28|12|16" data-sort="vote_average.desc" data-vote-min="100" data-anime="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Action</span><span class="card-name">Shonen</span></div>
+        </div>
+        <div class="mood-card mood-isekai" data-mood="Isekai" data-tag="Fantasy" data-genres="14|28|16" data-sort="vote_average.desc" data-vote-min="80" data-anime="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Fantasy</span><span class="card-name">Isekai</span></div>
+        </div>
+        <div class="mood-card mood-seinen" data-mood="Seinen" data-tag="Mature" data-genres="18|27|53|16" data-sort="vote_average.desc" data-vote-min="100" data-anime="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Mature</span><span class="card-name">Seinen</span></div>
+        </div>
+        <div class="mood-card mood-slice" data-mood="Slice of Life" data-tag="Wholesome" data-genres="35|18|16" data-sort="vote_average.desc" data-vote-min="80" data-anime="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Wholesome</span><span class="card-name">Slice of Life</span></div>
+        </div>
+        <div class="mood-card mood-shoujo" data-mood="Shoujo" data-tag="Romance" data-genres="10749|35|16" data-sort="vote_average.desc" data-vote-min="80" data-anime="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Romance</span><span class="card-name">Shoujo</span></div>
+        </div>
+        <div class="mood-card mood-dark-fantasy" data-mood="Dark Fantasy" data-tag="Supernatural" data-genres="14|27|28|16" data-sort="vote_average.desc" data-vote-min="100" data-anime="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Supernatural</span><span class="card-name">Dark Fantasy</span></div>
+        </div>
+        <div class="mood-card mood-mindtrip" data-mood="Mind Trip" data-tag="Psychological" data-genres="9648|53|16" data-sort="vote_average.desc" data-vote-min="100" data-anime="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Psychological</span><span class="card-name">Mind Trip</span></div>
+        </div>
+        <div class="mood-card mood-mecha" data-mood="Mecha" data-tag="Sci-Fi" data-genres="878|28|16" data-sort="vote_average.desc" data-vote-min="80" data-anime="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Sci-Fi</span><span class="card-name">Mecha</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mood-fade" id="moodFade"></div>
+  </div>
+  <div class="sticky-spin">
+    <button class="spin-btn" id="spinBtn" disabled>Select a mood to continue</button>
+  </div>
+</section>
+
+<!-- WHEEL -->
+<section id="screen-wheel" class="screen">
+  <div class="wheel-wrap">
+    <div class="wheel-eyebrow" id="wheelEyebrow">Finding your picks</div>
+    <div class="wheel-pointer-wrap">
+      <div class="wheel-triangle"></div>
+      <canvas id="wheelCanvas" width="300" height="300"></canvas>
+      <div class="wheel-center-dot"></div>
+    </div>
+    <div class="wheel-caption" id="wheelCaption">Scanning the vault...</div>
+  </div>
+</section>
+
+<!-- CURTAIN -->
+<section id="screen-curtain" class="screen">
+  <div class="curtain-container">
+    <div class="curtain-left" id="curtainLeft"></div>
+    <div class="curtain-right" id="curtainRight"></div>
+    <div class="curtain-center">
+      <div class="curtain-label" id="curtainLabel">Oya Watch</div>
+      <div class="curtain-msg" id="curtainMsg">Your picks are ready.</div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="screen-results" class="screen">
+  <div class="results-header">
+    <div class="results-wordmark">Oya Watch</div>
+    <div class="results-pill" id="resultsPill">Tonight</div>
+    <h2 class="results-title" id="resultsTitle">Tonight's picks</h2>
+  </div>
+  <div class="results-scroll" id="resultsScroll"></div>
+  <div class="results-actions">
+    <button class="btn-ghost" id="btnAgain">Change mood</button>
+    <button class="btn-prim" id="btnRespin">Spin again</button>
+  </div>
+</section>
+
+
+<!-- SHARE POPUP -->
+<div class="share-popup-overlay" id="shareOverlay">
+  <div class="share-popup" id="sharePopup">
+    <button class="share-popup-close" id="sharePopupClose">&#x2715;</button>
+    <div class="share-popup-top">
+      <div class="share-popup-icon" id="popupIcon">&#x1F37F;</div>
+      <div>
+        <div class="share-popup-headline" id="popupHeadline">Got someone to watch with?</div>
+        <div class="share-popup-sub" id="popupSub">Send them tonight's picks before they choose something terrible.</div>
+      </div>
+    </div>
+    <div class="share-link-box">
+      <span class="share-link-text" id="shareLinkText">oyawatch.vercel.app</span>
+      <button class="share-link-copy" id="shareLinkCopy">COPY</button>
+    </div>
+    <div class="share-popup-btns">
+      <button class="share-btn-primary" id="sharePopupShare">Share picks</button>
+      <button class="share-btn-secondary" id="sharePopupCopy">Copy link</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS SHEET -->
+<div class="sheet-overlay" id="settingsOverlay">
+  <div class="sheet" id="settingsSheet" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="sheet-grip"></div>
+    <div class="sheet-title">Your settings</div>
+    <div class="sheet-sub">Change your name, platform, or what to keep out of your picks.</div>
+
+    <label class="sheet-label" for="setName">Name</label>
+    <input class="name-input" id="setName" type="text" placeholder="Your first name" maxlength="24" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+
+    <label class="sheet-label">Streaming platform</label>
+    <div class="sheet-choice-row" id="setPlatform">
+      <div class="sheet-choice" data-pkey="netflix" role="button" tabindex="0"><span>🎬</span><span>Netflix</span><span class="chk">✓</span></div>
+      <div class="sheet-choice" data-pkey="crunchyroll" role="button" tabindex="0"><span>🌀</span><span>Crunchyroll</span><span class="chk">✓</span></div>
+    </div>
+
+    <label class="sheet-label">Never show me</label>
+    <div class="sheet-choice-row" id="setAvoid">
+      <div class="sheet-choice" data-avoid="Horror — hard no" role="button" tabindex="0"><span>Horror — hard no</span><span class="chk">✓</span></div>
+      <div class="sheet-choice" data-avoid="Romance please no" role="button" tabindex="0"><span>Romance please no</span><span class="chk">✓</span></div>
+      <div class="sheet-choice" data-avoid="I watch everything" role="button" tabindex="0"><span>I watch everything</span><span class="chk">✓</span></div>
+    </div>
+
+    <button class="sheet-save" id="setSave">Save changes</button>
+    <button class="sheet-reset" id="setReset">Reset profile &amp; start over</button>
+  </div>
+</div>
+<script>
+'use strict';
+
+const TMDB_KEY = 'fef890582a21ff47cd3918c9a5f770cd';
+const TMDB_IMG = 'https://image.tmdb.org/t/p/w300';
+const STORAGE_KEY = 'oyawatch_v1';
+// One-time migration from the previous storage key so existing users keep their profile.
+(function migrateLegacyStore(){
+  try{
+    const LEGACY='tmplug_v6';
+    if(!localStorage.getItem(STORAGE_KEY) && localStorage.getItem(LEGACY)){
+      localStorage.setItem(STORAGE_KEY, localStorage.getItem(LEGACY));
+      const seen=localStorage.getItem(LEGACY+'_seen');
+      if(seen) localStorage.setItem(STORAGE_KEY+'_seen', seen);
+    }
+  }catch{}
+})();
+
+// Only Netflix and Crunchyroll
+const PLATFORMS = {
+  netflix:     { id: 8,   name: 'Netflix',     url: 'https://www.netflix.com/search?q=' },
+  crunchyroll: { id: 283, name: 'Crunchyroll', url: 'https://www.crunchyroll.com/search?q=' },
+};
+
+// Onboarding: 3 steps only — name, platform, avoid
+const STEPS = [
+  { label:'First things first', headline:'Welcome to<br><em>Oya Watch.</em>', sub:"Stop scrolling for 40 minutes every night. Tell us your name and we'll sort the rest.", type:'text', cta:'Continue' },
+  { label:'Nice one{name}', headline:'Where do you<br><em>watch?</em>', sub:"Pick your platform — we'll point you straight to what's on it.", type:'platform', cta:'Continue' },
+  { label:'Last thing{name}', headline:'Anything you<br><em>never watch?</em>', sub:"We'll keep it far away from your picks. No wahala.", type:'options', options:['Horror — hard no','Romance please no','I watch everything'], key:'avoid', cta:"Oya — let's watch" },
+];
+
+const WHEEL_COPY  = ['Scanning the vault...','Asking the critics...','Looking for something unforgettable...','Curating your lineup...','Finding exactly what you need...'];
+const TOP_BADGE   = ['Highest rated','Top rated tonight','Best rated pick'];
+const WHEEL_EMOJIS= ['🎬','🍿','🎭','📽️','🎞️','🏆','⭐','🎥'];
+
+const MOOD_COLORS = {
+  'No Wahala':['#1a4030','#2d6a4f','#1a4030','#0d2b1a'],
+  'E Choke!':['#4a1800','#b84c00','#4a1800','#1a0800'],
+  'Chop Bfast':['#4a1230','#8b2050','#4a1230','#1a0410'],
+  'Dey Play':['#3a2e00','#6a5400','#3a2e00','#141000'],
+  'Vawulence':['#2a0000','#6b0000','#2a0000','#0d0000'],
+  'After Dark':['#0f0f2a','#1e1e6e','#0f0f2a','#05050f'],
+  'Lights Down':['#162414','#1e3a20','#162414','#080e08'],
+  'Deep Feels':['#28103a','#3d185a','#28103a','#0c0514'],
+  'Binge It':['#4a1800','#b84c00','#4a1800','#1a0800'],
+  'Addicted':['#2a0000','#6b0000','#2a0000','#0d0000'],
+  'Heartstrings':['#4a1230','#8b2050','#4a1230','#1a0410'],
+  'Laugh Track':['#3a2e00','#6a5400','#3a2e00','#141000'],
+  'Whodunit':['#0f0f2a','#1e1e6e','#0f0f2a','#05050f'],
+  'Night Mode':['#28103a','#3d185a','#28103a','#0c0514'],
+  'Real Talk':['#162414','#1e3a20','#162414','#080e08'],
+  'Comfort TV':['#1a4030','#2d6a4f','#1a4030','#0d2b1a'],
+  'Shonen':['#3a1800','#c85000','#3a1800','#1a0800'],
+  'Isekai':['#0a1a3a','#1a4a8a','#0a1a3a','#050f1a'],
+  'Seinen':['#1a0000','#5a0000','#1a0000','#0d0000'],
+  'Slice of Life':['#0a200a','#1a5a1a','#0a200a','#051005'],
+  'Shoujo':['#2a0a1a','#8a1a4a','#2a0a1a','#140510'],
+  'Dark Fantasy':['#0a001a','#3a006a','#0a001a','#05000f'],
+  'Mind Trip':['#001a1a','#004a4a','#001a1a','#000f0f'],
+  'Mecha':['#000a2a','#0a2a6a','#000a2a','#00051a'],
+};
+
+// Short human descriptors so the Pidgin mood names read clearly to everyone
+const MOOD_DESC = {
+  'No Wahala':'Easy, feel-good watches','E Choke!':'Tense, edge-of-seat drama','Chop Bfast':'Heartbreak & romance','Dey Play':'Comedies to laugh with','Vawulence':'Gritty crime & thrillers','After Dark':'Horror & mystery','Lights Down':'Big cinematic epics','Deep Feels':'Emotional, moving stories',
+  'Binge It':'Can\u2019t-stop crime sagas','Addicted':'Twisty thriller series','Heartstrings':'Romantic series','Laugh Track':'Sitcoms & comedy series','Whodunit':'Mystery & detective series','Night Mode':'Dark, moody dramas','Real Talk':'Grounded, true-to-life shows','Comfort TV':'Cosy, easy-watch series',
+  'Shonen':'Action-packed anime','Isekai':'Another-world adventures','Seinen':'Mature, darker anime','Slice of Life':'Gentle, wholesome anime','Shoujo':'Romantic anime','Dark Fantasy':'Supernatural & fantasy','Mind Trip':'Psychological anime','Mecha':'Giant-robot sci-fi',
+};
+
+// Genre ids for the passive "avoid" filter
+const AVOID_GENRE = { Horror:27, Romance:10749 };
+const PLATFORM_NAME_BY_ID = { 8:'Netflix', 283:'Crunchyroll' };
+const PLATFORM_KEY_BY_ID   = { 8:'netflix', 283:'crunchyroll' };
+
+// ── TMDB access — single choke-point so the API key/host can be swapped for a
+// serverless proxy without touching call sites. To move the key server-side:
+// set API_MODE='proxy' and deploy the included function (see /api/tmdb).
+const API_MODE  = 'direct';               // 'direct' | 'proxy'
+const TMDB_HOST = 'https://api.themoviedb.org/3';
+const _tmdbCache = new Map();             // session cache — cuts repeat calls per spin
+function _timeoutSignal(ms){ try { return AbortSignal.timeout(ms); } catch { return undefined; } }
+function tmdbUrl(path, params){
+  const qs = new URLSearchParams(params||{});
+  if(API_MODE==='proxy'){ qs.set('path', path); return '/api/tmdb?'+qs.toString(); }
+  qs.set('api_key', TMDB_KEY);
+  return TMDB_HOST + path + '?' + qs.toString();
+}
+async function tmdbGet(path, params, timeout){
+  const url = tmdbUrl(path, params);
+  if(_tmdbCache.has(url)) return _tmdbCache.get(url);
+  try{
+    const r = await fetch(url, { signal:_timeoutSignal(timeout||8000) });
+    if(!r.ok) return null;
+    const d = await r.json();
+    _tmdbCache.set(url, d);
+    return d;
+  }catch{ return null; }
+}
+
+function resolveRegion(){
+  const langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language||'en-US'];
+  for(const l of langs){ const p=(l||'').split('-'); if(p[1]) return p[1].toUpperCase(); }
+  return 'US';
+}
+
+// Convert TMDB's 0–10 vote into a clear 0–5 star display
+function ratingToStars(vote10){
+  const v = Math.max(0, Math.min(10, Number(vote10)||0));
+  const five = v/2;
+  return { five: Math.round(five*10)/10, pct: Math.max(0,Math.min(100,(five/5)*100)) };
+}
+function starsHTML(vote10){
+  const { five, pct } = ratingToStars(vote10);
+  const label = five>0 ? `${five.toFixed(1)} out of 5 stars` : 'Not yet rated';
+  return `<span class="rating-row"><span class="stars" role="img" aria-label="${label}">`
+    + `<span class="stars-bg" aria-hidden="true">★★★★★</span>`
+    + `<span class="stars-fg" style="width:${pct.toFixed(1)}%" aria-hidden="true">★★★★★</span>`
+    + `</span><span class="rating-num">${ five>0 ? `<b>${five.toFixed(1)}</b>/5` : '—' }</span></span>`;
+}
+
+// Real availability check for a title in a given region
+async function fetchProviders(type, id, region){
+  const d = await tmdbGet(`/${type}/${id}/watch/providers`, {}, 5000);
+  if(!d || !d.results) return null;
+  return d.results[region] || d.results.US || null;
+}
+
+const state = {
+  profile: null,
+  selectedMood: null,
+  selectedCard: null,
+  selectedType: 'movies',
+  currentMode: 'movies',
+  activePlatformIds: [PLATFORMS.netflix.id],
+  region: 'US', // set on boot via resolveRegion()
+  allPicks: [],        // full ranked pool for "show more"
+  shownCount: 0,
+  wheelAngle: 0,
+  onboardStep: 0,
+  tempProfile: {},
+  fetchingResults: false,
+  platformChangeMode: false,
+};
+
+// Storage
+function loadProfile()  { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { return null; } }
+function saveProfile(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch {} }
+function clearProfile() { try { localStorage.removeItem(STORAGE_KEY); } catch {} }
+function loadSeen()     { try { return JSON.parse(localStorage.getItem(STORAGE_KEY+'_seen') || '[]'); } catch { return []; } }
+function addSeen(id)    { try { const s=loadSeen(); if(!s.includes(id)){s.push(id);if(s.length>200)s.shift();localStorage.setItem(STORAGE_KEY+'_seen',JSON.stringify(s));} } catch {} }
+function clearSeen()    { try { localStorage.removeItem(STORAGE_KEY+'_seen'); } catch {} }
+
+// Utils
+function rand(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function getHour() { return new Date().getHours(); }
+function getTimeGreeting() { const h=getHour(); return h>=5&&h<12?'this morning':h>=12&&h<17?'this afternoon':'tonight'; }
+function getTimeLabel()    { const h=getHour(); return h>=5&&h<12?'Morning':h>=12&&h<17?'Afternoon':h>=17&&h<21?'Evening':'Late night'; }
+function esc(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function unesc(s){ return String(s).replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'"); }
+function $(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=$(id); if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// Back button — step back logically (close overlay → deep screen → pick),
+// but on the home/onboard screens let the browser leave so users aren't trapped.
+window.addEventListener('popstate', () => {
+  const s = $('settingsOverlay'), p = $('shareOverlay');
+  if (s && s.classList.contains('active')) { closeSettings(); history.pushState(null,'',location.href); return; }
+  if (p && p.classList.contains('active')) { hideSharePopup(); history.pushState(null,'',location.href); return; }
+  const active = document.querySelector('.screen.active');
+  const deep = active && ['screen-wheel','screen-curtain','screen-results'].includes(active.id);
+  if (deep) { history.pushState(null,'',location.href); initPickScreen(); return; }
+  // pick/onboard: allow normal back navigation (do not re-arm)
+});
+history.pushState(null, '', window.location.href);
+
+function showToast(msg) {
+  const t=$('toast'); if(!t) return;
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+function updatePlatformPill() {
+  const btn=$('platformPillBtn'); if(!btn) return;
+  const key = state.profile&&state.profile.platform ? state.profile.platform : 'netflix';
+  const name = PLATFORMS[key] ? PLATFORMS[key].name : 'Netflix';
+  // Anime pulls from Crunchyroll too — reflect that honestly.
+  const label = (state.currentMode==='anime' && key!=='crunchyroll') ? name+' + Crunchyroll' : name;
+  btn.textContent = label + ' · Change';
+}
+
+function copyText(text,cb) {
+  if(navigator.clipboard) navigator.clipboard.writeText(text).then(cb).catch(()=>{fbCopy(text);cb();});
+  else{fbCopy(text);cb();}
+}
+function fbCopy(t) {
+  const e=document.createElement('textarea'); e.value=t; e.style.cssText='position:fixed;opacity:0';
+  document.body.appendChild(e); e.focus(); e.select(); document.execCommand('copy'); document.body.removeChild(e);
+}
+
+// ── ONBOARDING
+function renderOnboardStep(step) {
+  const s=STEPS[step]; if(!s) return;
+  const el_label=$('stepLabel'), el_head=$('onboardHeadline'), el_sub=$('onboardSub'), el_dots=$('progressDots'), el_form=$('onboardForm');
+  const nm=(state.tempProfile&&state.tempProfile.name)||(state.profile&&state.profile.name)||'';
+  const withName=(str)=>String(str).replace(/\{name\}/g, nm?(', '+nm):'');
+  const cta=s.cta||'Continue';
+  if(el_label) el_label.textContent=withName(s.label);
+  if(el_head)  el_head.innerHTML=s.headline;
+  if(el_sub)   el_sub.textContent=withName(s.sub);
+  if(el_dots)  { const d=el_dots.children; for(let i=0;i<d.length;i++) d[i].className='dot'+(i<step?' done':i===step?' active':''); }
+  if(!el_form) return;
+
+  if(s.type==='text') {
+    el_form.innerHTML=`<input class="name-input" id="nameInput" type="text" placeholder="Your first name" maxlength="24" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+      <button class="primary-btn" id="onboardNext" disabled>${esc(cta)}</button>
+      <div class="skip-link" id="skipLink">Skip setup</div>`;
+    const inp=$('nameInput'), next=$('onboardNext');
+    if(inp){
+      const checkInp=()=>{ if(next) next.disabled=inp.value.trim().length<2; };
+      inp.addEventListener('input',checkInp);
+      inp.addEventListener('change',checkInp);
+      inp.addEventListener('keyup',checkInp);
+      inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&inp.value.trim().length>=2) advanceOnboard(); });
+      checkInp(); // sync disabled state on (re)render — handles prefilled values
+      setTimeout(()=>inp.focus(),100);
+    }
+
+  } else if(s.type==='platform') {
+    const current=state.tempProfile.platform||'netflix';
+    el_form.innerHTML=`<div class="platform-list">
+      ${Object.entries(PLATFORMS).map(([key,p])=>`
+        <div class="platform-opt${current===key?' selected':''}" data-pkey="${key}">
+          <span class="platform-opt-icon">${key==='netflix'?'🎬':'🌀'}</span>
+          <span class="platform-opt-name">${p.name}</span>
+          <span class="platform-opt-check">${current===key?'✓':''}</span>
+        </div>`).join('')}
+      </div>
+      <button class="primary-btn" id="onboardNext">${esc(cta)}</button>
+      <div class="skip-link" id="skipLink">Skip</div>`;
+    // Single select
+    el_form.querySelectorAll('.platform-opt').forEach(opt=>{
+      opt.addEventListener('click',()=>{
+        el_form.querySelectorAll('.platform-opt').forEach(o=>{
+          o.classList.remove('selected');
+          const chk=o.querySelector('.platform-opt-check'); if(chk) chk.textContent='';
+        });
+        opt.classList.add('selected');
+        const chk=opt.querySelector('.platform-opt-check'); if(chk) chk.textContent='✓';
+        state.tempProfile.platform=opt.dataset.pkey;
+      });
+    });
+
+  } else {
+    const opts=s.options;
+    el_form.innerHTML=`<div class="option-grid">${opts.map((o,i)=>`
+      <button class="option-btn" data-key="${s.key}" data-val="${i}"><span>${esc(o)}</span><span class="option-check"></span></button>`).join('')}
+      </div>
+      <button class="primary-btn" id="onboardNext" disabled>${esc(cta)}</button>
+      <div class="skip-link" id="skipLink">Skip this step</div>`;
+    el_form.querySelectorAll('.option-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        el_form.querySelectorAll('.option-btn').forEach(b=>{ b.classList.remove('selected'); const c=b.querySelector('.option-check'); if(c) c.textContent=''; });
+        btn.classList.add('selected');
+        const c=btn.querySelector('.option-check'); if(c) c.textContent='✓';
+        state.tempProfile[btn.dataset.key]=opts[parseInt(btn.dataset.val)];
+        const next=$('onboardNext'); if(next) next.disabled=false;
+      });
+    });
+  }
+
+  // Don't wire here - use delegation below
+}
+
+function advanceOnboard() {
+  if(state.onboardStep===0){
+    const inp=$('nameInput'); if(!inp) return;
+    const v=inp.value.trim(); if(v.length<2) return;
+    state.tempProfile.name=v.charAt(0).toUpperCase()+v.slice(1);
+  }
+  // On platform step, default to netflix if none selected
+  if(state.onboardStep===1 && !state.tempProfile.platform) state.tempProfile.platform='netflix';
+  state.onboardStep++;
+  if(state.onboardStep>=STEPS.length) finishOnboard();
+  else renderOnboardStep(state.onboardStep);
+}
+
+function skipOnboard() {
+  if(state.onboardStep===0) state.tempProfile.name='';
+  if(state.onboardStep===1) state.tempProfile.platform='netflix';
+  finishOnboard();
+}
+
+function finishOnboard() {
+  state.profile={...state.tempProfile};
+  saveProfile(state.profile);
+  if(state.platformChangeMode) { state.platformChangeMode=false; applyPlatformFromProfile(); initPickScreen(); }
+  else initPickScreen();
+}
+
+function applyPlatformFromProfile() {
+  const key=state.profile&&state.profile.platform?state.profile.platform:'netflix';
+  const prov=PLATFORMS[key]||PLATFORMS.netflix;
+  state.activePlatformIds=[prov.id];
+  // If anime mode, also include crunchyroll
+  if(state.currentMode==='anime') state.activePlatformIds=[PLATFORMS.crunchyroll.id, prov.id];
+}
+
+// ── PICK SCREEN
+function initPickScreen() {
+  const name=state.profile&&state.profile.name?state.profile.name:'';
+  const t=getTimeGreeting();
+  const greeting=$('pickGreeting');
+  if(greeting) greeting.innerHTML=name?`What are you<br>watching <em>${t}, ${name}?</em>`:`What are you<br>watching <em>${t}?</em>`;
+
+  applyPlatformFromProfile();
+  updatePlatformPill();
+
+  // Sync toggle UI
+  document.querySelectorAll('.type-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.currentMode));
+
+  // Show correct grid
+  const mg=$('moviesGrid'), tg=$('tvGrid'), ag=$('animeGrid');
+  if(mg) mg.style.display=state.currentMode==='movies'?'grid':'none';
+  if(tg) tg.style.display=state.currentMode==='tv'?'grid':'none';
+  if(ag) ag.style.display=state.currentMode==='anime'?'grid':'none';
+
+  // Wire similar search once
+  const sinp=$('similarInput'), sgo=$('similarGo');
+  if(sinp&&sgo&&!sinp._wired) {
+    sinp._wired=true;
+    sinp.value=''; sgo.disabled=true;
+    sinp.addEventListener('input',()=>{ sgo.disabled=sinp.value.trim().length<2; });
+    sgo.addEventListener('click',()=>{ if(sinp.value.trim().length>=2) runSimilarSearch(sinp.value.trim()); });
+    sinp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&sinp.value.trim().length>=2) runSimilarSearch(sinp.value.trim()); });
+  }
+
+  showScreen('screen-pick');
+}
+
+// ── TYPE TOGGLE
+document.querySelectorAll('.type-toggle-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.type-toggle-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const mode=btn.dataset.mode;
+    state.currentMode=mode;
+    state.selectedType=mode==='movies'?'movies':'tv';
+    resetMoodSelection();
+    const mg=$('moviesGrid'),tg=$('tvGrid'),ag=$('animeGrid');
+    if(mg) mg.style.display=mode==='movies'?'grid':'none';
+    if(tg) tg.style.display=mode==='tv'?'grid':'none';
+    if(ag) ag.style.display=mode==='anime'?'grid':'none';
+    // Platform IDs
+    const key=state.profile&&state.profile.platform?state.profile.platform:'netflix';
+    const prov=PLATFORMS[key]||PLATFORMS.netflix;
+    state.activePlatformIds=mode==='anime'?[PLATFORMS.crunchyroll.id,prov.id]:[prov.id];
+  });
+});
+
+// ── PLATFORM PILL — opens full settings (name, platform, avoid, reset)
+const pillBtn=$('platformPillBtn');
+if(pillBtn) pillBtn.addEventListener('click',openSettings);
+
+// ── MOOD SCROLL FADE
+const moodScrollEl=$('moodScroll'), moodFadeEl=$('moodFade');
+if(moodScrollEl&&moodFadeEl) {
+  moodScrollEl.addEventListener('scroll',()=>{
+    const atBottom=moodScrollEl.scrollHeight-moodScrollEl.scrollTop-moodScrollEl.clientHeight<40;
+    moodFadeEl.classList.toggle('hidden',atBottom);
+  },{passive:true});
+}
+
+// ── MOOD SELECTION
+function resetMoodSelection() {
+  document.querySelectorAll('.mood-card').forEach(c=>{c.classList.remove('selected');c.setAttribute('aria-pressed','false');});
+  document.querySelectorAll('.mood-grid').forEach(g=>g.classList.remove('has-selection'));
+  state.selectedMood=null; state.selectedCard=null;
+  const btn=$('spinBtn'); if(btn){btn.disabled=true;btn.textContent='Select a mood to continue';}
+}
+
+// Make every mood card keyboard-operable and self-explanatory (a11y + clarity)
+document.querySelectorAll('.mood-card').forEach(card=>{
+  const mood=card.dataset.mood, tag=card.dataset.tag||'', desc=MOOD_DESC[mood]||'';
+  card.setAttribute('role','button');
+  card.setAttribute('tabindex','0');
+  card.setAttribute('aria-pressed','false');
+  card.setAttribute('aria-label',`${mood} — ${desc||tag}`);
+  const content=card.querySelector('.card-content');
+  if(content && desc && !content.querySelector('.card-desc')){
+    const d=document.createElement('span'); d.className='card-desc'; d.textContent=desc; content.appendChild(d);
+  }
+  const select=()=>{
+    const grid=card.closest('.mood-grid');
+    document.querySelectorAll('.mood-card').forEach(c=>{c.classList.remove('selected');c.setAttribute('aria-pressed','false');});
+    document.querySelectorAll('.mood-grid').forEach(g=>g.classList.remove('has-selection'));
+    card.classList.add('selected'); card.setAttribute('aria-pressed','true');
+    if(grid) grid.classList.add('has-selection');
+    state.selectedMood=mood; state.selectedCard=card;
+    const btn=$('spinBtn'); if(btn){btn.disabled=false;btn.textContent='Spin — '+mood;}
+  };
+  card.addEventListener('click',select);
+  card.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(); } });
+});
+const spinBtnEl=$('spinBtn');
+if(spinBtnEl) spinBtnEl.addEventListener('click',startFlow);
+
+// ── SETTINGS SHEET
+let _resetArmed=false;
+function openSettings(){
+  const ov=$('settingsOverlay'); if(!ov) return;
+  const p=state.profile||{};
+  const nameEl=$('setName'); if(nameEl) nameEl.value=p.name||'';
+  const curPlat=p.platform||'netflix';
+  document.querySelectorAll('#setPlatform .sheet-choice').forEach(c=>c.classList.toggle('selected',c.dataset.pkey===curPlat));
+  const curAvoid=p.avoid||'I watch everything';
+  document.querySelectorAll('#setAvoid .sheet-choice').forEach(c=>c.classList.toggle('selected',c.dataset.avoid===curAvoid));
+  _resetArmed=false; const rb=$('setReset'); if(rb){rb.textContent='Reset profile & start over';rb.classList.remove('confirming');}
+  ov.classList.add('active');
+  history.pushState(null,'',location.href); // so back closes the sheet
+}
+function closeSettings(){ const ov=$('settingsOverlay'); if(ov) ov.classList.remove('active'); }
+
+(function wireSettings(){
+  const ov=$('settingsOverlay'); if(!ov) return;
+  ov.addEventListener('click',e=>{ if(e.target===ov) closeSettings(); });
+  const single=(sel,attr)=>document.querySelectorAll(sel+' .sheet-choice').forEach(c=>{
+    const pick=()=>{ document.querySelectorAll(sel+' .sheet-choice').forEach(x=>x.classList.remove('selected')); c.classList.add('selected'); };
+    c.addEventListener('click',pick);
+    c.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } });
+  });
+  single('#setPlatform');
+  single('#setAvoid');
+
+  const save=$('setSave');
+  if(save) save.addEventListener('click',()=>{
+    const nameRaw=($('setName')&&$('setName').value||'').trim();
+    const name=nameRaw?nameRaw.charAt(0).toUpperCase()+nameRaw.slice(1):'';
+    const platEl=document.querySelector('#setPlatform .sheet-choice.selected');
+    const avoidEl=document.querySelector('#setAvoid .sheet-choice.selected');
+    state.profile=Object.assign({}, state.profile, {
+      name,
+      platform: platEl?platEl.dataset.pkey:'netflix',
+      avoid: avoidEl?avoidEl.dataset.avoid:'I watch everything',
+    });
+    saveProfile(state.profile);
+    applyPlatformFromProfile();
+    updatePlatformPill();
+    // Refresh greeting
+    const t=getTimeGreeting(), g=$('pickGreeting');
+    if(g) g.innerHTML=name?`What are you<br>watching <em>${t}, ${esc(name)}?</em>`:`What are you<br>watching <em>${t}?</em>`;
+    closeSettings();
+    showToast('Settings saved');
+  });
+
+  const reset=$('setReset');
+  if(reset) reset.addEventListener('click',()=>{
+    if(!_resetArmed){ _resetArmed=true; reset.textContent='Tap again to confirm reset'; reset.classList.add('confirming'); return; }
+    clearProfile(); clearSeen();
+    state.profile=null; state.onboardStep=0; state.tempProfile={};
+    closeSettings();
+    renderOnboardStep(0); showScreen('screen-onboard');
+  });
+})();
+
+// ── WHEEL
+function drawWheel(angle) {
+  const canvas=$('wheelCanvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const s=canvas.width,cx=s/2,cy=s/2,r=s/2-4,segs=8,arc=(Math.PI*2)/segs;
+  const colors=MOOD_COLORS[state.selectedMood]||['#1a1a2a','#2a2a4a','#1a1a2a','#0f0f1a'];
+  ctx.clearRect(0,0,s,s);
+  for(let i=0;i<segs;i++){
+    const st=angle+i*arc,en=st+arc;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,st,en);ctx.closePath();
+    ctx.fillStyle=colors[i%colors.length];ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.6)';ctx.lineWidth=2;ctx.stroke();
+  }
+  ctx.save();
+  for(let i=0;i<segs;i++){
+    const mid=angle+i*arc+arc/2;
+    const tx=cx+r*0.62*Math.cos(mid),ty=cy+r*0.62*Math.sin(mid);
+    ctx.font=`${Math.round(s*0.088)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(WHEEL_EMOJIS[i],tx,ty);
+  }
+  ctx.restore();
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,s*0.055,0,Math.PI*2);ctx.fillStyle='#0c0c0c';ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1.5;ctx.stroke();
+}
+function spinWheel(onDone) {
+  let vel=0.26+Math.random()*0.1; const dec=0.991;
+  function frame(){state.wheelAngle+=vel;vel*=dec;drawWheel(state.wheelAngle);vel>0.004?requestAnimationFrame(frame):onDone();}
+  frame();
+}
+
+// ── CURTAIN
+function showCurtain(msg,onOpen) {
+  const msgEl=$('curtainMsg'),lbl=$('curtainLabel'),L=$('curtainLeft'),R=$('curtainRight');
+  if(msgEl) msgEl.textContent=msg;
+  if(lbl) lbl.classList.remove('show'); if(msgEl) msgEl.classList.remove('show');
+  showScreen('screen-curtain');
+  if(L) L.classList.remove('open'); if(R) R.classList.remove('open');
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{if(lbl)lbl.classList.add('show');if(msgEl)msgEl.classList.add('show');},60);
+    setTimeout(()=>{if(L)L.classList.add('open');if(R)R.classList.add('open');setTimeout(onOpen,620);},760);
+  });
+}
+
+// ── MAIN FLOW
+// The spin + curtain are theatre only; the fetch runs in parallel. A tap on the
+// wheel or curtain skips straight to the results (skeletons if still loading).
+let pendingDeliver = null;
+function wireSkip(){
+  ['screen-wheel','screen-curtain'].forEach(id=>{
+    const el=$(id);
+    if(el && !el._skipWired){
+      el._skipWired=true;
+      el.style.cursor='pointer';
+      el.addEventListener('click',()=>{ if(pendingDeliver) pendingDeliver(); });
+    }
+  });
+}
+
+function startFlow() {
+  if(!state.selectedMood||state.fetchingResults) return;
+  wireSkip();
+  const ew=$('wheelEyebrow'),cap=$('wheelCaption');
+  if(ew) ew.textContent=state.selectedMood+' picks';
+  if(cap) cap.textContent=rand(WHEEL_COPY)+'  ·  tap to skip';
+  showScreen('screen-wheel'); drawWheel(0);
+  state.fetchingResults=true;
+  const fp=fetchTMDB();
+  const name=state.profile&&state.profile.name?state.profile.name:'';
+
+  let delivered=false;
+  const deliver=()=>{
+    if(delivered) return; delivered=true; pendingDeliver=null;
+    showScreen('screen-results');
+    const pill=$('resultsPill'),title=$('resultsTitle');
+    if(pill) pill.textContent=state.selectedMood;
+    if(title) title.textContent=name?`${getTimeLabel()} picks for ${name}.`:`${getTimeLabel()} picks.`;
+    showSkeletons();
+    fp.then(p=>{state.fetchingResults=false;if(p&&p.length){renderPicks(p);startPopupTimer();}else{renderError('no-results');}})
+      .catch(()=>{state.fetchingResults=false;renderError('network');});
+  };
+  pendingDeliver=deliver;
+
+  spinWheel(()=>{
+    if(delivered) return;
+    showCurtain(name?name+', your picks are ready.':'Your picks are ready.',deliver);
+  });
+}
+
+function showSkeletons() {
+  const c=$('resultsScroll'); if(!c) return;
+  c.innerHTML=[0,1,2].map(()=>`
+    <div class="skel-card"><div style="display:flex">
+      <div class="skel" style="width:90px;height:135px;flex-shrink:0;border-radius:var(--rcard) 0 0 0"></div>
+      <div style="flex:1;padding:14px">
+        <div class="skel" style="height:8px;width:35%;margin-bottom:10px"></div>
+        <div class="skel" style="height:18px;width:80%;margin-bottom:8px"></div>
+        <div class="skel" style="height:11px;width:45%;margin-bottom:14px"></div>
+        <div class="skel" style="height:24px;width:52%"></div>
+      </div></div>
+      <div style="padding:10px 14px 14px;border-top:1px solid rgba(255,255,255,0.06)">
+        <div class="skel" style="height:11px;width:100%;margin-bottom:6px"></div>
+        <div class="skel" style="height:11px;width:70%"></div>
+      </div></div>`).join('');
+}
+
+// ── TMDB FETCH — returns a ranked pool tagged with provider provenance.
+// `verified:true` means the title came from a watch-provider-filtered query
+// (believed on the selected platform); those without are confirmed per-title
+// at render time so the "Watch on …" button is never a false promise.
+async function fetchTMDB() {
+  const card=state.selectedCard; if(!card) return [];
+  const isAnime=card.dataset.anime==='1';
+  const seen=loadSeen();
+  const provId=state.activePlatformIds.join('|')||'8';
+  const voteMin=parseInt(card.dataset.voteMin||'100');
+  const genres=card.dataset.genres||'18';
+  const sortBy=card.dataset.sort||'vote_average.desc';
+
+  // Anime can be films OR series — query both. Otherwise honour the toggle.
+  const mediaTypes = isAnime ? ['movie','tv'] : [state.currentMode==='movies'?'movie':'tv'];
+
+  // Passive avoid filter — but an explicit mood choice overrides it, so
+  // picking the Horror mood while "no horror" is set never dead-ends.
+  const moodGenreIds = genres.split('|');
+  let avoidGenres=[];
+  if(state.profile&&state.profile.avoid){
+    if(state.profile.avoid.includes('Horror'))  avoidGenres.push(AVOID_GENRE.Horror);
+    if(state.profile.avoid.includes('Romance')) avoidGenres.push(AVOID_GENRE.Romance);
+  }
+  avoidGenres = avoidGenres.filter(g => !moodGenreIds.includes(String(g)));
+
+  const buildParams=(mediaType,page,useProvider,region)=>{
+    const p={ with_genres:genres, sort_by:sortBy, 'vote_count.gte':voteMin, 'vote_average.gte':6.0, page };
+    if(useProvider){ p.with_watch_providers=provId; p.watch_region=region||'US'; }
+    if(isAnime) p.with_keywords=210024;
+    if(avoidGenres.length) p.without_genres=avoidGenres.join('|');
+    return { mediaType, params:p };
+  };
+  const discover=async(mediaType,page,useProvider,region)=>{
+    const { params }=buildParams(mediaType,page,useProvider,region);
+    const d=await tmdbGet(`/discover/${mediaType}`, params, 8000);
+    return (d&&d.results||[]).map(i=>({...i, mediaType, verified:!!useProvider}));
+  };
+
+  const p1=Math.floor(Math.random()*4)+1;
+  const p2=Math.floor(Math.random()*4)+2;
+  const forTypes=(fn)=>mediaTypes.flatMap(fn);
+
+  // Attempt 1 — provider + user region (verified)
+  let all=dedupe(await Promise.all(
+    forTypes(mt=>[discover(mt,p1,true,state.region), discover(mt,p2,true,state.region)])
+  ).then(a=>a.flat()));
+
+  // Attempt 2 — provider + US (verified) if user region came up short
+  if(all.length<6 && state.region!=='US'){
+    const more=(await Promise.all(forTypes(mt=>[discover(mt,p1,true,'US'), discover(mt,p2,true,'US')]))).flat();
+    all=dedupe([...all,...more]);
+  }
+
+  // Attempt 3 — genre only, no provider filter (unverified → checked at render)
+  if(all.length<6){
+    const more=(await Promise.all(forTypes(mt=>[discover(mt,p1,false), discover(mt,p2,false), discover(mt,Math.floor(Math.random()*6)+1,false)]))).flat();
+    all=dedupe([...all,...more]);
+  }
+
+  if(!all.length) return [];
+
+  // Prefer unseen for freshness across spins
+  const fresh=all.filter(r=>!seen.includes(`${r.mediaType}-${r.id}`));
+  const pool=fresh.length>=4?fresh:all;
+
+  // Verified titles first, then by rating; highest-rated verified is the top pick.
+  const ranked=[...pool].sort((a,b)=>(Number(b.verified)-Number(a.verified))||(b.vote_average-a.vote_average));
+  const top1=[...pool].sort((a,b)=>b.vote_average-a.vote_average)[0];
+  const rest=ranked.filter(r=>r!==top1).sort(()=>Math.random()-0.5);
+  const outPool=dedupe([top1,...rest]).slice(0,12).filter(Boolean);
+
+  outPool.forEach(p=>addSeen(`${p.mediaType}-${p.id}`));
+  return outPool;
+}
+
+function dedupe(arr) {
+  const s=new Set();
+  return arr.filter(i=>{const id=i.mediaType+i.id;if(s.has(id))return false;s.add(id);return true;});
+}
+
+// ── TRAILER
+async function fetchTrailer(id,type) {
+  const d=await tmdbGet(`/${type}/${id}/videos`,{},5000);
+  const t=(d&&d.results||[]).find(v=>v.site==='YouTube'&&(v.type==='Trailer'||v.type==='Teaser'));
+  return t?`https://www.youtube.com/watch?v=${t.key}`:null;
+}
+
+// ── RENDER PICKS
+const PICK_BATCH = 5;
+
+function pickCardHTML(p, i){
+  const isTop=i===0;
+  const title=p.title||p.name||'Untitled';
+  const year=(p.release_date||p.first_air_date||'').slice(0,4);
+  const type=p.mediaType==='movie'?'Film':'Series';
+  const five=ratingToStars(p.vote_average).five;
+  const synopsis=p.overview?p.overview.split(/(?<=[.!?])\s+/).filter(s=>s.trim().length>15).slice(0,2).join(' '):'';
+  const overviewFull=p.overview?esc(p.overview):'';
+  const shareText=`${title}${year?` (${year})`:''} — ${five>0?`${five.toFixed(1)}/5 stars`:'a great pick'} on Oya Watch.`;
+  const poster=p.poster_path?`<img src="${TMDB_IMG}${p.poster_path}" alt="${esc(title)}" loading="lazy" onerror="this.style.display='none'">`:``;
+  return `<div class="pick-card${isTop?' top-pick':''}" id="card${i}" data-idx="${i}">
+      <div class="card-poster-row">
+        <div class="card-poster">
+          ${poster}
+          <div class="card-poster-ph"${p.poster_path?' style="display:none"':''}>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+          </div>
+        </div>
+        <div class="card-body" role="button" tabindex="0" aria-expanded="false" data-expand="1" aria-label="${esc(title)} — tap for more info">
+          ${isTop?`<div class="top-badge">${rand(TOP_BADGE)}</div>`:''}
+          <div class="card-title">${esc(title)}</div>
+          <div class="card-meta">${year}${year?' · ':''}${type}</div>
+          ${starsHTML(p.vote_average)}
+          <div class="expand-hint"><span>More info</span><svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,1 6,6 11,1"/></svg></div>
+        </div>
+      </div>
+      ${synopsis?`<div class="card-synopsis"><p>${esc(synopsis)}</p></div>`:''}
+      <div class="card-details" id="details${i}">
+        <div class="detail-meta"></div>
+        ${overviewFull?`<p class="detail-overview">${overviewFull}</p>`:'<p class="detail-overview">No description available yet.</p>'}
+      </div>
+      <div class="card-action-primary">
+        <a class="watch-btn checking" data-title="${esc(title)}" data-id="${p.id}" data-mtype="${p.mediaType}" data-verified="${p.verified?1:0}" href="#" rel="noopener" aria-label="Checking availability">
+          <svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg>
+          <span class="watch-label">Checking availability…</span>
+        </a>
+      </div>
+      <div class="card-action-trailer">
+        <button class="trailer-btn" data-id="${p.id}" data-mtype="${p.mediaType}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/>
+            <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/>
+          </svg>
+          Watch Trailer
+        </button>
+      </div>
+      <div class="card-action-tertiary">
+        <button class="action-btn btn-copy" data-title="${esc(title)}">
+          <svg width="12" height="12" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M3 11H2a1 1 0 01-1-1V2a1 1 0 011-1h8a1 1 0 011 1v1"/></svg>
+          Copy title
+        </button>
+        <button class="action-btn btn-share" data-text="${esc(shareText)}" data-url="${esc(window.location.href)}">
+          <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          Share
+        </button>
+      </div>
+    </div>`;
+}
+
+// Honestly resolve the watch button: only promises "Watch on X" when confirmed.
+async function verifyWatch(cardEl){
+  const btn=cardEl.querySelector('.watch-btn'); if(!btn) return;
+  const title=unesc(btn.dataset.title||''), id=btn.dataset.id, type=btn.dataset.mtype;
+  const verified=btn.dataset.verified==='1';
+  const active=state.activePlatformIds;
+
+  const setOn=(pid)=>{
+    const key=PLATFORM_KEY_BY_ID[pid]; const prov=PLATFORMS[key]||PLATFORMS.netflix;
+    btn.className='watch-btn';
+    btn.href=prov.url+encodeURIComponent(title);
+    btn.target='_blank';
+    btn.setAttribute('aria-label',`Watch ${title} on ${prov.name}`);
+    const lbl=btn.querySelector('.watch-label'); if(lbl) lbl.textContent='Watch on '+prov.name;
+  };
+  const setElsewhere=(hasAny)=>{
+    btn.className='watch-btn elsewhere';
+    btn.href=`https://www.themoviedb.org/${type==='movie'?'movie':'tv'}/${id}/watch`;
+    btn.target='_blank';
+    const lbl=btn.querySelector('.watch-label');
+    btn.setAttribute('aria-label',`See where to watch ${title}`);
+    if(lbl) lbl.textContent = hasAny ? 'See where to watch' : 'Find where to watch';
+  };
+
+  // Single verified platform → trust the provider-filtered match (no extra call).
+  if(verified && active.length===1){ setOn(active[0]); return; }
+
+  const r=await fetchProviders(type, id, state.region);
+  const flat=(r&&r.flatrate)||[];
+  const ids=flat.map(f=>f.provider_id);
+  const hit=active.find(pid=>ids.includes(pid));
+  if(hit) setOn(hit);
+  else setElsewhere(flat.length>0);
+}
+
+function wireCards(cards){
+  cards.forEach(card=>{
+    const idx=+card.dataset.idx;
+
+    // Trailer — open the tab synchronously inside the gesture so iOS/Safari
+    // doesn't block it after the await.
+    const tb=card.querySelector('.trailer-btn');
+    if(tb) tb.addEventListener('click',async()=>{
+      const w=window.open('about:blank','_blank');
+      const orig=tb.innerHTML; tb.textContent='Loading…'; tb.disabled=true;
+      const url=await fetchTrailer(tb.dataset.id,tb.dataset.mtype);
+      tb.innerHTML=orig; tb.disabled=false;
+      if(url){ if(w) w.location.href=url; else window.open(url,'_blank'); }
+      else{ if(w) w.close(); tb.textContent='No trailer found'; setTimeout(()=>{tb.innerHTML=orig;},2000); }
+    });
+
+    const sh=card.querySelector('.btn-share');
+    if(sh) sh.addEventListener('click',()=>{
+      const raw=unesc(sh.dataset.text),url=sh.dataset.url;
+      if(navigator.share) navigator.share({title:'Oya Watch',text:raw,url}).catch(()=>{});
+      else copyText(url,()=>showToast('Link copied — paste to share!'));
+    });
+
+    const cp=card.querySelector('.btn-copy');
+    if(cp) cp.addEventListener('click',()=>{
+      const t=unesc(cp.dataset.title);
+      copyText(t,()=>{cp.classList.add('copied');showToast(`"${t}" copied`);setTimeout(()=>cp.classList.remove('copied'),2000);});
+    });
+
+    // Expand for full details (lazy-load runtime/genres/tagline once)
+    const body=card.querySelector('[data-expand]');
+    if(body){
+      const toggle=async()=>{
+        const open=card.classList.toggle('expanded');
+        body.setAttribute('aria-expanded',open?'true':'false');
+        if(open && !card.dataset.detailsLoaded){
+          card.dataset.detailsLoaded='1';
+          const p=state.allPicks[idx]; if(!p) return;
+          const d=await tmdbGet(`/${p.mediaType}/${p.id}`,{},6000);
+          const metaEl=card.querySelector('.detail-meta');
+          if(d && metaEl){
+            const chips=[];
+            const rt=d.runtime||(d.episode_run_time&&d.episode_run_time[0]);
+            if(rt) chips.push(rt+' min');
+            if(d.number_of_seasons) chips.push(d.number_of_seasons+' season'+(d.number_of_seasons>1?'s':''));
+            (d.genres||[]).slice(0,3).forEach(g=>chips.push(g.name));
+            if(d.original_language) chips.push(String(d.original_language).toUpperCase());
+            metaEl.innerHTML=chips.map(c=>`<span class="detail-chip">${esc(String(c))}</span>`).join('');
+            if(d.tagline){ const t=document.createElement('div'); t.className='detail-tagline'; t.textContent='“'+d.tagline+'”'; metaEl.insertAdjacentElement('afterend',t); }
+          }
+        }
+      };
+      body.addEventListener('click',toggle);
+      body.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+    }
+
+    verifyWatch(card);
+  });
+}
+
+function renderFooter(){
+  const footer=$('picksFooter'); if(!footer) return;
+  const remaining=state.allPicks.length-state.shownCount;
+  footer.innerHTML=`${remaining>0?`<button class="show-more-btn" id="showMoreBtn">Show ${Math.min(remaining,PICK_BATCH)} more pick${Math.min(remaining,PICK_BATCH)>1?'s':''}</button>`:''}`
+    +`<div class="attribution">Oya Watch · Powered by TMDB</div>`;
+  const b=$('showMoreBtn'); if(b) b.addEventListener('click',renderNextBatch);
+}
+
+function renderNextBatch(){
+  const list=$('picksList'); if(!list) return;
+  const start=state.shownCount;
+  const slice=state.allPicks.slice(start,start+PICK_BATCH);
+  if(!slice.length){ renderFooter(); return; }
+  list.insertAdjacentHTML('beforeend', slice.map((p,k)=>pickCardHTML(p,start+k)).join(''));
+  const allCards=Array.from(list.querySelectorAll('.pick-card'));
+  const newCards=allCards.slice(start);
+  state.shownCount+=slice.length;
+  wireCards(newCards);
+  newCards.forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),i*90));
+  renderFooter();
+}
+
+function renderPicks(picks) {
+  const container=$('resultsScroll'); if(!container) return;
+  state.allPicks=picks.slice();
+  state.shownCount=0;
+  container.innerHTML=`<div id="picksList"></div><div id="picksFooter"></div>`;
+  renderNextBatch();
+}
+
+// ── SIMILAR SEARCH
+async function runSimilarSearch(query) {
+  if(state.fetchingResults) return;
+  state.fetchingResults=true;
+  const sgo=$('similarGo');
+  showScreen('screen-results');
+  const pill=$('resultsPill'),title=$('resultsTitle');
+  if(pill) pill.textContent='Similar picks';
+  if(title) title.textContent='Finding something similar...';
+  showSkeletons();
+  if(sgo){sgo.textContent='...';sgo.disabled=true;}
+  try{
+    const sd=await tmdbGet(`/search/multi`,{query,page:1},6000);
+    const match=(sd&&sd.results||[]).find(r=>r.media_type==='movie'||r.media_type==='tv');
+    if(!match){showToast("Couldn't find that title — try another");state.fetchingResults=false;if(sgo){sgo.textContent='Go';sgo.disabled=false;}initPickScreen();return;}
+    const mtype=match.media_type;
+    const[simD,recD]=await Promise.all([
+      tmdbGet(`/${mtype}/${match.id}/similar`,{page:1},6000),
+      tmdbGet(`/${mtype}/${match.id}/recommendations`,{page:1},6000),
+    ]);
+    // Not provider-filtered → verified:false so availability is checked per title.
+    const combined=dedupe([...((recD&&recD.results)||[]).map(r=>({...r,mediaType:mtype,verified:false})),...((simD&&simD.results)||[]).map(r=>({...r,mediaType:mtype,verified:false}))]);
+    const seen=loadSeen();
+    const fresh=combined.filter(r=>!seen.includes(`${r.mediaType}-${r.id}`)&&r.vote_average>6&&r.vote_count>50);
+    const pool=fresh.length>=4?fresh:combined.filter(r=>r.vote_average>6);
+    if(!pool.length){showToast('No similar titles found — try another');state.fetchingResults=false;if(sgo){sgo.textContent='Go';sgo.disabled=false;}return;}
+    const sorted=[...pool].sort((a,b)=>b.vote_average-a.vote_average);
+    const newPicks=dedupe([sorted[0],...[...sorted.slice(1)].sort(()=>Math.random()-0.5)]).slice(0,12).filter(Boolean);
+    newPicks.forEach(p=>addSeen(`${p.mediaType}-${p.id}`));
+    if(title) title.textContent=`Similar to "${esc(match.title||match.name)}"`;
+    state.fetchingResults=false;
+    if(sgo){sgo.textContent='Go';sgo.disabled=false;}
+    renderPicks(newPicks);
+    startPopupTimer();
+  }catch{
+    showToast('Something went wrong — try again');
+    state.fetchingResults=false;
+    if(sgo){sgo.textContent='Go';sgo.disabled=false;}
+    renderError('network');
+  }
+}
+
+function renderError(type) {
+  const c=$('resultsScroll'); if(!c) return;
+  const msg=type==='no-results'?"We couldn't find anything. Try a different mood or platform.":"Network issue — check your connection and try again.";
+  c.innerHTML=`<div class="error-box"><strong>${type==='no-results'?'Nothing matched':'Something went sideways'}</strong><p>${msg}</p></div>`;
+}
+
+const btnAgain=$('btnAgain'),btnRespin=$('btnRespin');
+if(btnAgain)  btnAgain.addEventListener('click',()=>{resetMoodSelection();initPickScreen();});
+if(btnRespin) btnRespin.addEventListener('click',startFlow);
+
+// ── BOOT
+state.region=resolveRegion();
+state.profile=loadProfile();
+if(state.profile) initPickScreen();
+else{renderOnboardStep(0);showScreen('screen-onboard');}
+
+// ── SHARE PROMPT — one consistent, friendly voice; shown at most once per
+// session as a non-blocking bottom banner (never dims or traps the screen).
+const POPUP_VARIANTS = [
+  { icon: '🍿', headline: (n) => `Watching with someone${n?', '+n:''}?`, sub: "Send them tonight's lineup so you're not stuck deciding for everyone." },
+  { icon: '🎬', headline: (n) => `Share tonight's picks${n?', '+n:''}?`, sub: "One tap sends the whole lineup to whoever's watching with you." },
+];
+
+let popupTimer = null, popupDismissTimer = null;
+let popupShownThisSession = false;
+const POPUP_DELAY_MS = 12000;    // 12s after results land
+
+function showSharePopup() {
+  const overlay = $('shareOverlay');
+  const icon = $('popupIcon'), headline = $('popupHeadline'), sub = $('popupSub'), linkText = $('shareLinkText');
+  if (!overlay) return;
+
+  const variant = POPUP_VARIANTS[Math.floor(Math.random() * POPUP_VARIANTS.length)];
+  const name = state.profile && state.profile.name ? state.profile.name : '';
+  if (icon) icon.textContent = variant.icon;
+  if (headline) headline.textContent = variant.headline(name);
+  if (sub) sub.textContent = variant.sub;
+  if (linkText) linkText.textContent = window.location.href.replace(/^https?:\/\//,'');
+
+  overlay.classList.add('active');
+  popupShownThisSession = true;
+  // Auto-dismiss if ignored, so it never lingers.
+  clearTimeout(popupDismissTimer);
+  popupDismissTimer = setTimeout(hideSharePopup, 9000);
+}
+
+function hideSharePopup() {
+  const overlay = $('shareOverlay');
+  if (overlay) overlay.classList.remove('active');
+  clearTimeout(popupDismissTimer);
+}
+
+function startPopupTimer() {
+  if (popupShownThisSession) return;   // once per session, no nagging
+  clearTimeout(popupTimer);
+  popupTimer = setTimeout(showSharePopup, POPUP_DELAY_MS);
+}
+
+// Popup — event delegation on document so elements always found
+document.addEventListener('click', function(e) {
+  // Onboarding buttons - always use live lookup
+  if (e.target && e.target.id === 'onboardNext') { advanceOnboard(); return; }
+  if (e.target && e.target.id === 'skipLink') { skipOnboard(); return; }
+
+  var overlay = document.getElementById('shareOverlay');
+  if (!overlay || !overlay.classList.contains('active')) return;
+
+  // Tap backdrop = dismiss
+  if (e.target === overlay) { hideSharePopup(); return; }
+
+  // X close
+  var closeBtn = document.getElementById('sharePopupClose');
+  if (closeBtn && (e.target === closeBtn || closeBtn.contains(e.target))) {
+    hideSharePopup(); return;
+  }
+
+  // Share picks
+  var shareBtn = document.getElementById('sharePopupShare');
+  if (shareBtn && (e.target === shareBtn || shareBtn.contains(e.target))) {
+    var url = window.location.href;
+    var name = state.profile && state.profile.name ? state.profile.name : '';
+    var mood = state.selectedMood || 'some great picks';
+    var text = (name ? name + ' found' : 'Found') + ' "' + mood + '" picks on Oya Watch. Come watch with me!';
+    if (navigator.share) { navigator.share({ title: 'Oya Watch', text: text, url: url }).catch(function(){}); }
+    else { copyText(url, function() { showToast('Link copied - paste to share!'); }); }
+    hideSharePopup(); return;
+  }
+
+  // Copy link button
+  var copyBtn = document.getElementById('sharePopupCopy');
+  if (copyBtn && (e.target === copyBtn || copyBtn.contains(e.target))) {
+    copyText(window.location.href, function() {
+      showToast('Link copied!');
+      copyBtn.textContent = 'Copied!';
+      setTimeout(function() { copyBtn.textContent = 'Copy link'; }, 2000);
+    });
+    hideSharePopup(); return;
+  }
+
+  // COPY on link box
+  var linkCopy = document.getElementById('shareLinkCopy');
+  if (linkCopy && (e.target === linkCopy || linkCopy.contains(e.target))) {
+    e.stopPropagation();
+    copyText(window.location.href, function() {
+      showToast('Link copied!');
+      linkCopy.textContent = 'COPIED';
+      setTimeout(function() { linkCopy.textContent = 'COPY'; }, 2000);
+    });
+    return;
+  }
+});
+
+// Delegated input handler on document — input events bubble, so this keeps the
+// name-step Continue button in sync even in sandboxed builder iframes (Framer,
+// srcdoc, etc.) where directly wired listeners on re-rendered nodes can be lost.
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'nameInput') {
+    var next = document.getElementById('onboardNext');
+    if (next) next.disabled = e.target.value.trim().length < 2;
+  }
+});
+
+// Logo tap on results = go home
+document.querySelectorAll('.results-wordmark').forEach(function(el) {
+  el.style.cursor = 'pointer';
+  el.addEventListener('click', function() { resetMoodSelection(); initPickScreen(); });
+});
+
+// Re-init greeting on tab return
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && state.profile) {
+    var active = document.querySelector('.screen.active');
+    if (active && active.id === 'screen-pick') {
+      var name = state.profile.name || '';
+      var t = getTimeGreeting();
+      var el = document.getElementById('pickGreeting');
+      if (el) el.innerHTML = name
+        ? 'What are you<br>watching <em>' + t + ', ' + name + '?</em>'
+        : 'What are you<br>watching <em>' + t + '?</em>';
+    }
+  }
+});
+</script>
+</body>
+</html>

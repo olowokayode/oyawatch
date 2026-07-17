@@ -1,0 +1,14 @@
+{
+  "name": "oya-watch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Oya Watch — pick a mood, get movie & TV picks you can actually stream. A single-file, TMDB-powered web app.",
+  "scripts": {
+    "test": "node tests/run.js",
+    "start": "npx serve ."
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  },
+  "license": "MIT"
+}

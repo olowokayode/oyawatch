@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+tests/node_modules/
+
+# Test artifacts
+tests/.cache/
+coverage/
+
+# Env / secrets
+.env
+.env.local
+*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Deploy / build caches
+.vercel/
+.netlify/

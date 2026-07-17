@@ -1,0 +1,21 @@
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Optional TMDB proxy (only used when API_MODE='proxy' in index.html).
+# Must come before the SPA catch-all so it wins.
+[[redirects]]
+  from = "/api/tmdb"
+  to = "/.netlify/functions/tmdb"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
