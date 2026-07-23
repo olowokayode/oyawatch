@@ -74,7 +74,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
 .platform-opt{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--rcard);border:1.5px solid var(--border2);background:var(--surface);cursor:pointer;transition:all 0.18s;-webkit-user-select:none;user-select:none}
 .platform-opt.selected{border-color:var(--red);background:var(--surface2)}
 .platform-opt-icon{font-size:22px;flex-shrink:0}
+.platform-opt-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
 .platform-opt-name{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--text)}
+.platform-opt-hint{font-size:12px;font-weight:500;color:var(--muted2);font-family:var(--fb)}
 .platform-opt-check{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;transition:all 0.2s}
 .platform-opt.selected .platform-opt-check{background:var(--red);border-color:var(--red)}
 
@@ -102,7 +104,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
 
 /* Type toggle — pill style, proper sizing */
 .type-toggle{display:flex;gap:6px;padding:14px 24px 0;flex-shrink:0}
-.type-toggle-btn{flex:1;padding:9px 4px;border-radius:var(--rpill);border:1px solid var(--border2);background:var(--surface);color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;white-space:nowrap}
+.type-toggle-btn{flex:1;min-width:0;padding:9px 4px;border-radius:var(--rpill);border:1px solid var(--border2);background:var(--surface);color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .type-toggle-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
 
 /* Similar search — visual hierarchy: less prominent than mood grid */
@@ -169,6 +171,16 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
 .mood-mindtrip.selected{border-color:#0a8a8a;box-shadow:0 0 0 1.5px #0a8a8a,0 0 18px rgba(10,138,138,0.4)}
 .mood-mecha.selected{border-color:#2a5abb;box-shadow:0 0 0 1.5px #2a5abb,0 0 18px rgba(42,90,187,0.4)}
 
+/* Naija Movies — selected glow (named for the genre, not slang) */
+.mood-naija-romance.selected{border-color:#8a1050;box-shadow:0 0 0 1.5px #8a1050,0 0 18px rgba(138,16,80,0.4)}
+.mood-naija-comedy.selected{border-color:#8a5a00;box-shadow:0 0 0 1.5px #8a5a00,0 0 18px rgba(138,90,0,0.4)}
+.mood-naija-drama.selected{border-color:#1a3a5a;box-shadow:0 0 0 1.5px #1a3a5a,0 0 18px rgba(26,58,90,0.4)}
+.mood-naija-family.selected{border-color:#7a3a10;box-shadow:0 0 0 1.5px #7a3a10,0 0 18px rgba(122,58,16,0.4)}
+.mood-naija-epic.selected{border-color:#5a1a8a;box-shadow:0 0 0 1.5px #5a1a8a,0 0 18px rgba(90,26,138,0.4)}
+.mood-naija-action.selected{border-color:#7a1a00;box-shadow:0 0 0 1.5px #7a1a00,0 0 18px rgba(122,26,0,0.4)}
+.mood-naija-crime.selected{border-color:#7a0a0a;box-shadow:0 0 0 1.5px #7a0a0a,0 0 18px rgba(122,10,10,0.4)}
+.mood-naija-thriller.selected{border-color:#0a3a1a;box-shadow:0 0 0 1.5px #0a3a1a,0 0 18px rgba(10,58,26,0.4)}
+
 /* Colour washes */
 .mood-no-wahala .card-color-wash,.mood-comfort-tv .card-color-wash{background:#00ff88}
 .mood-e-choke .card-color-wash,.mood-binge-worthy .card-color-wash{background:#ff4400}
@@ -186,6 +198,14 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
 .mood-dark-fantasy .card-color-wash{background:#8800cc}
 .mood-mindtrip .card-color-wash{background:#00aaaa}
 .mood-mecha .card-color-wash{background:#2255cc}
+.mood-naija-romance .card-color-wash{background:#ff2e88}
+.mood-naija-comedy .card-color-wash{background:#ffb300}
+.mood-naija-drama .card-color-wash{background:#3a6a9a}
+.mood-naija-family .card-color-wash{background:#e0703c}
+.mood-naija-epic .card-color-wash{background:#ffcc00}
+.mood-naija-action .card-color-wash{background:#ff4400}
+.mood-naija-crime .card-color-wash{background:#e01010}
+.mood-naija-thriller .card-color-wash{background:#00ff66}
 
 /* Movie card images */
 .mood-no-wahala .card-img{background-image:url('https://images.pexels.com/photos/4997840/pexels-photo-4997840.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
@@ -214,6 +234,15 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
 .mood-dark-fantasy .card-img{background-image:url('https://images.pexels.com/photos/1820770/pexels-photo-1820770.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
 .mood-mindtrip .card-img{background-image:url('https://images.pexels.com/photos/2156/sky-earth-space-working.jpg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
 .mood-mecha .card-img{background-image:url('https://images.pexels.com/photos/586344/pexels-photo-586344.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+/* Naija Movies card images */
+.mood-naija-romance .card-img{background-image:url('https://images.pexels.com/photos/11741360/pexels-photo-11741360.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-naija-comedy .card-img{background-image:url('https://images.pexels.com/photos/32486602/pexels-photo-32486602.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-naija-drama .card-img{background-image:url('https://images.pexels.com/photos/1172207/pexels-photo-1172207.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-naija-family .card-img{background-image:url('https://images.pexels.com/photos/30564957/pexels-photo-30564957.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-naija-epic .card-img{background-image:url('https://images.pexels.com/photos/33763179/pexels-photo-33763179.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-naija-action .card-img{background-image:url('https://images.pexels.com/photos/3756165/pexels-photo-3756165.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-naija-crime .card-img{background-image:url('https://images.pexels.com/photos/6964169/pexels-photo-6964169.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
+.mood-naija-thriller .card-img{background-image:url('https://images.pexels.com/photos/217660/pexels-photo-217660.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop')}
 
 .card-check{position:absolute;top:16px;right:10px;z-index:6;display:none;width:20px;height:20px;background:var(--red);border-radius:50%;align-items:center;justify-content:center}
 .card-check svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none}
@@ -455,6 +484,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
     <button class="type-toggle-btn active" data-mode="movies">Movies</button>
     <button class="type-toggle-btn" data-mode="tv">TV Shows</button>
     <button class="type-toggle-btn" data-mode="anime">Anime</button>
+    <button class="type-toggle-btn" data-mode="naija">Naija</button>
   </div>
   <div class="similar-section">
     <div class="similar-inner">
@@ -621,6 +651,60 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
           <div class="card-content"><span class="card-tag">Sci-Fi</span><span class="card-name">Mecha</span></div>
         </div>
       </div>
+
+      <!-- NAIJA MOVIES grid — Nollywood, sourced from YouTube instead of Netflix/Crunchyroll.
+           Moods are the same plain genre words any streaming platform uses for its
+           own genre rows — no invented combos, no slang. -->
+      <div class="mood-grid" id="naijaGrid" style="display:none">
+        <div class="mood-card mood-naija-romance" data-mood="Romance" data-tag="Naija" data-genres="10749" data-sort="popularity.desc" data-vote-min="5" data-naija="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Naija</span><span class="card-name">Romance</span></div>
+        </div>
+        <div class="mood-card mood-naija-comedy" data-mood="Comedy" data-tag="Naija" data-genres="35" data-sort="popularity.desc" data-vote-min="5" data-naija="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Naija</span><span class="card-name">Comedy</span></div>
+        </div>
+        <div class="mood-card mood-naija-drama" data-mood="Drama" data-tag="Naija" data-genres="18" data-sort="popularity.desc" data-vote-min="5" data-naija="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Naija</span><span class="card-name">Drama</span></div>
+        </div>
+        <div class="mood-card mood-naija-family" data-mood="Family" data-tag="Naija" data-genres="10751|18" data-sort="popularity.desc" data-vote-min="5" data-naija="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Naija</span><span class="card-name">Family</span></div>
+        </div>
+        <div class="mood-card mood-naija-epic" data-mood="Epic" data-tag="Naija" data-genres="36|14" data-sort="popularity.desc" data-vote-min="5" data-naija="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Naija</span><span class="card-name">Epic</span></div>
+        </div>
+        <div class="mood-card mood-naija-action" data-mood="Action" data-tag="Naija" data-genres="28|12" data-sort="popularity.desc" data-vote-min="5" data-naija="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Naija</span><span class="card-name">Action</span></div>
+        </div>
+        <div class="mood-card mood-naija-crime" data-mood="Crime" data-tag="Naija" data-genres="80" data-sort="popularity.desc" data-vote-min="5" data-naija="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Naija</span><span class="card-name">Crime</span></div>
+        </div>
+        <div class="mood-card mood-naija-thriller" data-mood="Thriller" data-tag="Naija" data-genres="53|9648" data-sort="popularity.desc" data-vote-min="5" data-naija="1">
+          <div class="card-img"></div><div class="card-color-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
+          <div class="card-notch-row"><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div><div class="card-notch"></div></div>
+          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+          <div class="card-content"><span class="card-tag">Naija</span><span class="card-name">Thriller</span></div>
+        </div>
+      </div>
     </div>
     <div class="mood-fade" id="moodFade"></div>
   </div>
@@ -705,6 +789,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
     <div class="sheet-choice-row" id="setPlatform">
       <div class="sheet-choice" data-pkey="netflix" role="button" tabindex="0"><span>🎬</span><span>Netflix</span><span class="chk">✓</span></div>
       <div class="sheet-choice" data-pkey="crunchyroll" role="button" tabindex="0"><span>🌀</span><span>Crunchyroll</span><span class="chk">✓</span></div>
+      <div class="sheet-choice" data-pkey="youtube" role="button" tabindex="0"><span>▶️</span><span>YouTube (Naija Movies)</span><span class="chk">✓</span></div>
     </div>
 
     <label class="sheet-label">Never show me</label>
@@ -736,10 +821,18 @@ const STORAGE_KEY = 'oyawatch_v1';
   }catch{}
 })();
 
-// Only Netflix and Crunchyroll
+// The three content sources this app pulls from. All three are real,
+// selectable options in onboarding and Settings — Naija Movies always uses
+// YouTube regardless of which one is chosen as the general preference (the
+// same way Anime always adds Crunchyroll on top, further down), but it still
+// needs to appear here so people actually see it exists and can pick it as
+// their default. id 192 is TMDB's real "YouTube" watch-provider id (used for
+// its official rent/buy catalog); Naija Movies itself doesn't rely on TMDB
+// verifying that id — see the note on verifyWatch() for why.
 const PLATFORMS = {
-  netflix:     { id: 8,   name: 'Netflix',     url: 'https://www.netflix.com/search?q=' },
-  crunchyroll: { id: 283, name: 'Crunchyroll', url: 'https://www.crunchyroll.com/search?q=' },
+  netflix:     { id: 8,   name: 'Netflix',     url: 'https://www.netflix.com/search?q=',        hint: 'Movies & TV shows' },
+  crunchyroll: { id: 283, name: 'Crunchyroll', url: 'https://www.crunchyroll.com/search?q=',     hint: 'Anime' },
+  youtube:     { id: 192, name: 'YouTube',     url: 'https://www.youtube.com/results?search_query=', hint: 'Naija Movies' },
 };
 
 // Onboarding: 3 steps only — name, platform, avoid
@@ -778,6 +871,14 @@ const MOOD_COLORS = {
   'Dark Fantasy':['#0a001a','#3a006a','#0a001a','#05000f'],
   'Mind Trip':['#001a1a','#004a4a','#001a1a','#000f0f'],
   'Mecha':['#000a2a','#0a2a6a','#000a2a','#00051a'],
+  'Romance':['#3a0a20','#8a1050','#3a0a20','#150310'],
+  'Comedy':['#4a3a00','#8a6a00','#4a3a00','#1a1400'],
+  'Drama':['#0a1e3a','#1a3a6a','#0a1e3a','#040f1a'],
+  'Family':['#3a1e0a','#7a3a10','#3a1e0a','#150c04'],
+  'Epic':['#2a0a4a','#5a1a8a','#2a0a4a','#0f0320'],
+  'Action':['#3a1200','#7a2800','#3a1200','#150a00'],
+  'Crime':['#3a0000','#7a0a0a','#3a0000','#150000'],
+  'Thriller':['#0a2a14','#0a5a2a','#0a2a14','#031005'],
 };
 
 // Short human descriptors so the Pidgin mood names read clearly to everyone
@@ -785,12 +886,13 @@ const MOOD_DESC = {
   'No Wahala':'Easy, feel-good watches','E Choke!':'Tense, edge-of-seat drama','Chop Bfast':'Heartbreak & romance','Dey Play':'Comedies to laugh with','Vawulence':'Gritty crime & thrillers','After Dark':'Horror & mystery','Lights Down':'Big cinematic epics','Deep Feels':'Emotional, moving stories',
   'Binge It':'Can\u2019t-stop crime sagas','Addicted':'Twisty thriller series','Heartstrings':'Romantic series','Laugh Track':'Sitcoms & comedy series','Whodunit':'Mystery & detective series','Night Mode':'Dark, moody dramas','Real Talk':'Grounded, true-to-life shows','Comfort TV':'Cosy, easy-watch series',
   'Shonen':'Action-packed anime','Isekai':'Another-world adventures','Seinen':'Mature, darker anime','Slice of Life':'Gentle, wholesome anime','Shoujo':'Romantic anime','Dark Fantasy':'Supernatural & fantasy','Mind Trip':'Psychological anime','Mecha':'Giant-robot sci-fi',
+  'Romance':'Naija love stories & relationships','Comedy':'Nigerian comedies to laugh with','Drama':'Grounded, emotional Nigerian stories','Family':'Marriage, in-laws & home truths','Epic':'Royal courts & historical epics','Action':'High-stakes Nigerian action','Crime':'Heists, fraud & crime dramas','Thriller':'Tense, edge-of-seat suspense',
 };
 
 // Genre ids for the passive "avoid" filter
 const AVOID_GENRE = { Horror:27, Romance:10749 };
-const PLATFORM_NAME_BY_ID = { 8:'Netflix', 283:'Crunchyroll' };
-const PLATFORM_KEY_BY_ID   = { 8:'netflix', 283:'crunchyroll' };
+const PLATFORM_NAME_BY_ID = { 8:'Netflix', 283:'Crunchyroll', 192:'YouTube' };
+const PLATFORM_KEY_BY_ID   = { 8:'netflix', 283:'crunchyroll', 192:'youtube' };
 
 // ── TMDB access — single choke-point so the API key/host can be swapped for a
 // serverless proxy without touching call sites. To move the key server-side:
@@ -906,6 +1008,9 @@ function showToast(msg) {
 
 function updatePlatformPill() {
   const btn=$('platformPillBtn'); if(!btn) return;
+  // Naija Movies always sources from YouTube — independent of the user's
+  // general Netflix/Crunchyroll preference, so it overrides the pill outright.
+  if(state.currentMode==='naija'){ btn.textContent='YouTube · Nigerian movies'; return; }
   const key = state.profile&&state.profile.platform ? state.profile.platform : 'netflix';
   const name = PLATFORMS[key] ? PLATFORMS[key].name : 'Netflix';
   // Anime pulls from Crunchyroll too — reflect that honestly.
@@ -952,11 +1057,15 @@ function renderOnboardStep(step) {
 
   } else if(s.type==='platform') {
     const current=state.tempProfile.platform||'netflix';
+    const ICON={netflix:'🎬',crunchyroll:'🌀',youtube:'▶️'};
     el_form.innerHTML=`<div class="platform-list">
       ${Object.entries(PLATFORMS).map(([key,p])=>`
         <div class="platform-opt${current===key?' selected':''}" data-pkey="${key}">
-          <span class="platform-opt-icon">${key==='netflix'?'🎬':'🌀'}</span>
-          <span class="platform-opt-name">${p.name}</span>
+          <span class="platform-opt-icon">${ICON[key]||'🎬'}</span>
+          <span class="platform-opt-text">
+            <span class="platform-opt-name">${p.name}</span>
+            <span class="platform-opt-hint">${p.hint||''}</span>
+          </span>
           <span class="platform-opt-check">${current===key?'✓':''}</span>
         </div>`).join('')}
       </div>
@@ -1038,16 +1147,7 @@ function initPickScreen() {
   if(greeting) greeting.innerHTML=name?`What are you<br>watching <em>${t}, ${name}?</em>`:`What are you<br>watching <em>${t}?</em>`;
 
   applyPlatformFromProfile();
-  updatePlatformPill();
-
-  // Sync toggle UI
-  document.querySelectorAll('.type-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.currentMode));
-
-  // Show correct grid
-  const mg=$('moviesGrid'), tg=$('tvGrid'), ag=$('animeGrid');
-  if(mg) mg.style.display=state.currentMode==='movies'?'grid':'none';
-  if(tg) tg.style.display=state.currentMode==='tv'?'grid':'none';
-  if(ag) ag.style.display=state.currentMode==='anime'?'grid':'none';
+  syncModeUI();
 
   // Wire similar search once
   const sinp=$('similarInput'), sgo=$('similarGo');
@@ -1062,20 +1162,39 @@ function initPickScreen() {
   showScreen('screen-pick');
 }
 
+// Keeps every piece of mode-dependent chrome (toggle active state, which grid
+// shows, the platform pill, and the similar-search placeholder) in sync in one
+// place, so switching modes can never leave one of them stale.
+function syncModeUI(){
+  const mode=state.currentMode;
+  document.querySelectorAll('.type-toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+
+  const mg=$('moviesGrid'), tg=$('tvGrid'), ag=$('animeGrid'), ng=$('naijaGrid');
+  if(mg) mg.style.display=mode==='movies'?'grid':'none';
+  if(tg) tg.style.display=mode==='tv'?'grid':'none';
+  if(ag) ag.style.display=mode==='anime'?'grid':'none';
+  if(ng) ng.style.display=mode==='naija'?'grid':'none';
+
+  updatePlatformPill();
+
+  const sinp=$('similarInput');
+  if(sinp){
+    sinp.placeholder = mode==='tv' ? 'Type a show you love...'
+      : mode==='anime' ? 'Type an anime you love...'
+      : mode==='naija' ? 'Type a Nigerian movie you love...'
+      : 'Type a movie you love...';
+  }
+}
+
 // ── TYPE TOGGLE
 document.querySelectorAll('.type-toggle-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('.type-toggle-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
     const mode=btn.dataset.mode;
     state.currentMode=mode;
-    state.selectedType=mode==='movies'?'movies':'tv';
+    state.selectedType=mode==='tv'?'tv':'movies';
     resetMoodSelection();
-    const mg=$('moviesGrid'),tg=$('tvGrid'),ag=$('animeGrid');
-    if(mg) mg.style.display=mode==='movies'?'grid':'none';
-    if(tg) tg.style.display=mode==='tv'?'grid':'none';
-    if(ag) ag.style.display=mode==='anime'?'grid':'none';
-    // Platform IDs
+    syncModeUI();
+    // Platform IDs (irrelevant for naija — that mode always resolves to YouTube)
     const key=state.profile&&state.profile.platform?state.profile.platform:'netflix';
     const prov=PLATFORMS[key]||PLATFORMS.netflix;
     state.activePlatformIds=mode==='anime'?[PLATFORMS.crunchyroll.id,prov.id]:[prov.id];
@@ -1300,14 +1419,18 @@ function showSkeletons() {
 async function fetchTMDB() {
   const card=state.selectedCard; if(!card) return [];
   const isAnime=card.dataset.anime==='1';
+  const isNaija=card.dataset.naija==='1';
   const seen=loadSeen();
   const provId=state.activePlatformIds.join('|')||'8';
+  // Nollywood titles carry far fewer TMDB votes than Hollywood/global catalog
+  // titles, so the usual vote-count floor would starve the pool — loosen it.
   const voteMin=parseInt(card.dataset.voteMin||'100');
   const genres=card.dataset.genres||'18';
   const sortBy=card.dataset.sort||'vote_average.desc';
 
-  // Anime can be films OR series — query both. Otherwise honour the toggle.
-  const mediaTypes = isAnime ? ['movie','tv'] : [state.currentMode==='movies'?'movie':'tv'];
+  // Anime and Naija can both be films OR series — query both to widen a
+  // narrower catalog slice. Otherwise honour the Movies/TV Shows toggle.
+  const mediaTypes = (isAnime||isNaija) ? ['movie','tv'] : [state.currentMode==='movies'?'movie':'tv'];
 
   // Passive avoid filter — but an explicit mood choice overrides it, so
   // picking the Horror mood while "no horror" is set never dead-ends.
@@ -1320,37 +1443,64 @@ async function fetchTMDB() {
   avoidGenres = avoidGenres.filter(g => !moodGenreIds.includes(String(g)));
 
   const buildParams=(mediaType,page,useProvider,region)=>{
-    const p={ with_genres:genres, sort_by:sortBy, 'vote_count.gte':voteMin, 'vote_average.gte':6.0, page };
+    const p={ with_genres:genres, sort_by:sortBy, 'vote_count.gte':voteMin, 'vote_average.gte':isNaija?5.0:6.0, page };
     if(useProvider){ p.with_watch_providers=provId; p.watch_region=region||'US'; }
     if(isAnime) p.with_keywords=210024;
+    // Nigerian-origin filter — this is what actually narrows Naija Movies down
+    // to Nollywood, not a watch-provider match (see note below).
+    if(isNaija) p.with_origin_country='NG';
     if(avoidGenres.length) p.without_genres=avoidGenres.join('|');
     return { mediaType, params:p };
   };
   const discover=async(mediaType,page,useProvider,region)=>{
     const { params }=buildParams(mediaType,page,useProvider,region);
     const d=await tmdbGet(`/discover/${mediaType}`, params, 8000);
-    return (d&&d.results||[]).map(i=>({...i, mediaType, verified:!!useProvider}));
+    return (d&&d.results||[]).map(i=>({...i, mediaType, verified:!!useProvider, naija:isNaija}));
   };
 
   const p1=Math.floor(Math.random()*4)+1;
   const p2=Math.floor(Math.random()*4)+2;
   const forTypes=(fn)=>mediaTypes.flatMap(fn);
 
-  // Attempt 1 — provider + user region (verified)
-  let all=dedupe(await Promise.all(
-    forTypes(mt=>[discover(mt,p1,true,state.region), discover(mt,p2,true,state.region)])
-  ).then(a=>a.flat()));
+  let all=[];
+  if(isNaija){
+    // Nigerian-origin content is a far smaller slice of TMDB than the global
+    // catalog the random-page strategy below was built for — a specific
+    // genre + with_origin_country=NG combo can easily have well under 40
+    // total matches. Randomly requesting pages 2-6 (fine when there are
+    // thousands of matches) routinely lands past the real last page and
+    // TMDB just returns an empty array, which is exactly why spins were
+    // coming back with nothing. Always anchor on page 1 (guaranteed to hold
+    // whatever exists) and treat page 2 as a bonus, never as the only source.
+    const more=(await Promise.all(forTypes(mt=>[discover(mt,1,false), discover(mt,2,false)]))).flat();
+    all=dedupe(more);
 
-  // Attempt 2 — provider + US (verified) if user region came up short
-  if(all.length<6 && state.region!=='US'){
-    const more=(await Promise.all(forTypes(mt=>[discover(mt,p1,true,'US'), discover(mt,p2,true,'US')]))).flat();
-    all=dedupe([...all,...more]);
-  }
+    // Last resort: if even that specific genre bucket is too thin, broaden
+    // to any well-known Nigerian title rather than show "nothing matched".
+    if(all.length<4){
+      const wider=(await Promise.all(mediaTypes.map(mt=>{
+        const p={ sort_by:'popularity.desc', 'vote_count.gte':1, page:1, with_origin_country:'NG' };
+        return tmdbGet(`/discover/${mt}`, p, 8000).then(d=>(d&&d.results||[]).map(i=>({...i, mediaType:mt, verified:false, naija:true})));
+      }))).flat();
+      all=dedupe([...all,...wider]);
+    }
+  } else {
+    // Attempt 1 — provider + user region (verified)
+    all=dedupe(await Promise.all(
+      forTypes(mt=>[discover(mt,p1,true,state.region), discover(mt,p2,true,state.region)])
+    ).then(a=>a.flat()));
 
-  // Attempt 3 — genre only, no provider filter (unverified → checked at render)
-  if(all.length<6){
-    const more=(await Promise.all(forTypes(mt=>[discover(mt,p1,false), discover(mt,p2,false), discover(mt,Math.floor(Math.random()*6)+1,false)]))).flat();
-    all=dedupe([...all,...more]);
+    // Attempt 2 — provider + US (verified) if user region came up short
+    if(all.length<6 && state.region!=='US'){
+      const more=(await Promise.all(forTypes(mt=>[discover(mt,p1,true,'US'), discover(mt,p2,true,'US')]))).flat();
+      all=dedupe([...all,...more]);
+    }
+
+    // Attempt 3 — genre only, no provider filter (unverified → checked at render)
+    if(all.length<6){
+      const more=(await Promise.all(forTypes(mt=>[discover(mt,p1,false), discover(mt,p2,false), discover(mt,Math.floor(Math.random()*6)+1,false)]))).flat();
+      all=dedupe([...all,...more]);
+    }
   }
 
   if(!all.length) return [];
@@ -1359,9 +1509,14 @@ async function fetchTMDB() {
   const fresh=all.filter(r=>!seen.includes(`${r.mediaType}-${r.id}`));
   const pool=fresh.length>=4?fresh:all;
 
-  // Verified titles first, then by rating; highest-rated verified is the top pick.
-  const ranked=[...pool].sort((a,b)=>(Number(b.verified)-Number(a.verified))||(b.vote_average-a.vote_average));
-  const top1=[...pool].sort((a,b)=>b.vote_average-a.vote_average)[0];
+  // Naija's sparse vote counts make vote_average noisy (a title with 2 votes
+  // of 10 would otherwise float straight to the top) — rank by popularity
+  // instead for that mode.
+  const scoreOf=(r)=> isNaija ? (r.popularity||0) : (r.vote_average||0);
+
+  // Verified titles first, then by score; highest-scoring verified is the top pick.
+  const ranked=[...pool].sort((a,b)=>(Number(b.verified)-Number(a.verified))||(scoreOf(b)-scoreOf(a)));
+  const top1=[...pool].sort((a,b)=>scoreOf(b)-scoreOf(a))[0];
   const rest=ranked.filter(r=>r!==top1).sort(()=>Math.random()-0.5);
   const outPool=dedupe([top1,...rest]).slice(0,12).filter(Boolean);
 
@@ -1416,7 +1571,7 @@ function pickCardHTML(p, i){
         ${overviewFull?`<p class="detail-overview">${overviewFull}</p>`:'<p class="detail-overview">No description available yet.</p>'}
       </div>
       <div class="card-action-primary">
-        <a class="watch-btn checking" data-title="${esc(title)}" data-id="${p.id}" data-mtype="${p.mediaType}" data-verified="${p.verified?1:0}" href="#" rel="noopener" aria-label="Checking availability">
+        <a class="watch-btn checking" data-title="${esc(title)}" data-id="${p.id}" data-mtype="${p.mediaType}" data-verified="${p.verified?1:0}" data-naija="${p.naija?1:0}" href="#" rel="noopener" aria-label="Checking availability">
           <svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg>
           <span class="watch-label">Checking availability…</span>
         </a>
@@ -1452,6 +1607,19 @@ async function verifyWatch(cardEl){
   const title=unesc(btn.dataset.title||''), id=btn.dataset.id, type=btn.dataset.mtype;
   const verified=btn.dataset.verified==='1';
   const active=state.activePlatformIds;
+
+  // Naija picks are sourced for YouTube, not Netflix/Crunchyroll. TMDB doesn't
+  // track free Nollywood uploads as a watch provider, so there's nothing to
+  // verify — send people straight to a real, working YouTube search instead
+  // of a "checking availability" call that would almost always come back empty.
+  if(btn.dataset.naija==='1'){
+    btn.className='watch-btn';
+    btn.href=PLATFORMS.youtube.url+encodeURIComponent(title+' full movie');
+    btn.target='_blank';
+    btn.setAttribute('aria-label',`Watch ${title} on YouTube`);
+    const lbl=btn.querySelector('.watch-label'); if(lbl) lbl.textContent='Watch on YouTube';
+    return;
+  }
 
   const setOn=(pid)=>{
     const key=PLATFORM_KEY_BY_ID[pid]; const prov=PLATFORMS[key]||PLATFORMS.netflix;
@@ -1592,9 +1760,14 @@ async function runSimilarSearch(query) {
       tmdbGet(`/${mtype}/${match.id}/recommendations`,{page:1},6000),
     ]);
     // Not provider-filtered → verified:false so availability is checked per title.
-    const combined=dedupe([...((recD&&recD.results)||[]).map(r=>({...r,mediaType:mtype,verified:false})),...((simD&&simD.results)||[]).map(r=>({...r,mediaType:mtype,verified:false}))]);
+    // Tag with the current mode's naija flag so the watch button resolves to
+    // YouTube instead of a Netflix/Crunchyroll check when searching from that tab.
+    const isNaijaSearch=state.currentMode==='naija';
+    const combined=dedupe([...((recD&&recD.results)||[]).map(r=>({...r,mediaType:mtype,verified:false,naija:isNaijaSearch})),...((simD&&simD.results)||[]).map(r=>({...r,mediaType:mtype,verified:false,naija:isNaijaSearch}))]);
     const seen=loadSeen();
-    const fresh=combined.filter(r=>!seen.includes(`${r.mediaType}-${r.id}`)&&r.vote_average>6&&r.vote_count>50);
+    // Nollywood titles carry far fewer TMDB votes — don't filter them all out.
+    const voteCountMin=isNaijaSearch?5:50;
+    const fresh=combined.filter(r=>!seen.includes(`${r.mediaType}-${r.id}`)&&r.vote_average>6&&r.vote_count>voteCountMin);
     const pool=fresh.length>=4?fresh:combined.filter(r=>r.vote_average>6);
     if(!pool.length){showToast('No similar titles found — try another');state.fetchingResults=false;if(sgo){sgo.textContent='Go';sgo.disabled=false;}return;}
     const sorted=[...pool].sort((a,b)=>b.vote_average-a.vote_average);

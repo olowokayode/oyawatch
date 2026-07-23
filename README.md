@@ -12,11 +12,21 @@ one-tap sharing. Powered by [TMDB](https://www.themoviedb.org/).
 
 ## Features
 
-- **Mood-based discovery** — Movies, TV, and Anime, each with its own set of moods.
+- **Three platforms, everywhere you'd expect them** — Netflix, Crunchyroll,
+  and YouTube (for Naija Movies) are all real, selectable options in both
+  onboarding and Settings, not just something hidden behind a mode toggle.
+- **Mood-based discovery** — Movies, TV, Anime, and Naija Movies, each with its
+  own set of moods.
+- **Naija Movies** — Nollywood, filtered by Nigerian origin on TMDB and pointed
+  at YouTube, since that's where most Nollywood movies actually live. Moods use
+  the same plain genre words any streaming platform uses: Romance, Comedy,
+  Drama, Family, Epic, Action, Crime, and Thriller.
 - **Search "more like this"** — type a film or show you love and get similar picks.
 - **Honest availability** — a title only says "Watch on Netflix" when it's actually
   there for your region; otherwise it links to a real "where to watch" page. No
-  dead-end searches.
+  dead-end searches. Naija Movies picks always say "Watch on YouTube" and link to
+  a real search there, since TMDB doesn't track free Nollywood uploads as a watch
+  provider the way it does Netflix or Crunchyroll.
 - **Clear 0–5 star ratings** — TMDB scores shown as fractional stars everyone
   understands (no confusing "IMDb" mislabels).
 - **Expandable cards** — tap a pick for runtime, genres, tagline, and full synopsis.

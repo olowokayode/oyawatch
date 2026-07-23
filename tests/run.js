@@ -3,7 +3,7 @@
 const origErr = console.error;
 console.error = (...a) => { if (String(a[0]).includes("Not implemented: Window's scrollTo")) return; origErr.apply(console, a); };
 
-const SUITES = ['behavior', 'flow', 'edge', 'onboarding'];
+const SUITES = ['behavior', 'flow', 'edge', 'onboarding', 'naija'];
 
 (async () => {
   let pass = 0, fail = 0;
