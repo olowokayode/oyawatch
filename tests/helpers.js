@@ -1,10 +1,7 @@
-// Shared test helpers: load the real index.html into jsdom with a stubbed TMDB
-// API so the app's actual functions run against deterministic data.
 const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');
 
-// Read index.html and expose internals on window.__app for assertions.
 function instrumentedHtml() {
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf-8');
   const hook = `
@@ -12,8 +9,8 @@ function instrumentedHtml() {
 window.__app = {
   ratingToStars, starsHTML, resolveRegion, fetchTMDB, renderPicks, runSimilarSearch,
   verifyWatch, tmdbGet, fetchProviders, startFlow, openSettings, closeSettings,
-  showSharePopup, hideSharePopup, startPopupTimer, applyPlatformFromProfile,
-  updatePlatformPill, renderOnboardStep, initPickScreen, state, PLATFORMS,
+  showSharePopup, hideSharePopup, startPopupTimer, renderOnboardStep, initPickScreen,
+  renderError, state,
   isPopupShown: function () { return popupShownThisSession; }
 };
 </script>
@@ -27,7 +24,6 @@ const mkRes = (obj) => ({
   text: () => Promise.resolve(JSON.stringify(obj)),
 });
 
-// One fetch stub covering every endpoint the app calls, with a few modes.
 function makeFetch(win) {
   return (url) => {
     const u = String(url);
@@ -66,7 +62,7 @@ function makeFetch(win) {
       else flat = [{ provider_id: 9 }];
       const region = { flatrate: flat };
       const results = { US: region };
-      if (id < 9000) results.NG = region; // id>=9000 => US only (region fallback)
+      if (id < 9000) results.NG = region;
       return Promise.resolve(mkRes({ results }));
     }
     if (u.includes('/videos')) {

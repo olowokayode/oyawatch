@@ -5,7 +5,11 @@ module.exports = async (t) => {
   const win = dom.window, doc = win.document, A = win.__app;
   await flush();
 
-  const setMood = (sel) => { const c = doc.querySelector(sel); A.state.selectedMood = c.dataset.mood; A.state.selectedCard = c; A.state.currentMode = c.dataset.anime ? 'anime' : 'movies'; };
+  const setMood = (sel) => {
+    const c = doc.querySelector(sel);
+    A.state.selectedMood = c.dataset.mood;
+    A.state.selectedCard = c;
+  };
 
   t.group('tmdbGet session caching');
   {
@@ -16,8 +20,9 @@ module.exports = async (t) => {
 
   t.group('Empty results -> graceful error');
   {
-    A.state.profile = { name: 'Ada', platform: 'netflix' }; A.applyPlatformFromProfile();
-    A.state.currentMode = 'movies'; setMood('#moviesGrid .mood-card[data-mood="Dey Play"]');
+    A.state.profile = { name: 'Ada', platform: 'netflix' };
+    A.state.currentMode = 'movies';
+    setMood('#moviesGrid .mood-card[data-mood="Dey Play"]');
     win.__mode = 'empty'; A.state.fetchingResults = false;
     A.startFlow(); await flush(2);
     doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
@@ -32,33 +37,19 @@ module.exports = async (t) => {
     win.__mode = 'reject'; A.state.fetchingResults = false;
     A.startFlow(); await flush(2);
     doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(/error-box/.test(doc.getElementById('resultsScroll').innerHTML), 'network failure shows an error box (no crash)');
+    t.ok(/error-box/.test(doc.getElementById('resultsScroll').innerHTML), 'network failure shows error box');
     win.__mode = 'normal'; A.state.fetchingResults = false;
-  }
-
-  t.group('Anime provider labelling (Crunchyroll + region fallback)');
-  {
-    A.state.activePlatformIds = [283, 8]; A.state.region = 'NG';
-    A.renderPicks([
-      { id: 112, title: 'AnimeCR', overview: 'Great one twelve. A series that earns its runtime and rewards the viewer nicely here now.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'tv', verified: false },
-      { id: 111, title: 'AnimeNF', overview: 'Great one eleven. A series that earns its runtime and rewards the viewer nicely here now ok.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'tv', verified: false },
-      { id: 9003, title: 'RegionFallback', overview: 'Great nine thousand three. A series that earns its runtime and rewards viewers here now.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'tv', verified: false },
-    ]); await flush();
-    t.ok(/Watch on Crunchyroll/.test(doc.getElementById('card0').querySelector('.watch-label').textContent), 'on Crunchyroll -> "Watch on Crunchyroll"');
-    t.ok(/Watch on Netflix/.test(doc.getElementById('card1').querySelector('.watch-label').textContent), 'on Netflix (anime mode) -> "Watch on Netflix"');
-    t.ok(/Watch on Netflix/.test(doc.getElementById('card2').querySelector('.watch-label').textContent), 'region-only-US providers resolved via US fallback');
-    A.state.activePlatformIds = [8];
   }
 
   t.group('Share + Copy actions');
   {
-    A.renderPicks([{ id: 500, title: 'ShareMe', overview: 'Great five hundred. A film that earns its runtime and rewards the viewer nicely here now.', vote_average: 9, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: true }]); await flush();
+    A.renderPicks([{ id: 500, title: 'ShareMe', overview: 'Great five hundred. A film that earns its runtime and rewards the viewer tonight.', vote_average: 9, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: true }]); await flush();
     win.__shared = null;
     doc.getElementById('card0').querySelector('.btn-share').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
     t.ok(win.__shared && /ShareMe/.test(win.__shared.text), 'Share button invokes navigator.share with title');
-    t.ok(/\/5 stars/.test(win.__shared.text), 'share text uses star rating, not IMDb');
+    t.ok(/\/5 stars/.test(win.__shared.text), 'share text uses star rating');
     doc.getElementById('card0').querySelector('.btn-copy').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(doc.getElementById('toast').classList.contains('show'), 'Copy title shows a confirmation toast');
+    t.ok(doc.getElementById('toast').classList.contains('show'), 'Copy title shows confirmation toast');
   }
 
   t.group('starsHTML with missing rating');
@@ -77,7 +68,7 @@ module.exports = async (t) => {
     t.ok(doc.getElementById('screen-results').classList.contains('active'), 'reached results');
     A.state.fetchingResults = false;
     doc.getElementById('btnRespin').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush(2);
-    t.ok(doc.getElementById('screen-wheel').classList.contains('active'), '"Spin again" restarts the spin');
+    t.ok(doc.getElementById('screen-wheel').classList.contains('active'), '"Spin again" restarts spin');
     doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
     t.ok(doc.getElementById('screen-results').classList.contains('active'), 'respin returns to results');
   }
@@ -103,10 +94,19 @@ module.exports = async (t) => {
     t.ok(/Tap again/.test(rb.textContent), 'first reset tap asks for confirmation');
     t.ok(A.state.profile !== null, 'profile intact after first tap');
     rb.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(A.state.profile === null, 'second tap wipes the profile');
+    t.ok(A.state.profile === null, 'second tap wipes profile');
     t.ok(doc.getElementById('screen-onboard').classList.contains('active'), 'reset returns to onboarding');
   }
 
+  t.group('No platform selector anywhere in app');
+  {
+    t.ok(!doc.querySelector('.platform-list'), 'no platform-list element');
+    t.ok(!doc.querySelector('.platform-opt'), 'no platform-opt elements');
+    t.ok(!doc.getElementById('platformPillBtn'), 'no platformPillBtn');
+    t.ok(!doc.getElementById('setPlatform'), 'no setPlatform in settings');
+    t.ok(doc.querySelector('.netflix-badge'), 'Netflix badge is present on pick screen');
+  }
+
   t.group('No silent runtime errors');
-  t.ok(dom.__errors.length === 0, 'zero window/console errors' + (dom.__errors.length ? ': ' + dom.__errors.slice(0, 3).join(' | ') : ''));
+  t.ok(dom.__errors.length === 0, 'zero window errors' + (dom.__errors.length ? ': ' + dom.__errors.slice(0, 3).join(' | ') : ''));
 };

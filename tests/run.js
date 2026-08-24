@@ -1,5 +1,3 @@
-// Minimal test runner: loads each suite, aggregates pass/fail, sets exit code.
-// jsdom's unimplemented window.scrollTo warning is harmless and silenced below.
 const origErr = console.error;
 console.error = (...a) => { if (String(a[0]).includes("Not implemented: Window's scrollTo")) return; origErr.apply(console, a); };
 
@@ -23,7 +21,7 @@ const SUITES = ['behavior', 'flow', 'edge', 'onboarding', 'naija'];
       await suite(t);
     } catch (e) {
       fail++; failures.push(name + ' threw: ' + e.message);
-      process.stdout.write('    \u2717 SUITE ERROR: ' + e.message + '\n');
+      process.stdout.write('    \u2717 SUITE ERROR: ' + e.message + '\n' + (e.stack || '') + '\n');
     }
   }
 
