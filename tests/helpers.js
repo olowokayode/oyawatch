@@ -7,10 +7,14 @@ function instrumentedHtml() {
   const hook = `
 <script>
 window.__app = {
-  ratingToStars, starsHTML, resolveRegion, fetchTMDB, renderPicks, runSimilarSearch,
-  verifyWatch, tmdbGet, fetchProviders, startFlow, openSettings, closeSettings,
-  showSharePopup, hideSharePopup, startPopupTimer, renderOnboardStep, initPickScreen,
-  renderError, state,
+  state,
+  resolveRegion, fetchTMDB, dedupe, runSimilarSearch,
+  verifyWatch, tmdbGet, fetchProviders, startFlow,
+  openSettings, closeSettings, openWL, closeWL,
+  showSharePopup, hideSharePopup, startPopupTimer,
+  renderOnboardStep, initPickScreen, renderError,
+  renderSwipeStack, addToWatchlist, updateWLBadge,
+  getVerdict, buildSwipeCard, loadWatchlist, saveWatchlist,
   isPopupShown: function () { return popupShownThisSession; }
 };
 </script>
@@ -44,7 +48,7 @@ function makeFetch(win) {
           id,
           title: isTV ? undefined : ('Movie ' + id),
           name: isTV ? ('Show ' + id) : undefined,
-          overview: 'Acclaimed story number ' + id + '. It follows compelling people through vivid events. Worth the night.',
+          overview: 'Acclaimed story ' + id + '. Compelling characters, vivid world, worth your night.',
           vote_average: 6 + ((id % 40) / 10),
           vote_count: 500,
           poster_path: '/p' + id + '.jpg',
@@ -56,14 +60,13 @@ function makeFetch(win) {
     }
     if (u.includes('/watch/providers')) {
       const id = Number((p.match(/\/(movie|tv)\/(\d+)\/watch\/providers/) || [])[2]);
-      let flat; const m = id % 3;
+      let flat;
+      const m = id % 3;
       if (m === 1) flat = [{ provider_id: 283 }];
       else if (m === 0) flat = [{ provider_id: 8 }];
       else flat = [{ provider_id: 9 }];
       const region = { flatrate: flat };
-      const results = { US: region };
-      if (id < 9000) results.NG = region;
-      return Promise.resolve(mkRes({ results }));
+      return Promise.resolve(mkRes({ results: { US: region, NG: region } }));
     }
     if (u.includes('/videos')) {
       return win.__deferredVideos || Promise.resolve(mkRes({ results: [{ site: 'YouTube', type: 'Trailer', key: 'abc' }] }));
@@ -76,13 +79,13 @@ function makeFetch(win) {
       const results = [];
       for (let i = 0; i < 8; i++) {
         const id = (rec ? 3000 : 4000) + i;
-        results.push({ id, title: (rec ? 'Rec ' : 'Sim ') + id, overview: 'A fine watch ' + id + '. Truly worth the evening ahead of you.', vote_average: 7 + (i % 3) * 0.5, vote_count: 200, poster_path: '/x' + id + '.jpg', release_date: '2019-01-01' });
+        results.push({ id, title: (rec ? 'Rec ' : 'Sim ') + id, overview: 'Great watch ' + id + '. Stays with you.', vote_average: 7 + (i % 3) * 0.5, vote_count: 200, poster_path: '/x' + id + '.jpg', release_date: '2019-01-01' });
       }
       return Promise.resolve(mkRes({ results }));
     }
     if (/\/(movie|tv)\/\d+$/.test(p)) {
       const isTV = p.includes('/tv/');
-      return Promise.resolve(mkRes({ runtime: isTV ? undefined : 128, episode_run_time: isTV ? [45] : undefined, number_of_seasons: isTV ? 3 : undefined, genres: [{ name: 'Drama' }, { name: 'Thriller' }], tagline: 'A gripping tale.', original_language: 'en' }));
+      return Promise.resolve(mkRes({ runtime: isTV ? undefined : 128, episode_run_time: isTV ? [45] : undefined, number_of_seasons: isTV ? 3 : undefined, genres: [{ name: 'Drama' }], tagline: 'A gripping tale.', original_language: 'en' }));
     }
     return Promise.resolve(mkRes({ results: [] }));
   };
@@ -109,6 +112,7 @@ async function makeDom(opts = {}) {
       win.__shared = null;
       win.navigator.share = (d) => { win.__shared = d; return Promise.resolve(); };
       win.navigator.clipboard = { writeText: () => Promise.resolve() };
+      win.navigator.vibrate = () => true;
       win.addEventListener('error', (e) => errors.push(String(e.message || e.error)));
       if (opts.legacy) { try { win.localStorage.setItem('tmplug_v6', JSON.stringify(opts.legacy)); } catch (e) { win.__legacyErr = String(e); } }
     },
@@ -118,7 +122,7 @@ async function makeDom(opts = {}) {
   return dom;
 }
 
-const flush = async (n = 10) => { for (let i = 0; i < n; i++) { await Promise.resolve(); await new Promise((r) => setTimeout(r, 0)); } };
+const flush = async (n = 12) => { for (let i = 0; i < n; i++) { await Promise.resolve(); await new Promise((r) => setTimeout(r, 0)); } };
 
 function deferredVideos() {
   let resolve;
@@ -126,4 +130,4 @@ function deferredVideos() {
   return { promise, resolve };
 }
 
-module.exports = { makeDom, flush, deferredVideos, instrumentedHtml };
+module.exports = { makeDom, flush, deferredVideos };

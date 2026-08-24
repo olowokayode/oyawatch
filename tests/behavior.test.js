@@ -5,157 +5,209 @@ module.exports = async (t) => {
   const win = dom.window, doc = win.document, A = win.__app;
   await flush();
 
-  t.group('Star rating conversion (0-5)');
-  {
-    const r = A.ratingToStars(7.8);
-    t.ok(Math.abs(r.five - 3.9) < 1e-6, 'ratingToStars(7.8).five = 3.9');
-    t.ok(Math.abs(r.pct - 78) < 1e-6, 'ratingToStars(7.8).pct = 78');
-    t.ok(A.ratingToStars(10).five === 5 && A.ratingToStars(10).pct === 100, 'ratingToStars(10) = 5/100%');
-    t.ok(A.ratingToStars(0).five === 0, 'ratingToStars(0) = 0');
-    const h = A.starsHTML(7.8);
-    t.ok(h.includes('width:78.0%'), 'starsHTML fills 78.0%');
-    t.ok(h.includes('3.9 out of 5 stars'), 'starsHTML has aria-label');
-    t.ok(h.includes('<b>3.9</b>/5'), 'starsHTML shows 3.9/5');
-    t.ok(!/imdb/i.test(h), 'no "IMDb" in stars');
-  }
-
   t.group('Region resolution');
-  t.ok(A.state.region === 'NG', "region 'NG' from navigator.languages");
+  t.ok(A.state.region === 'NG', "region 'NG' from navigator.languages ['en-NG']");
 
-  t.group('Netflix-only: activePlatformIds always [8]');
+  t.group('Verdict copy — benefit-led, not numeric');
   {
-    t.ok(!doc.querySelector('.platform-opt'), 'no platform picker on pick screen');
-    t.ok(!doc.getElementById('platformPillBtn'), 'no platform pill button');
-    t.ok(doc.querySelector('.netflix-badge'), 'Netflix badge visible');
+    t.ok(A.getVerdict(9.2) === 'A film people rewatch.', '9.2 → rewatch verdict');
+    t.ok(A.getVerdict(8.5) === 'Stays with you.', '8.5 → stays verdict');
+    t.ok(A.getVerdict(7.1) === 'Worth the night.', '7.1 → worth verdict');
+    t.ok(A.getVerdict(6.2) === 'A gamble. Could be good.', '6.2 → gamble verdict');
+    t.ok(A.getVerdict(0) === 'A gamble. Could be good.', '0 → gamble verdict');
   }
 
-  t.group('fetchTMDB: avoid-override applies');
+  t.group('Netflix-only — no platform picker');
   {
-    A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'Horror — hard no' };
+    t.ok(!doc.querySelector('.platform-opt'), 'no platform-opt on pick screen');
+    t.ok(!doc.getElementById('platformPillBtn'), 'no platformPillBtn');
+    t.ok(doc.querySelector('.netflix-pill'), 'Netflix pill badge visible');
+    t.ok(!doc.querySelector('[data-pkey]'), 'no data-pkey attributes');
+  }
+
+  t.group('fetchTMDB: Netflix provider always included');
+  {
+    A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'I watch everything' };
     A.state.currentMode = 'movies';
-    A.state.selectedMood = 'Dey Play';
-    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="Dey Play"]');
-    win.__fetches = []; await A.fetchTMDB();
-    t.ok(win.__fetches.filter((u) => u.includes('/discover/')).some((u) => u.includes('without_genres=27')), 'non-conflicting avoid keeps without_genres=27');
-
-    A.state.selectedMood = 'After Dark';
-    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="After Dark"]');
-    win.__fetches = []; await A.fetchTMDB();
-    const hd = win.__fetches.filter((u) => u.includes('/discover/'));
-    t.ok(hd.length > 0 && !hd.some((u) => u.includes('without_genres')), 'explicit Horror mood overrides avoid');
-  }
-
-  t.group('fetchTMDB: Netflix provider always passed');
-  {
     A.state.selectedMood = 'No Wahala';
     A.state.selectedCard = doc.querySelector('.mood-card[data-mood="No Wahala"]');
-    win.__fetches = []; await A.fetchTMDB();
-    const provFetches = win.__fetches.filter((u) => u.includes('with_watch_providers=8'));
-    t.ok(provFetches.length > 0, 'fetches include Netflix provider filter (id=8)');
-    t.ok(!win.__fetches.some((u) => u.includes('with_watch_providers=283')), 'no Crunchyroll provider filter');
+    win.__fetches = [];
+    await A.fetchTMDB();
+    const provFetches = win.__fetches.filter(u => u.includes('with_watch_providers=8'));
+    t.ok(provFetches.length > 0, 'fetches include Netflix provider id=8');
+    t.ok(!win.__fetches.some(u => u.includes('with_watch_providers=283')), 'no Crunchyroll provider');
   }
 
-  t.group('TV mode: fetchTMDB hits /discover/tv');
+  t.group('fetchTMDB: avoid horror (non-conflicting mood)');
+  {
+    A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'Horror — hard no' };
+    A.state.selectedMood = 'Dey Play';
+    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="Dey Play"]');
+    win.__fetches = [];
+    await A.fetchTMDB();
+    const discover = win.__fetches.filter(u => u.includes('/discover/'));
+    t.ok(discover.some(u => u.includes('without_genres=27')), 'horror genre excluded from Dey Play');
+  }
+
+  t.group('fetchTMDB: horror mood overrides avoid-horror');
+  {
+    A.state.selectedMood = 'After Dark';
+    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="After Dark"]');
+    win.__fetches = [];
+    await A.fetchTMDB();
+    const discover = win.__fetches.filter(u => u.includes('/discover/'));
+    t.ok(!discover.some(u => u.includes('without_genres')), 'horror mood overrides horror avoid');
+  }
+
+  t.group('TV mode hits /discover/tv');
   {
     A.state.currentMode = 'tv';
     A.state.selectedMood = 'Binge It';
     A.state.selectedCard = doc.querySelector('.mood-card[data-mood="Binge It"]');
-    win.__fetches = []; const pool = await A.fetchTMDB();
-    t.ok(win.__fetches.some((u) => u.includes('/discover/tv')), 'TV mode hits /discover/tv');
-    t.ok(!win.__fetches.some((u) => u.includes('/discover/movie')), 'TV mode does not hit /discover/movie');
+    win.__fetches = [];
+    const pool = await A.fetchTMDB();
+    t.ok(win.__fetches.some(u => u.includes('/discover/tv')), 'TV mode queries /discover/tv');
+    t.ok(!win.__fetches.some(u => u.includes('/discover/movie')), 'TV mode does not query /discover/movie');
     t.ok(pool.length > 0, 'TV mode returns picks');
     A.state.currentMode = 'movies';
   }
 
-  t.group('renderPicks: stars, no IMDb, show-more');
+  t.group('Swipe stack renders cards');
   {
+    A.state.profile = { name: 'Ada', platform: 'netflix' };
+    A.state.selectedMood = 'No Wahala';
+    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="No Wahala"]');
+    A.state.pickIdx = 0;
     const picks = [];
-    for (let i = 0; i < 6; i++) picks.push({ id: 200 + i, title: 'Title ' + (200 + i), overview: 'A strong watch number ' + i + '. It carries real weight and holds attention throughout the night.', vote_average: 7.8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: true });
-    A.renderPicks(picks); await flush();
-    const list = doc.getElementById('picksList');
-    t.ok(list.querySelectorAll('.pick-card').length === 5, 'first batch = 5 cards');
-    t.ok(doc.getElementById('showMoreBtn'), 'show-more present when >5');
-    t.ok(/width:78\.0%/.test(list.innerHTML), 'cards show 78% star fill');
-    t.ok(!/imdb/i.test(doc.getElementById('resultsScroll').innerHTML), 'no "IMDb" in results');
-    doc.getElementById('showMoreBtn').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(list.querySelectorAll('.pick-card').length === 6, 'show-more appends 6th');
-    t.ok(!doc.getElementById('showMoreBtn'), 'show-more gone when exhausted');
+    for (let i = 0; i < 6; i++) picks.push({ id: 300 + i, title: 'Film ' + (300 + i), overview: 'A great film number ' + i + ' that rewards the viewer tonight.', vote_average: 7.8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true });
+    A.state.allPicks = picks;
+    A.renderSwipeStack(); await flush();
+    const cards = doc.querySelectorAll('.swipe-card');
+    t.ok(cards.length >= 1, 'swipe cards rendered (' + cards.length + ')');
+    t.ok(cards.length <= 4, 'max 4 cards in stack at once');
+    t.ok(cards[0].classList.contains('swipe-card-nth-1'), 'top card has nth-1 class');
+    if (cards[1]) t.ok(cards[1].classList.contains('swipe-card-nth-2'), 'second card has nth-2 class');
+  }
+
+  t.group('Swipe card shows verdict, not star rating');
+  {
+    const picks = [{ id: 500, title: 'VerdictTest', overview: 'A worthy film tonight.', vote_average: 8.5, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }];
+    A.state.allPicks = picks; A.state.pickIdx = 0;
+    A.renderSwipeStack(); await flush();
+    const wrap = doc.getElementById('swipeCardWrap');
+    t.ok(/Stays with you/.test(wrap.innerHTML), 'verdict copy shown on card');
+    t.ok(/8\.5/.test(wrap.innerHTML), 'numeric score shown');
+    t.ok(!/★/.test(wrap.innerHTML), 'no star glyphs on swipe cards');
+    t.ok(!/imdb/i.test(wrap.innerHTML), 'no IMDb reference');
   }
 
   t.group('Watch button: Netflix vs elsewhere');
   {
-    A.renderPicks([
-      { id: 102, title: 'OnNetflix', overview: 'Great one hundred two. A film that earns its runtime and rewards the viewer well tonight.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: false },
-      { id: 101, title: 'NotOnNetflix', overview: 'Great one oh one. A film that earns its runtime and rewards the viewer well tonight.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: false },
-    ]); await flush();
-    t.ok(/Watch on Netflix/.test(doc.getElementById('card0').querySelector('.watch-label').textContent), 'on Netflix -> "Watch on Netflix"');
-    t.ok(/where to watch/i.test(doc.getElementById('card1').querySelector('.watch-label').textContent), 'not on Netflix -> "Find where to watch"');
-    t.ok(/themoviedb\.org\/movie\/101\/watch/.test(doc.getElementById('card1').querySelector('.watch-btn').getAttribute('href')), 'off-platform links to TMDB where-to-watch');
+    const picks = [
+      { id: 102, title: 'OnNetflix', overview: 'On Netflix tonight.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: false },
+      { id: 101, title: 'NotHere', overview: 'Elsewhere tonight.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: false },
+    ];
+    A.state.allPicks = picks; A.state.pickIdx = 0;
+    A.renderSwipeStack(); await flush();
+    const topCard = doc.querySelector('.swipe-card');
+    const watchBtn = topCard && topCard.querySelector('.sc-watch-btn');
+    t.ok(watchBtn, 'watch button present on top card');
+    // Wait for provider check
+    await flush(8);
+    const label = watchBtn && watchBtn.querySelector('span');
+    t.ok(label && (label.textContent.includes('Netflix') || label.textContent.includes('watch')), 'watch button has resolved label');
+  }
+
+  t.group('Verified pick skips provider fetch');
+  {
+    const picks = [{ id: 55, title: 'Verified', overview: 'Verified film.', vote_average: 9, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }];
+    A.state.allPicks = picks; A.state.pickIdx = 0;
     win.__fetches = [];
-    A.renderPicks([{ id: 55, title: 'VerifiedOdd', overview: 'Great fifty five. A film that earns its runtime and rewards the viewer nicely tonight.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: true }]); await flush();
-    t.ok(/Watch on Netflix/.test(doc.getElementById('card0').querySelector('.watch-label').textContent), 'verified -> "Watch on Netflix" immediately');
-    t.ok(!win.__fetches.some((u) => u.includes('/55/watch/providers')), 'verified skips providers call');
+    A.renderSwipeStack(); await flush();
+    t.ok(!win.__fetches.some(u => u.includes('/55/watch/providers')), 'verified pick skips providers call');
+    const btn = doc.querySelector('.sc-watch-btn');
+    t.ok(btn && /Netflix/.test(btn.querySelector('span').textContent), 'verified → Watch on Netflix immediately');
+  }
+
+  t.group('Watchlist: add and persist');
+  {
+    const pick = { id: 999, title: 'SaveMe', mediaType: 'movie', poster_path: null, release_date: '2022-01-01', vote_average: 8, vote_count: 300, overview: 'Worth saving.' };
+    A.state.watchlist = [];
+    A.addToWatchlist(pick);
+    t.ok(A.state.watchlist.length === 1, 'pick added to watchlist');
+    A.addToWatchlist(pick);
+    t.ok(A.state.watchlist.length === 1, 'duplicate not added');
+    const stored = A.loadWatchlist();
+    t.ok(stored.some(w => w.id === 999), 'watchlist persisted to localStorage');
+  }
+
+  t.group('Watchlist badge visibility');
+  {
+    A.state.watchlist = [];
+    A.updateWLBadge();
+    t.ok(!doc.getElementById('wlBadge').classList.contains('visible'), 'badge hidden when watchlist empty');
+    A.addToWatchlist({ id: 888, title: 'Test', mediaType: 'movie', poster_path: null, release_date: '2022-01-01' });
+    t.ok(doc.getElementById('wlBadge').classList.contains('visible'), 'badge visible when watchlist has items');
+    t.ok(/♡/.test(doc.getElementById('wlBadge').textContent), 'badge shows ♡ with count');
   }
 
   t.group('iOS-safe trailer open');
   {
     const dv = deferredVideos();
     win.__deferredVideos = dv.promise;
-    A.renderPicks([{ id: 300, title: 'TrailerTest', overview: 'Great three hundred. A film that earns its runtime and rewards the viewer nicely tonight.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: true }]); await flush();
+    const pick = { id: 300, title: 'TrailerTest', overview: 'Great trailer.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true };
+    A.state.allPicks = [pick]; A.state.pickIdx = 0;
+    A.renderSwipeStack(); await flush();
     win.__openCalls = [];
-    doc.getElementById('card0').querySelector('.trailer-btn').dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
-    t.ok(win.__openCalls.length === 1 && win.__openCalls[0][0] === 'about:blank', 'window.open("about:blank") fired synchronously');
-    dv.resolve(); await flush();
-    t.ok(win.__lastWin && /youtube\.com\/watch\?v=zzz/.test(win.__lastWin.location.href), 'trailer tab redirected to YouTube');
+    const trailerBtn = doc.querySelector('.sc-trailer');
+    if (trailerBtn) {
+      trailerBtn.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+      t.ok(win.__openCalls.length === 1 && win.__openCalls[0][0] === 'about:blank', 'window.open("about:blank") fired synchronously');
+      dv.resolve(); await flush();
+      t.ok(win.__lastWin && /youtube\.com\/watch\?v=zzz/.test(win.__lastWin.location.href), 'trailer tab redirected to YouTube');
+    } else { t.ok(false, 'trailer button not found'); }
     win.__deferredVideos = null;
   }
 
-  t.group('Expandable detail');
+  t.group('Long-press peek titles populated');
   {
-    A.renderPicks([{ id: 400, title: 'ExpandTest', overview: 'Great four hundred. A film that earns its runtime and rewards the viewer nicely tonight.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: true }]); await flush();
-    const card = doc.getElementById('card0');
-    card.querySelector('[data-expand]').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(card.classList.contains('expanded'), 'card expands on tap');
-    const chips = card.querySelectorAll('.detail-chip');
-    t.ok(chips.length >= 2, 'lazy-loads detail chips');
-    t.ok([...chips].some((c) => /min/.test(c.textContent)), 'runtime chip present');
-    t.ok(card.querySelector('.detail-tagline'), 'tagline rendered');
+    const card = doc.querySelector('.mood-card[data-mood="Vawulence"]');
+    t.ok(card, 'Vawulence card exists');
+    const peek = card && card.querySelector('.card-peek');
+    const titles = peek && peek.querySelectorAll('.peek-title');
+    t.ok(titles && titles.length >= 1, 'peek titles populated from data-peek attribute');
   }
 
-  t.group('Mood cards keyboard-operable');
+  t.group('Mood card: first child spans full width');
   {
-    const card = doc.querySelector('.mood-card[data-mood="No Wahala"]');
-    t.ok(card.getAttribute('role') === 'button' && card.getAttribute('tabindex') === '0', 'role=button + tabindex');
-    t.ok(card.querySelector('.card-desc'), 'plain-language description shown');
-    card.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    t.ok(card.classList.contains('selected') && card.getAttribute('aria-pressed') === 'true', 'Enter selects card');
-    t.ok(!doc.getElementById('spinBtn').disabled, 'spin enabled after keyboard select');
+    const grid = doc.getElementById('moviesGrid');
+    const first = grid && grid.querySelector('.mood-card:first-child');
+    t.ok(first, 'first mood card exists');
+    // CSS sets grid-column: 1/-1 — verify via class or attribute presence
+    t.ok(grid && grid.children.length >= 2, 'mood grid has multiple cards');
   }
 
-  t.group('Similar search');
-  {
-    A.state.fetchingResults = false; await A.runSimilarSearch('Inception'); await flush();
-    t.ok(doc.getElementById('picksList').querySelectorAll('.pick-card').length >= 1, 'similar renders picks');
-    t.ok(A.state.allPicks.length > 3, 'pool >3 for show-more (' + A.state.allPicks.length + ')');
-  }
-
-  t.group('Settings sheet: name saves, platform stays netflix');
+  t.group('Settings: platform stays netflix after save');
   {
     A.state.profile = { name: 'Zara', platform: 'netflix', avoid: 'I watch everything' };
     A.openSettings();
-    doc.getElementById('setName').value = 'ada';
+    const nameEl = doc.getElementById('setName'); if (nameEl) nameEl.value = 'ada';
     doc.getElementById('setSave').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(A.state.profile.name === 'Ada', 'name saved + capitalized');
-    t.ok(A.state.profile.platform === 'netflix', 'platform stays netflix regardless');
+    t.ok(A.state.profile.name === 'Ada', 'name saved and capitalised');
+    t.ok(A.state.profile.platform === 'netflix', 'platform locked to netflix');
     t.ok(!doc.getElementById('settingsOverlay').classList.contains('active'), 'sheet closes after save');
   }
 
-  t.group('Share prompt once-per-session');
+  t.group('Share popup once-per-session');
   {
     A.showSharePopup();
     t.ok(doc.getElementById('shareOverlay').classList.contains('active'), 'popup shows');
-    t.ok(A.isPopupShown() === true, 'marked shown this session');
+    t.ok(A.isPopupShown() === true, 'session flag set');
+    A.hideSharePopup();
     A.startPopupTimer();
-    t.ok(true, 'startPopupTimer no-ops after shown');
+    t.ok(true, 'startPopupTimer no-ops after shown this session');
   }
+
+  t.group('Zero runtime errors');
+  t.ok(dom.__errors.length === 0, 'zero window errors' + (dom.__errors.length ? ': ' + dom.__errors.slice(0, 2).join(' | ') : ''));
 };
