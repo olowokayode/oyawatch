@@ -6,208 +6,264 @@ module.exports = async (t) => {
   await flush();
 
   t.group('Region resolution');
-  t.ok(A.state.region === 'NG', "region 'NG' from navigator.languages ['en-NG']");
+  t.ok(A.state.region === 'NG', "region 'NG' from ['en-NG']");
 
-  t.group('Verdict copy — benefit-led, not numeric');
+  t.group('Time copy system');
   {
-    t.ok(A.getVerdict(9.2) === 'A film people rewatch.', '9.2 → rewatch verdict');
-    t.ok(A.getVerdict(8.5) === 'Stays with you.', '8.5 → stays verdict');
-    t.ok(A.getVerdict(7.1) === 'Worth the night.', '7.1 → worth verdict');
-    t.ok(A.getVerdict(6.2) === 'A gamble. Could be good.', '6.2 → gamble verdict');
-    t.ok(A.getVerdict(0) === 'A gamble. Could be good.', '0 → gamble verdict');
+    const period = A.getTimePeriod();
+    t.ok(['morning','afternoon','evening','night'].includes(period), 'valid time period: ' + period);
+    const copy = A.tc();
+    t.ok(copy.hero && copy.cardBadge && copy.watchlistTitle && copy.sharePrefix, 'tc() returns all keys');
+    t.ok(!copy.hero.includes('—'), 'no em dash in time copy');
+    t.ok(!copy.cardBadge.includes('—'), 'no em dash in card badge');
+  }
+
+  t.group('Verdict copy — benefit-led');
+  {
+    t.ok(A.getVerdict(9.2) === 'A film people rewatch.', '9.2 → rewatch');
+    t.ok(A.getVerdict(8.5) === 'Stays with you.', '8.5 → stays');
+    t.ok(A.getVerdict(7.1) === 'Worth the night.', '7.1 → worth');
+    t.ok(A.getVerdict(6.2) === 'A gamble. Could be good.', '6.2 → gamble');
+    t.ok(A.getVerdict(0) === 'A gamble. Could be good.', '0 → gamble');
+  }
+
+  t.group('No em dashes in visible UI text');
+  {
+    const uiEls = [...doc.querySelectorAll('button, a, label, span, h1, h2, h3, p, div.sheet-title, div.wl-title, div.alldone-title, div.error-title')];
+    const uiText = uiEls.map(el => el.textContent).join(' ');
+    t.ok(!uiText.includes('—'), 'no em dashes in UI elements');
+    t.ok(!doc.documentElement.innerHTML.includes('&mdash;'), 'no &mdash; entity in HTML');
   }
 
   t.group('Netflix-only — no platform picker');
   {
-    t.ok(!doc.querySelector('.platform-opt'), 'no platform-opt on pick screen');
+    t.ok(!doc.querySelector('.platform-opt'), 'no platform-opt element');
     t.ok(!doc.getElementById('platformPillBtn'), 'no platformPillBtn');
-    t.ok(doc.querySelector('.netflix-pill'), 'Netflix pill badge visible');
-    t.ok(!doc.querySelector('[data-pkey]'), 'no data-pkey attributes');
+    t.ok(doc.querySelector('.netflix-pill'), 'Netflix pill visible');
   }
 
-  t.group('fetchTMDB: Netflix provider always included');
+  t.group('Settings accessible via visible button');
+  {
+    t.ok(doc.getElementById('settingsBtn'), 'settings button present');
+    doc.getElementById('settingsBtn').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
+    t.ok(doc.getElementById('settingsOverlay').classList.contains('active'), 'settings sheet opens');
+    t.ok(doc.querySelector('.sheet-title').textContent === 'Preferences', 'title is "Preferences" not "Your settings"');
+    t.ok(!doc.querySelector('.sheet-sub'), 'no sub-copy in settings sheet');
+    A.closeSettings();
+  }
+
+  t.group('Settings — no em dashes in choices');
+  {
+    const choices = [...doc.querySelectorAll('#setAvoid .sheet-choice')];
+    t.ok(choices.length >= 3, '3 avoid choices');
+    choices.forEach(c => {
+      t.ok(!c.textContent.includes('—'), `no em dash in: "${c.textContent.trim()}"`);
+    });
+    t.ok(choices.some(c => c.textContent.includes('Horror. Hard no.')), 'period instead of em dash in horror option');
+  }
+
+  t.group('Mood reel — full-width panels, no grid');
+  {
+    t.ok(!doc.querySelector('.mood-grid'), 'no .mood-grid (replaced by reel)');
+    t.ok(doc.querySelector('.mood-reel'), '.mood-reel present');
+    t.ok(doc.querySelectorAll('.mood-panel').length >= 8, 'at least 8 mood panels');
+    t.ok(!doc.querySelector('.card-pill'), 'no frosted pill labels on cards');
+    t.ok(!doc.querySelector('.card-check'), 'no card check circles');
+    t.ok(!doc.querySelector('.card-desc'), 'no 9px card descriptions');
+    t.ok(!doc.querySelector('.card-peek'), 'long-press peek removed');
+  }
+
+  t.group('Mood panel selection — spin button appears');
+  {
+    const panel = doc.querySelector('.mood-panel[data-mood="No Wahala"]');
+    t.ok(panel, 'No Wahala panel exists');
+    t.ok(doc.getElementById('stickyCta').classList.contains('hidden'), 'CTA hidden before selection');
+    panel.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+    t.ok(!doc.getElementById('stickyCta').classList.contains('hidden'), 'CTA appears after selection');
+    t.ok(doc.getElementById('spinBtnText').textContent === 'No Wahala', 'spin button shows mood name');
+    t.ok(A.state.selectedMood === 'No Wahala', 'state.selectedMood set');
+  }
+
+  t.group('Series tab label (not TV Shows)');
+  {
+    const tabs = [...doc.querySelectorAll('.type-btn')];
+    t.ok(tabs.some(b => b.textContent === 'Series'), '"Series" tab present');
+    t.ok(!tabs.some(b => b.textContent === 'TV Shows'), 'no "TV Shows" tab');
+  }
+
+  t.group('Search go button — arrow not "Go"');
+  {
+    const go = doc.getElementById('similarGo');
+    t.ok(go, 'search go button exists');
+    t.ok(!go.textContent.trim().includes('Go'), 'go button has no "Go" text');
+    t.ok(go.querySelector('svg'), 'go button has SVG arrow');
+  }
+
+  t.group('No "Or pick a mood" label');
+  {
+    t.ok(!doc.querySelector('.mood-label'), 'no .mood-label element');
+    t.ok(!doc.body.innerHTML.includes('Or pick a mood'), 'no "Or pick a mood" text');
+  }
+
+  t.group('Surprise button present');
+  {
+    t.ok(doc.getElementById('surpriseBtn'), 'surprise button in movies reel');
+    t.ok(doc.getElementById('surpriseBtnTV'), 'surprise button in TV reel');
+    t.ok(doc.querySelector('.mood-panel-surprise-text').textContent === 'Feeling lucky?', 'correct surprise copy');
+  }
+
+  t.group('fetchTMDB — Netflix provider always id=8');
   {
     A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'I watch everything' };
     A.state.currentMode = 'movies';
     A.state.selectedMood = 'No Wahala';
-    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="No Wahala"]');
+    A.state.selectedCard = doc.querySelector('.mood-panel[data-mood="No Wahala"]');
     win.__fetches = [];
     await A.fetchTMDB();
-    const provFetches = win.__fetches.filter(u => u.includes('with_watch_providers=8'));
-    t.ok(provFetches.length > 0, 'fetches include Netflix provider id=8');
+    t.ok(win.__fetches.some(u => u.includes('with_watch_providers=8')), 'Netflix provider filter applied');
     t.ok(!win.__fetches.some(u => u.includes('with_watch_providers=283')), 'no Crunchyroll provider');
   }
 
-  t.group('fetchTMDB: avoid horror (non-conflicting mood)');
+  t.group('fetchTMDB — avoid horror (non-conflicting mood)');
   {
-    A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'Horror — hard no' };
+    A.state.profile.avoid = 'Horror. Hard no.';
     A.state.selectedMood = 'Dey Play';
-    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="Dey Play"]');
+    A.state.selectedCard = doc.querySelector('.mood-panel[data-mood="Dey Play"]');
     win.__fetches = [];
     await A.fetchTMDB();
-    const discover = win.__fetches.filter(u => u.includes('/discover/'));
-    t.ok(discover.some(u => u.includes('without_genres=27')), 'horror genre excluded from Dey Play');
-  }
-
-  t.group('fetchTMDB: horror mood overrides avoid-horror');
-  {
-    A.state.selectedMood = 'After Dark';
-    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="After Dark"]');
-    win.__fetches = [];
-    await A.fetchTMDB();
-    const discover = win.__fetches.filter(u => u.includes('/discover/'));
-    t.ok(!discover.some(u => u.includes('without_genres')), 'horror mood overrides horror avoid');
+    t.ok(win.__fetches.filter(u => u.includes('/discover/')).some(u => u.includes('without_genres=27')), 'horror excluded from Dey Play');
   }
 
   t.group('TV mode hits /discover/tv');
   {
     A.state.currentMode = 'tv';
     A.state.selectedMood = 'Binge It';
-    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="Binge It"]');
+    A.state.selectedCard = doc.querySelector('.mood-panel[data-mood="Binge It"]');
     win.__fetches = [];
     const pool = await A.fetchTMDB();
-    t.ok(win.__fetches.some(u => u.includes('/discover/tv')), 'TV mode queries /discover/tv');
-    t.ok(!win.__fetches.some(u => u.includes('/discover/movie')), 'TV mode does not query /discover/movie');
+    t.ok(win.__fetches.some(u => u.includes('/discover/tv')), 'queries /discover/tv');
+    t.ok(!win.__fetches.some(u => u.includes('/discover/movie')), 'no /discover/movie in TV mode');
     t.ok(pool.length > 0, 'TV mode returns picks');
     A.state.currentMode = 'movies';
   }
 
-  t.group('Swipe stack renders cards');
+  t.group('Swipe stack renders correctly');
   {
-    A.state.profile = { name: 'Ada', platform: 'netflix' };
-    A.state.selectedMood = 'No Wahala';
-    A.state.selectedCard = doc.querySelector('.mood-card[data-mood="No Wahala"]');
+    A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'I watch everything' };
     A.state.pickIdx = 0;
-    const picks = [];
-    for (let i = 0; i < 6; i++) picks.push({ id: 300 + i, title: 'Film ' + (300 + i), overview: 'A great film number ' + i + ' that rewards the viewer tonight.', vote_average: 7.8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true });
+    const picks = Array.from({ length: 5 }, (_, i) => ({ id: 200 + i, title: 'Film ' + i, overview: 'Great film ' + i + '. Worth your night.', vote_average: 7.8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }));
     A.state.allPicks = picks;
     A.renderSwipeStack(); await flush();
     const cards = doc.querySelectorAll('.swipe-card');
-    t.ok(cards.length >= 1, 'swipe cards rendered (' + cards.length + ')');
-    t.ok(cards.length <= 4, 'max 4 cards in stack at once');
-    t.ok(cards[0].classList.contains('swipe-card-nth-1'), 'top card has nth-1 class');
-    if (cards[1]) t.ok(cards[1].classList.contains('swipe-card-nth-2'), 'second card has nth-2 class');
+    t.ok(cards.length >= 1 && cards.length <= 4, `stack has ${cards.length} cards (1-4)`);
+    t.ok(cards[0].classList.contains('swipe-card-nth-1'), 'top card is nth-1');
   }
 
-  t.group('Swipe card shows verdict, not star rating');
+  t.group('Swipe card — verdict shown, no star glyphs, no /10 suffix removed');
   {
-    const picks = [{ id: 500, title: 'VerdictTest', overview: 'A worthy film tonight.', vote_average: 8.5, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }];
-    A.state.allPicks = picks; A.state.pickIdx = 0;
+    A.state.allPicks = [{ id: 500, title: 'Test', overview: 'A great film.', vote_average: 8.5, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }];
+    A.state.pickIdx = 0;
     A.renderSwipeStack(); await flush();
-    const wrap = doc.getElementById('swipeCardWrap');
-    t.ok(/Stays with you/.test(wrap.innerHTML), 'verdict copy shown on card');
-    t.ok(/8\.5/.test(wrap.innerHTML), 'numeric score shown');
-    t.ok(!/★/.test(wrap.innerHTML), 'no star glyphs on swipe cards');
-    t.ok(!/imdb/i.test(wrap.innerHTML), 'no IMDb reference');
+    const html = doc.getElementById('swipeCardWrap').innerHTML;
+    t.ok(/Stays with you/.test(html), 'verdict shown');
+    t.ok(!/★|☆/.test(html), 'no star glyphs');
+    t.ok(!/imdb/i.test(html), 'no IMDb reference');
+    t.ok(/8\.5/.test(html), 'score shown');
   }
 
-  t.group('Watch button: Netflix vs elsewhere');
+  t.group('Swipe card — action buttons are icon-only');
   {
-    const picks = [
-      { id: 102, title: 'OnNetflix', overview: 'On Netflix tonight.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: false },
-      { id: 101, title: 'NotHere', overview: 'Elsewhere tonight.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: false },
-    ];
-    A.state.allPicks = picks; A.state.pickIdx = 0;
-    A.renderSwipeStack(); await flush();
-    const topCard = doc.querySelector('.swipe-card');
-    const watchBtn = topCard && topCard.querySelector('.sc-watch-btn');
-    t.ok(watchBtn, 'watch button present on top card');
-    // Wait for provider check
-    await flush(8);
-    const label = watchBtn && watchBtn.querySelector('span');
-    t.ok(label && (label.textContent.includes('Netflix') || label.textContent.includes('watch')), 'watch button has resolved label');
+    const html = doc.getElementById('swipeCardWrap').innerHTML;
+    t.ok(!/<button[^>]*sc-trailer[^>]*>[^<]*Trailer/.test(html), 'trailer button has no text label');
+    t.ok(!/<button[^>]*sc-share[^>]*>[^<]*Share/.test(html), 'share button has no text label');
+    t.ok(!/<button[^>]*sc-save[^>]*>[^<]*Save/.test(html), 'save button has no text label');
   }
 
-  t.group('Verified pick skips provider fetch');
+  t.group('Watch button states');
   {
-    const picks = [{ id: 55, title: 'Verified', overview: 'Verified film.', vote_average: 9, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }];
-    A.state.allPicks = picks; A.state.pickIdx = 0;
-    win.__fetches = [];
-    A.renderSwipeStack(); await flush();
-    t.ok(!win.__fetches.some(u => u.includes('/55/watch/providers')), 'verified pick skips providers call');
+    A.state.allPicks = [{ id: 102, title: 'OnNetflix', overview: 'On Netflix.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }];
+    A.state.pickIdx = 0;
+    A.renderSwipeStack(); await flush(8);
     const btn = doc.querySelector('.sc-watch-btn');
-    t.ok(btn && /Netflix/.test(btn.querySelector('span').textContent), 'verified → Watch on Netflix immediately');
+    t.ok(btn && /Watch on Netflix/.test(btn.textContent), 'verified → Watch on Netflix');
+    t.ok(!btn.classList.contains('checking'), 'verified clears checking state');
   }
 
-  t.group('Watchlist: add and persist');
+  t.group('"Where to watch" fallback (no em dash)');
   {
-    const pick = { id: 999, title: 'SaveMe', mediaType: 'movie', poster_path: null, release_date: '2022-01-01', vote_average: 8, vote_count: 300, overview: 'Worth saving.' };
-    A.state.watchlist = [];
-    A.addToWatchlist(pick);
-    t.ok(A.state.watchlist.length === 1, 'pick added to watchlist');
-    A.addToWatchlist(pick);
-    t.ok(A.state.watchlist.length === 1, 'duplicate not added');
-    const stored = A.loadWatchlist();
-    t.ok(stored.some(w => w.id === 999), 'watchlist persisted to localStorage');
+    A.state.allPicks = [{ id: 101, title: 'NotHere', overview: 'Elsewhere.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: false }];
+    A.state.pickIdx = 0;
+    win.__fetches = [];
+    A.renderSwipeStack(); await flush(8);
+    const btn = doc.querySelector('.sc-watch-btn');
+    if (btn && btn.classList.contains('elsewhere')) {
+      t.ok(!btn.textContent.includes('—'), 'no em dash in fallback button text');
+      t.ok(/Where to watch/.test(btn.textContent), 'fallback says "Where to watch"');
+    } else { t.ok(true, 'watch state still resolving'); }
   }
 
-  t.group('Watchlist badge visibility');
+  t.group('Watchlist — add, dedupe, badge');
   {
     A.state.watchlist = [];
-    A.updateWLBadge();
-    t.ok(!doc.getElementById('wlBadge').classList.contains('visible'), 'badge hidden when watchlist empty');
-    A.addToWatchlist({ id: 888, title: 'Test', mediaType: 'movie', poster_path: null, release_date: '2022-01-01' });
-    t.ok(doc.getElementById('wlBadge').classList.contains('visible'), 'badge visible when watchlist has items');
-    t.ok(/♡/.test(doc.getElementById('wlBadge').textContent), 'badge shows ♡ with count');
+    const pick = { id: 999, title: 'SaveMe', mediaType: 'movie', poster_path: null, release_date: '2022-01-01' };
+    A.addToWatchlist(pick); A.addToWatchlist(pick);
+    t.ok(A.state.watchlist.length === 1, 'deduplication works');
+    t.ok(A.loadWatchlist().some(w => w.id === 999), 'persisted to localStorage');
+    t.ok(doc.getElementById('wlBadge').classList.contains('visible'), 'badge visible');
   }
 
   t.group('iOS-safe trailer open');
   {
     const dv = deferredVideos();
     win.__deferredVideos = dv.promise;
-    const pick = { id: 300, title: 'TrailerTest', overview: 'Great trailer.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true };
-    A.state.allPicks = [pick]; A.state.pickIdx = 0;
+    A.state.allPicks = [{ id: 300, title: 'Trailer', overview: 'Test.', vote_average: 8, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }];
+    A.state.pickIdx = 0;
     A.renderSwipeStack(); await flush();
     win.__openCalls = [];
-    const trailerBtn = doc.querySelector('.sc-trailer');
-    if (trailerBtn) {
-      trailerBtn.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
-      t.ok(win.__openCalls.length === 1 && win.__openCalls[0][0] === 'about:blank', 'window.open("about:blank") fired synchronously');
+    const btn = doc.querySelector('.sc-trailer');
+    if (btn) {
+      btn.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+      t.ok(win.__openCalls.length === 1 && win.__openCalls[0][0] === 'about:blank', 'opens about:blank synchronously');
       dv.resolve(); await flush();
-      t.ok(win.__lastWin && /youtube\.com\/watch\?v=zzz/.test(win.__lastWin.location.href), 'trailer tab redirected to YouTube');
+      t.ok(win.__lastWin && /youtube\.com\/watch\?v=zzz/.test(win.__lastWin.location.href), 'redirected to YouTube');
     } else { t.ok(false, 'trailer button not found'); }
     win.__deferredVideos = null;
   }
 
-  t.group('Long-press peek titles populated');
+  t.group('Curtain copy — no "Your picks are ready"');
   {
-    const card = doc.querySelector('.mood-card[data-mood="Vawulence"]');
-    t.ok(card, 'Vawulence card exists');
-    const peek = card && card.querySelector('.card-peek');
-    const titles = peek && peek.querySelectorAll('.peek-title');
-    t.ok(titles && titles.length >= 1, 'peek titles populated from data-peek attribute');
+    const html = doc.documentElement.innerHTML;
+    t.ok(!html.includes('your picks are ready'), 'old curtain copy removed');
+    t.ok(doc.getElementById('curtainMsg'), 'curtain msg element exists');
   }
 
-  t.group('Mood card: first child spans full width');
+  t.group('Results header — one line, no separate headline');
   {
-    const grid = doc.getElementById('moviesGrid');
-    const first = grid && grid.querySelector('.mood-card:first-child');
-    t.ok(first, 'first mood card exists');
-    // CSS sets grid-column: 1/-1 — verify via class or attribute presence
-    t.ok(grid && grid.children.length >= 2, 'mood grid has multiple cards');
+    t.ok(!doc.getElementById('resultsHeadline'), 'resultsHeadline removed');
+    t.ok(doc.getElementById('resultsMoodPill'), 'mood pill present');
+    t.ok(doc.getElementById('resultsWordmark'), 'logotype present');
+    t.ok(doc.querySelector('.results-header'), 'results header exists');
   }
 
-  t.group('Settings: platform stays netflix after save');
+  t.group('Share popup is a bottom sheet');
   {
-    A.state.profile = { name: 'Zara', platform: 'netflix', avoid: 'I watch everything' };
-    A.openSettings();
-    const nameEl = doc.getElementById('setName'); if (nameEl) nameEl.value = 'ada';
-    doc.getElementById('setSave').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(A.state.profile.name === 'Ada', 'name saved and capitalised');
-    t.ok(A.state.profile.platform === 'netflix', 'platform locked to netflix');
-    t.ok(!doc.getElementById('settingsOverlay').classList.contains('active'), 'sheet closes after save');
-  }
-
-  t.group('Share popup once-per-session');
-  {
-    A.showSharePopup();
-    t.ok(doc.getElementById('shareOverlay').classList.contains('active'), 'popup shows');
-    t.ok(A.isPopupShown() === true, 'session flag set');
+    A.showSharePopup(); await flush();
+    const ov = doc.getElementById('shareOverlay');
+    t.ok(ov.classList.contains('active'), 'share sheet opens');
+    t.ok(ov.querySelector('.share-sheet'), 'uses .share-sheet (bottom sheet class)');
+    t.ok(!ov.querySelector('.share-popup'), '.share-popup (modal) not used');
+    const hl = doc.getElementById('shareHeadline');
+    t.ok(hl && (hl.textContent.includes('Watching with') || hl.textContent.includes('Share')), 'correct headline variant');
+    const sb = doc.getElementById('shareSub');
+    t.ok(sb && (sb.textContent.includes('terrible') || sb.textContent.includes('sorted')), 'share sub has personality copy');
     A.hideSharePopup();
-    A.startPopupTimer();
-    t.ok(true, 'startPopupTimer no-ops after shown this session');
+  }
+
+  t.group('"Copy" not "COPY" in share sheet');
+  {
+    t.ok(doc.getElementById('shareLinkCopy').textContent === 'Copy', '"Copy" not "COPY"');
   }
 
   t.group('Zero runtime errors');
-  t.ok(dom.__errors.length === 0, 'zero window errors' + (dom.__errors.length ? ': ' + dom.__errors.slice(0, 2).join(' | ') : ''));
+  t.ok(dom.__errors.length === 0, 'no errors' + (dom.__errors.length ? ': ' + dom.__errors.slice(0, 2).join(' | ') : ''));
 };

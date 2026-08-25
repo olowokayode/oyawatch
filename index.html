@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#080808">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Oya Watch — Stop Scrolling. Start Watching.</title>
-<meta name="description" content="Oya Watch — pick a mood, get exactly what to watch on Netflix tonight. No more 40-minute scroll.">
+<title>Oya Watch. The right film. Tonight.</title>
+<meta name="description" content="Pick a mood. Swipe your pick. Watch on Netflix. Done in seconds.">
 <meta property="og:title" content="Oya Watch">
-<meta property="og:description" content="Stop scrolling Netflix. Pick a mood, get your pick in seconds.">
+<meta property="og:description" content="The right film is one swipe away. Oya Watch.">
 <meta property="og:image" content="https://images.pexels.com/photos/1117132/pexels-photo-1117132.jpeg?auto=compress&cs=tinysrgb&w=1200&h=630&fit=crop">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -25,202 +25,132 @@
   --red:#E50914;--gold:#C9A84C;
   --fd:'Syne',sans-serif;--fb:'Inter',sans-serif;
   --rpill:100px;--rcard:18px;
+  --snap:0.15s ease-out;
+  --reveal:0.38s cubic-bezier(0.34,1.56,0.64,1);
+  --cinematic:0.82s cubic-bezier(0.86,0,0.07,1);
 }
 html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100dvh;overscroll-behavior:none}
 .screen{display:none;flex-direction:column;min-height:100dvh}
 .screen.active{display:flex}
 
 /* ── ONBOARDING ── */
-#screen-onboard{background:var(--bg);justify-content:flex-end;position:relative;overflow:hidden}
-#screen-onboard::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 45% at 50% 0%,rgba(229,9,20,0.14),transparent 70%);pointer-events:none;z-index:0}
-.onboard-top{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:0 28px 32px;position:relative;z-index:1}
-.onboard-marquee-wrap{position:absolute;top:0;left:0;right:0;height:48%;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,#000 40%,transparent 100%);mask-image:linear-gradient(to bottom,#000 40%,transparent 100%)}
-.poster-track{display:flex;gap:12px;width:max-content;animation:posterDrift 38s linear infinite}
-.poster-chip{width:52px;height:78px;border-radius:10px;flex-shrink:0;border:1px solid rgba(255,255,255,0.1);position:relative;overflow:hidden}
-.poster-chip::after{content:'';position:absolute;inset:0;border-radius:10px;background:linear-gradient(160deg,rgba(255,255,255,0.18),transparent 45%)}
-.pc1{background:linear-gradient(150deg,#1a4a30,#0d1f14)}
-.pc2{background:linear-gradient(150deg,#8b1a00,#1a0500)}
-.pc3{background:linear-gradient(150deg,#6b1040,#140818)}
-.pc4{background:linear-gradient(150deg,#0f0f55,#050510)}
-.pc5{background:linear-gradient(150deg,#2d0f42,#0a0514)}
-.pc6{background:linear-gradient(150deg,#5a0000,#0d0000)}
-.pc7{background:linear-gradient(150deg,#0a2a6a,#030d1a)}
-.pc8{background:linear-gradient(150deg,#4a3800,#100e00)}
-@keyframes posterDrift{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 6px))}}
-@media(prefers-reduced-motion:reduce){.poster-track{animation:none}}
-.onboard-eyebrow{font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--red);margin-bottom:16px;font-family:var(--fb)}
-.onboard-headline{font-family:var(--fd);font-size:36px;font-weight:800;line-height:1.08;color:var(--text);margin-bottom:12px;letter-spacing:-0.02em}
-.onboard-headline em{font-style:normal;color:var(--red)}
-.onboard-sub{font-size:14px;color:var(--muted2);line-height:1.65;max-width:280px;font-weight:500}
-.progress-row{display:flex;align-items:center;gap:8px;margin-top:22px}
-.prog-dot{width:6px;height:6px;border-radius:50%;background:var(--border3);transition:all 0.3s}
-.prog-dot.active{width:22px;border-radius:3px;background:var(--red)}
-.prog-dot.done{background:var(--muted)}
-.onboard-form{flex-shrink:0;padding:0 20px env(safe-area-inset-bottom,28px);position:relative;z-index:1}
-.name-input{width:100%;padding:17px 18px;border-radius:14px;border:1.5px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--fb);font-size:16px;font-weight:500;outline:none;-webkit-appearance:none;margin-bottom:12px;display:block;transition:border-color 0.2s,background 0.2s;caret-color:var(--red)}
+#screen-onboard{background:var(--bg);position:relative;overflow:hidden;justify-content:flex-end}
+.onboard-bg{position:absolute;inset:0;z-index:0;background-image:url('https://images.pexels.com/photos/1117132/pexels-photo-1117132.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop');background-size:cover;background-position:center;animation:kenBurns 22s ease-in-out infinite alternate;filter:brightness(0.45) saturate(1.2)}
+@keyframes kenBurns{from{transform:scale(1)}to{transform:scale(1.06)}}
+@media(prefers-reduced-motion:reduce){.onboard-bg{animation:none}}
+.onboard-vignette{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at center,rgba(8,8,8,0.1) 0%,rgba(8,8,8,0.72) 100%)}
+.onboard-vignette::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,0.95) 0%,rgba(8,8,8,0.2) 50%,transparent 100%)}
+.onboard-hero{position:absolute;top:0;left:0;right:0;bottom:42%;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:0 32px 36px;z-index:2}
+.onboard-headline{font-family:var(--fd);font-size:clamp(48px,12vw,72px);font-weight:800;line-height:1.0;color:var(--text);letter-spacing:-0.03em}
+.onboard-headline em{font-style:normal;display:block;color:var(--red)}
+.onboard-form-wrap{flex-shrink:0;position:relative;z-index:2;padding:0 20px env(safe-area-inset-bottom,28px)}
+.onboard-form-card{background:rgba(17,17,17,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.1);border-radius:24px 24px 0 0;padding:28px 20px 20px}
+.name-input{width:100%;padding:17px 18px;border-radius:14px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.06);color:var(--text);font-family:var(--fb);font-size:16px;font-weight:500;outline:none;-webkit-appearance:none;margin-bottom:12px;display:block;transition:border-color var(--snap),background var(--snap);caret-color:var(--red)}
 .name-input::placeholder{color:var(--muted)}
-.name-input:focus{border-color:rgba(255,255,255,0.28);background:var(--surface2)}
-.option-grid{display:flex;flex-direction:column;gap:9px;width:100%}
-.option-btn{width:100%;padding:15px 18px;border-radius:14px;border:1.5px solid var(--border2);background:var(--surface);color:var(--text);font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;text-align:left;transition:all 0.18s;display:flex;align-items:center;justify-content:space-between}
-.option-btn.selected{background:var(--surface2);border-color:rgba(255,255,255,0.26)}
-.option-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all 0.2s}
-.option-btn.selected .option-check{background:var(--red);border-color:var(--red);color:#fff}
-.primary-btn{width:100%;padding:0 24px;height:58px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s,transform 0.15s;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:0.03em}
+.name-input:focus{border-color:rgba(255,255,255,0.32);background:rgba(255,255,255,0.1)}
+.avoid-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.avoid-chip{padding:10px 16px;border-radius:var(--rpill);border:1.5px solid var(--border2);background:transparent;color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--snap);-webkit-user-select:none;user-select:none;white-space:nowrap}
+.avoid-chip.selected{background:var(--surface2);border-color:rgba(255,255,255,0.3);color:var(--text)}
+.primary-btn{width:100%;padding:0 24px;height:58px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer;transition:opacity var(--snap),transform var(--snap);display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:0.03em}
 .primary-btn:disabled{opacity:0.22;cursor:not-allowed}
 .primary-btn:not(:disabled):active{transform:scale(0.965)}
-.skip-link{text-align:center;margin-top:16px;padding-bottom:4px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.skip-link{text-align:center;margin-top:14px;padding-bottom:2px;font-size:12px;color:var(--muted);cursor:pointer;letter-spacing:0.04em}
 
 /* ── PICK SCREEN ── */
 #screen-pick{background:var(--bg)}
-.pick-header{padding:52px 24px 0;flex-shrink:0}
-.logotype-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.logotype{font-family:var(--fd);font-size:11px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+.pick-header{padding:52px 24px 0;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.logotype{font-family:var(--fd);font-size:11px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none}
+.header-right{display:flex;align-items:center;gap:10px}
 .netflix-pill{font-size:10px;font-weight:700;color:var(--red);background:rgba(229,9,20,0.1);border:1px solid rgba(229,9,20,0.28);border-radius:var(--rpill);padding:5px 11px;letter-spacing:0.05em;font-family:var(--fb)}
-.pick-greeting{font-family:var(--fd);font-size:26px;font-weight:800;line-height:1.12;color:var(--text);letter-spacing:-0.02em}
-.pick-greeting em{font-style:normal;color:var(--red)}
-.type-toggle{display:flex;gap:6px;padding:14px 24px 0;flex-shrink:0}
-.type-btn{flex:1;padding:10px 4px;border-radius:var(--rpill);border:1.5px solid var(--border2);background:var(--surface);color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center}
-.type-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
-.search-section{padding:10px 24px 0;flex-shrink:0}
-.search-inner{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:0 14px 0 12px;display:flex;align-items:center;gap:10px;height:48px;transition:border-color 0.2s}
-.search-inner:focus-within{border-color:rgba(255,255,255,0.2)}
-.search-icon{flex-shrink:0;opacity:0.35}
+.settings-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.settings-btn:active{background:var(--surface)}
+
+/* Type toggle — glass pill */
+.type-toggle-wrap{padding:14px 24px 0;flex-shrink:0}
+.type-toggle{display:inline-flex;background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:var(--rpill);padding:3px;width:100%}
+.type-btn{flex:1;padding:9px 4px;border-radius:var(--rpill);border:none;background:transparent;color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--snap);text-align:center}
+.type-btn.active{background:rgba(255,255,255,0.15);color:var(--text)}
+
+/* Search bar */
+.search-wrap{padding:12px 24px 0;flex-shrink:0}
+.search-inner{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:0 14px 0 12px;display:flex;align-items:center;gap:10px;height:48px;transition:border-color var(--snap)}
+.search-inner:focus-within{border-color:rgba(255,255,255,0.22)}
+.search-icon{flex-shrink:0;color:var(--muted)}
 .search-input{flex:1;min-width:0;background:transparent;border:none;color:var(--text);font-family:var(--fb);font-size:15px;outline:none;-webkit-appearance:none;caret-color:var(--red)}
-.search-input::placeholder{color:var(--muted);font-size:14px}
-.search-go{padding:7px 14px;border-radius:10px;border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;transition:opacity 0.2s;letter-spacing:0.02em}
-.search-go:disabled{opacity:0.28;cursor:not-allowed}
-.search-go:not(:disabled):active{opacity:0.82}
-.mood-label{display:block;padding:12px 24px 0;font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-family:var(--fb);flex-shrink:0}
-.mood-scroll-outer{flex:1;position:relative;overflow:hidden;min-height:0}
-.mood-fade{position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(to top,var(--bg) 35%,transparent);pointer-events:none;z-index:5;transition:opacity 0.3s}
+.search-input::placeholder{color:var(--muted);font-size:14px;transition:opacity 0.4s}
+.search-go{width:32px;height:32px;border-radius:10px;border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0;transition:opacity var(--snap);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none}
+.search-go.visible{opacity:1;pointer-events:auto}
+.search-go:active{opacity:0.82}
+
+/* Mood reel */
+.mood-reel-outer{flex:1;position:relative;overflow:hidden;min-height:0}
+.mood-fade{position:absolute;bottom:0;left:0;right:0;height:110px;background:linear-gradient(to top,var(--bg) 30%,transparent);pointer-events:none;z-index:5;transition:opacity 0.3s}
 .mood-fade.hidden{opacity:0}
-.mood-scroll{height:100%;overflow-y:auto;padding:8px 24px 120px;-webkit-overflow-scrolling:touch}
-.mood-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mood-grid .mood-card:first-child{grid-column:1/-1}
+.mood-reel{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:120px}
+.mood-panel{position:relative;width:100%;overflow:hidden;cursor:pointer;-webkit-user-select:none;user-select:none}
+.mood-panel:not(:last-child){margin-bottom:3px}
+.mood-panel-img{position:absolute;inset:0;background-size:cover;background-position:center;transition:filter var(--reveal),transform var(--reveal)}
+.mood-panel-gradient{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.2) 45%,transparent 100%)}
+.mood-panel-content{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;padding:20px 24px 22px;height:100%}
+.mood-panel-tag{font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:5px;font-family:var(--fb)}
+.mood-panel-name{font-family:var(--fd);font-size:clamp(36px,9vw,52px);font-weight:800;color:#fff;line-height:1.0;letter-spacing:-0.025em}
+.mood-panel[data-size="hero"]{height:58vw;min-height:200px;max-height:280px}
+.mood-panel[data-size="normal"]{height:44vw;min-height:160px;max-height:220px}
 
-/* ── MOOD CARDS ── */
-.mood-card{border-radius:var(--rcard);cursor:pointer;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;border:1.5px solid var(--border);transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1),border-color 0.28s,box-shadow 0.28s;-webkit-user-select:none;user-select:none;aspect-ratio:3/4;max-height:210px}
-.mood-grid .mood-card:first-child{aspect-ratio:16/9;max-height:none;height:170px}
-.mood-card:active{transform:scale(0.96)}
-.card-img{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;transition:filter 0.32s ease,transform 0.32s ease;background-color:var(--surface2)}
-.card-wash{position:absolute;inset:0;z-index:1;mix-blend-mode:color;opacity:0;transition:opacity 0.32s ease}
-.card-dark{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,0.72);transition:opacity 0.32s ease}
-.card-gradient{position:absolute;inset:0;z-index:3;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.06) 55%,transparent 100%)}
-.mood-card .card-img{filter:saturate(0.25) brightness(0.45)}
-.mood-card .card-dark{opacity:1}
-.mood-grid.has-sel .mood-card:not(.selected) .card-img{filter:saturate(0.1) brightness(0.22)}
-.mood-card.selected .card-img{filter:saturate(1.15) brightness(1.0)!important;transform:scale(1.04)}
-.mood-card.selected .card-dark{opacity:0!important}
-.mood-card.selected .card-wash{opacity:0.28}
-.card-check{position:absolute;top:12px;right:10px;z-index:6;display:none;width:22px;height:22px;background:var(--red);border-radius:50%;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(229,9,20,0.6)}
-.card-check svg{width:11px;height:11px;stroke:#fff;stroke-width:2.8;fill:none}
-.mood-card.selected .card-check{display:flex}
-.card-content{position:relative;z-index:5;padding:10px 12px 14px}
-.card-pill{display:inline-block;background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);border-radius:var(--rpill);padding:3px 9px;font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:5px;font-family:var(--fb)}
-.card-name{font-family:var(--fd);font-size:14px;font-weight:800;line-height:1.15;color:#fff;letter-spacing:-0.01em}
-.mood-grid .mood-card:first-child .card-name{font-size:17px}
-.card-desc{font-size:9px;line-height:1.4;color:rgba(255,255,255,0.55);margin-top:3px;font-family:var(--fb);font-weight:500}
+/* Reel — default desaturated, selected vivid */
+.mood-panel .mood-panel-img{filter:saturate(0.55) brightness(0.62)}
+.mood-reel.has-sel .mood-panel:not(.selected) .mood-panel-img{filter:saturate(0.2) brightness(0.32)}
+.mood-panel.selected .mood-panel-img{filter:saturate(1.1) brightness(0.92);transform:scale(1.03)}
 
-/* Long-press peek preview */
-.card-peek{position:absolute;inset:0;z-index:8;background:rgba(0,0,0,0.82);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);display:flex;flex-direction:column;justify-content:flex-end;padding:12px;opacity:0;pointer-events:none;transition:opacity 0.2s;border-radius:var(--rcard)}
-.card-peek.visible{opacity:1}
-.peek-label{font-size:8px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-family:var(--fb)}
-.peek-titles{display:flex;flex-direction:column;gap:4px}
-.peek-title{font-size:11px;font-weight:600;color:var(--text);font-family:var(--fb)}
+/* Selected border glow */
+.mood-panel.selected::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none}
+.mood-panel.selected{outline:2px solid rgba(229,9,20,0.7);outline-offset:-2px}
 
-/* Card glow on selection */
-.mood-no-wahala.selected{border-color:#2d6a4f;box-shadow:0 0 0 1.5px #2d6a4f,0 0 22px rgba(45,106,79,0.45)}
-.mood-e-choke.selected{border-color:#c85000;box-shadow:0 0 0 1.5px #c85000,0 0 22px rgba(200,80,0,0.45)}
-.mood-chop-breakfast.selected{border-color:#9b2455;box-shadow:0 0 0 1.5px #9b2455,0 0 22px rgba(155,36,85,0.45)}
-.mood-dey-play.selected{border-color:#8a7a00;box-shadow:0 0 0 1.5px #8a7a00,0 0 22px rgba(138,122,0,0.45)}
-.mood-vawulence.selected{border-color:#cc1111;box-shadow:0 0 0 1.5px #cc1111,0 0 22px rgba(204,17,17,0.45)}
-.mood-after-dark.selected{border-color:#2a2a9e;box-shadow:0 0 0 1.5px #2a2a9e,0 0 22px rgba(42,42,158,0.45)}
-.mood-lights-down.selected{border-color:#2a5a2a;box-shadow:0 0 0 1.5px #2a5a2a,0 0 22px rgba(42,90,42,0.45)}
-.mood-deep-feels.selected{border-color:#6a2a9a;box-shadow:0 0 0 1.5px #6a2a9a,0 0 22px rgba(106,42,154,0.45)}
-.mood-binge-worthy.selected{border-color:#c85000;box-shadow:0 0 0 1.5px #c85000,0 0 22px rgba(200,80,0,0.45)}
-.mood-addicted.selected{border-color:#cc1111;box-shadow:0 0 0 1.5px #cc1111,0 0 22px rgba(204,17,17,0.45)}
-.mood-heartstrings.selected{border-color:#9b2455;box-shadow:0 0 0 1.5px #9b2455,0 0 22px rgba(155,36,85,0.45)}
-.mood-laugh-track.selected{border-color:#8a7a00;box-shadow:0 0 0 1.5px #8a7a00,0 0 22px rgba(138,122,0,0.45)}
-.mood-whodunit.selected{border-color:#2a2a9e;box-shadow:0 0 0 1.5px #2a2a9e,0 0 22px rgba(42,42,158,0.45)}
-.mood-night-mode.selected{border-color:#6a2a9a;box-shadow:0 0 0 1.5px #6a2a9a,0 0 22px rgba(106,42,154,0.45)}
-.mood-docu.selected{border-color:#2d6a4f;box-shadow:0 0 0 1.5px #2d6a4f,0 0 22px rgba(45,106,79,0.45)}
-.mood-comfort-tv.selected{border-color:#2a5a2a;box-shadow:0 0 0 1.5px #2a5a2a,0 0 22px rgba(42,90,42,0.45)}
+/* Surprise panel */
+.mood-panel-surprise{background:var(--red);cursor:pointer;-webkit-user-select:none;user-select:none;display:flex;align-items:center;justify-content:center;height:44vw;min-height:140px;max-height:200px}
+.mood-panel-surprise-text{font-family:var(--fd);font-size:clamp(32px,8vw,46px);font-weight:800;color:#fff;letter-spacing:-0.025em}
 
-/* Colour washes */
-.mood-no-wahala .card-wash,.mood-comfort-tv .card-wash{background:#00ff88}
-.mood-e-choke .card-wash,.mood-binge-worthy .card-wash{background:#ff4400}
-.mood-chop-breakfast .card-wash,.mood-heartstrings .card-wash{background:#ff0066}
-.mood-dey-play .card-wash,.mood-laugh-track .card-wash{background:#ffcc00}
-.mood-vawulence .card-wash,.mood-addicted .card-wash{background:#ff0000}
-.mood-after-dark .card-wash,.mood-whodunit .card-wash{background:#0000ff}
-.mood-lights-down .card-wash,.mood-docu .card-wash{background:#00ff44}
-.mood-deep-feels .card-wash,.mood-night-mode .card-wash{background:#8800ff}
-
-/* Card images — Movies */
-.mood-no-wahala .card-img{background-image:url('https://images.pexels.com/photos/4997840/pexels-photo-4997840.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-e-choke .card-img{background-image:url('https://images.pexels.com/photos/3756165/pexels-photo-3756165.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-chop-breakfast .card-img{background-image:url('https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-dey-play .card-img{background-image:url('https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-vawulence .card-img{background-image:url('https://images.pexels.com/photos/3052361/pexels-photo-3052361.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-after-dark .card-img{background-image:url('https://images.pexels.com/photos/3617457/pexels-photo-3617457.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-lights-down .card-img{background-image:url('https://images.pexels.com/photos/1117132/pexels-photo-1117132.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-deep-feels .card-img{background-image:url('https://images.pexels.com/photos/1172207/pexels-photo-1172207.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-/* TV */
-.mood-binge-worthy .card-img{background-image:url('https://images.pexels.com/photos/6899764/pexels-photo-6899764.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-addicted .card-img{background-image:url('https://images.pexels.com/photos/2873486/pexels-photo-2873486.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-heartstrings .card-img{background-image:url('https://images.pexels.com/photos/5617699/pexels-photo-5617699.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-laugh-track .card-img{background-image:url('https://images.pexels.com/photos/7015034/pexels-photo-7015034.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-whodunit .card-img{background-image:url('https://images.pexels.com/photos/8369648/pexels-photo-8369648.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-night-mode .card-img{background-image:url('https://images.pexels.com/photos/1820770/pexels-photo-1820770.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-docu .card-img{background-image:url('https://images.pexels.com/photos/3568520/pexels-photo-3568520.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-.mood-comfort-tv .card-img{background-image:url('https://images.pexels.com/photos/4997840/pexels-photo-4997840.jpeg?auto=compress&cs=tinysrgb&w=500&h=700&fit=crop')}
-
-/* Spin button */
-.sticky-cta{position:fixed;bottom:0;left:0;right:0;padding:12px 20px env(safe-area-inset-bottom,14px);background:linear-gradient(to top,var(--bg) 58%,transparent);z-index:100}
-.spin-btn{width:100%;height:58px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s,transform 0.15s;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:10px}
-.spin-btn:disabled{opacity:0.2;cursor:not-allowed}
-.spin-btn:not(:disabled):active{transform:scale(0.965);opacity:0.88}
-.spin-btn-arrow{font-size:18px;transition:transform 0.2s}
-.spin-btn:not(:disabled):hover .spin-btn-arrow{transform:translateX(3px)}
+/* Spin CTA */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;padding:12px 20px env(safe-area-inset-bottom,14px);background:linear-gradient(to top,var(--bg) 60%,transparent);z-index:100;transition:opacity var(--snap),transform var(--snap)}
+.sticky-cta.hidden{opacity:0;pointer-events:none;transform:translateY(8px)}
+.spin-btn{width:100%;height:58px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer;transition:opacity var(--snap),transform var(--snap);letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:10px}
+.spin-btn:active{transform:scale(0.965);opacity:0.88}
 
 /* ── WHEEL ── */
-#screen-wheel{align-items:center;justify-content:center;background:var(--bg)}
-.wheel-wrap{text-align:center;padding:40px 24px;width:100%}
-.wheel-eyebrow{font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;font-family:var(--fb)}
+#screen-wheel{background:var(--bg);position:relative;align-items:center;justify-content:center;overflow:hidden}
+.wheel-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(60px) saturate(200%) brightness(0.3);transform:scale(1.1);transition:background-image 0.6s}
+.wheel-content{position:relative;z-index:1;text-align:center;padding:40px 24px;width:100%}
+.wheel-eyebrow{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--red);margin-bottom:24px;font-family:var(--fb)}
 .wheel-pointer-wrap{position:relative;display:inline-block}
 .wheel-tri{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid var(--text);z-index:11}
-#wheelCanvas{display:block;margin:0 auto;max-width:280px;width:85vw;height:auto;border-radius:50%}
+#wheelCanvas{display:block;margin:0 auto;max-width:min(280px,80vw);width:80vw;height:auto;border-radius:50%}
 .wheel-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:var(--bg);border-radius:50%;border:2px solid rgba(255,255,255,0.12);z-index:10}
 .wheel-caption{font-size:14px;color:var(--muted2);margin-top:28px;font-style:italic;animation:capPulse 1.6s ease-in-out infinite}
-.wheel-skip{font-size:11px;color:var(--muted);margin-top:16px;letter-spacing:0.08em;opacity:0.6}
-@keyframes capPulse{0%,100%{opacity:0.3}50%{opacity:0.9}}
+.wheel-skip{font-size:11px;color:var(--muted);margin-top:14px;opacity:0.5;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@keyframes capPulse{0%,100%{opacity:0.28}50%{opacity:0.85}}
 
 /* ── CURTAIN ── */
 #screen-curtain{overflow:hidden;background:var(--bg)}
 .curtain-container{position:relative;width:100%;height:100dvh;overflow:hidden}
-.curtain-left,.curtain-right{position:absolute;top:0;bottom:0;width:50%;z-index:10;transition:transform 0.82s cubic-bezier(0.86,0,0.07,1);background:#0e0e0e}
-.curtain-left{left:0}.curtain-right{right:0}
+.curtain-left,.curtain-right{position:absolute;top:0;bottom:0;width:50%;z-index:10;transition:transform var(--cinematic)}
+.curtain-left{left:0;background:linear-gradient(to right,#0a0a0a,#0e0e0e)}
+.curtain-right{right:0;background:linear-gradient(to left,#0a0a0a,#0e0e0e)}
 .curtain-left.open{transform:translateX(-100%)}.curtain-right.open{transform:translateX(100%)}
-.curtain-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;gap:6px;padding:0 32px;text-align:center}
+.curtain-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;gap:8px;padding:0 32px;text-align:center}
 .curtain-label{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--red);opacity:0;transition:opacity 0.4s ease;font-family:var(--fb)}
-.curtain-msg{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--text);opacity:0;line-height:1.18;letter-spacing:-0.02em;transition:opacity 0.4s ease 0.1s}
+.curtain-msg{font-family:var(--fd);font-size:32px;font-weight:800;color:var(--text);opacity:0;line-height:1.1;letter-spacing:-0.025em;transition:opacity 0.4s ease 0.1s}
 .curtain-label.show,.curtain-msg.show{opacity:1}
 
-/* ── RESULTS SCREEN ── */
+/* ── RESULTS ── */
 #screen-results{background:var(--bg);position:relative}
-.results-ambient{position:fixed;top:0;left:0;right:0;height:240px;z-index:0;pointer-events:none;transition:background 1.2s ease;opacity:0.28}
-.results-header{padding:52px 24px 0;flex-shrink:0;position:relative;z-index:2}
-.results-logotype{font-family:var(--fd);font-size:10px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;cursor:pointer;display:inline-block}
-.results-mood-pill{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--muted2);border:1px solid var(--border2);letter-spacing:0.05em;font-family:var(--fb);margin-bottom:12px}
-.results-mood-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0}
-.results-headline{font-family:var(--fd);font-size:24px;font-weight:800;line-height:1.15;color:var(--text);letter-spacing:-0.02em}
+.results-ambient{position:fixed;top:0;left:0;right:0;height:260px;z-index:0;pointer-events:none;opacity:0.22;transition:background 1.4s ease}
+.results-header{padding:52px 24px 0;flex-shrink:0;position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between}
+.results-logotype{font-family:var(--fd);font-size:11px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+.results-mood-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border-radius:7px;padding:5px 11px;font-size:11px;font-weight:700;color:var(--muted2);border:1px solid var(--border2);letter-spacing:0.04em;font-family:var(--fb)}
+.results-mood-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--red);flex-shrink:0}
 
 /* ── SWIPE STACK ── */
 .swipe-stage{flex:1;position:relative;overflow:hidden;min-height:0}
-.swipe-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:0;opacity:0;transition:opacity 0.3s;pointer-events:none}
-.swipe-hint-icon{font-size:36px;margin-bottom:8px}
-.swipe-hint-text{font-size:14px;color:var(--muted);font-family:var(--fb)}
-.swipe-hint.visible{opacity:1}
 .swipe-card-wrap{position:absolute;inset:16px 20px 0;z-index:1;perspective:1000px}
 .swipe-card{position:absolute;inset:0;border-radius:20px;overflow:hidden;background:var(--surface);border:1px solid var(--border);cursor:grab;touch-action:pan-y;transform-origin:center bottom;will-change:transform;transition:box-shadow 0.2s}
 .swipe-card:active{cursor:grabbing}
@@ -229,129 +159,115 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
 .swipe-card.fly-right{animation:flyRight 0.42s cubic-bezier(0.36,0.07,0.19,0.97) forwards}
 @keyframes flyLeft{to{transform:translateX(-160%) rotate(-22deg);opacity:0}}
 @keyframes flyRight{to{transform:translateX(160%) rotate(22deg);opacity:0}}
-.swipe-card-nth-1{transform:translateY(0) scale(1);z-index:4;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.swipe-card-nth-1{transform:translateY(0) scale(1);z-index:4;box-shadow:0 24px 64px rgba(0,0,0,0.7)}
 .swipe-card-nth-2{transform:translateY(14px) scale(0.95);z-index:3;box-shadow:0 10px 30px rgba(0,0,0,0.4)}
-.swipe-card-nth-3{transform:translateY(26px) scale(0.90);z-index:2;box-shadow:0 6px 18px rgba(0,0,0,0.3)}
-.swipe-card-nth-4{transform:translateY(36px) scale(0.86);z-index:1;opacity:0.7}
+.swipe-card-nth-3{transform:translateY(26px) scale(0.90);z-index:2}
+.swipe-card-nth-4{transform:translateY(36px) scale(0.86);z-index:1;opacity:0.6}
 
-/* Vote intent overlay (yes/no) */
-.swipe-intent{position:absolute;top:20px;z-index:10;opacity:0;transition:opacity 0.12s;pointer-events:none;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:800;letter-spacing:0.08em;font-family:var(--fd)}
-.swipe-intent-yes{left:16px;background:rgba(40,200,100,0.9);color:#fff;border:2px solid #28c864}
-.swipe-intent-no{right:16px;background:rgba(229,9,20,0.9);color:#fff;border:2px solid var(--red)}
+/* Intent labels */
+.swipe-intent{position:absolute;top:22px;z-index:10;opacity:0;transition:opacity 0.1s;pointer-events:none;padding:7px 16px;border-radius:10px;font-size:14px;font-weight:800;letter-spacing:0.06em;font-family:var(--fd)}
+.swipe-intent-yes{left:18px;background:rgba(34,197,94,0.92);color:#fff;border:2px solid #22c55e}
+.swipe-intent-no{right:18px;background:rgba(229,9,20,0.92);color:#fff;border:2px solid var(--red)}
 
-/* Swipe card inner content */
-.sc-poster{width:100%;height:52%;object-fit:cover;display:block;background:var(--surface2)}
-.sc-poster-ph{width:100%;height:52%;display:flex;align-items:center;justify-content:center;background:var(--surface2)}
-.sc-poster-ph svg{width:32px;height:32px;stroke:var(--muted);stroke-width:1.2;fill:none;opacity:0.3}
-.sc-ambient-glow{position:absolute;top:0;left:0;right:0;height:52%;z-index:1;pointer-events:none;transition:background 0.8s ease}
-.sc-body{padding:16px;position:relative;z-index:2}
-.sc-top-badge{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px;margin-bottom:10px;font-family:var(--fb)}
-.sc-top-badge::before{content:'';width:16px;height:1px;background:var(--gold)}
-.sc-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text);line-height:1.18;letter-spacing:-0.02em;margin-bottom:6px}
+/* Card content */
+.sc-poster{width:100%;height:56%;object-fit:cover;display:block;background:var(--surface2)}
+.sc-poster-ph{width:100%;height:56%;display:flex;align-items:center;justify-content:center;background:var(--surface2)}
+.sc-poster-ph svg{width:32px;height:32px;opacity:0.2}
+.sc-ambient-glow{position:absolute;top:0;left:0;right:0;height:56%;z-index:1;pointer-events:none;transition:background 0.9s ease}
+.sc-body{padding:14px 16px 16px;position:relative;z-index:2}
+.sc-top-badge{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;font-family:var(--fb);display:block}
+.sc-title{font-family:var(--fd);font-size:21px;font-weight:800;color:var(--text);line-height:1.15;letter-spacing:-0.025em;margin-bottom:4px}
 .sc-meta{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:10px}
-.sc-score{display:flex;align-items:baseline;gap:5px;margin-bottom:10px}
-.sc-score-num{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.03em;line-height:1}
-.sc-score-denom{font-size:13px;color:var(--muted);font-weight:500}
-.sc-score-label{font-size:11px;color:var(--muted2);font-weight:600;font-family:var(--fb)}
-.sc-verdict{font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:14px;font-family:var(--fb);font-style:italic}
-.sc-synopsis{font-size:13px;line-height:1.65;color:var(--muted2);margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.sc-watch-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:12px;background:var(--red);color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;text-decoration:none;transition:opacity 0.2s;letter-spacing:0.03em;margin-bottom:10px}
-.sc-watch-btn.checking{background:var(--surface2);color:var(--muted2);cursor:default;pointer-events:none}
+.sc-score-row{display:flex;align-items:baseline;gap:4px;margin-bottom:6px}
+.sc-score-num{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--text);letter-spacing:-0.03em;line-height:1}
+.sc-verdict{font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:12px;font-family:var(--fb);font-style:italic}
+.sc-synopsis{font-size:13px;line-height:1.65;color:var(--muted2);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sc-watch-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:var(--red);color:#fff;font-family:var(--fd);font-size:14px;font-weight:700;text-decoration:none;transition:opacity var(--snap);letter-spacing:0.03em;margin-bottom:10px}
+.sc-watch-btn.checking{background:var(--surface2);opacity:0.5;pointer-events:none}
 .sc-watch-btn.elsewhere{background:var(--surface2);border:1px solid var(--border2);color:var(--text)}
-.sc-watch-btn:active{opacity:0.85}
+.sc-watch-btn:active{opacity:0.84}
 .sc-actions{display:flex;gap:8px}
-.sc-act-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;border-radius:10px;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-family:var(--fb);font-size:12px;font-weight:600;cursor:pointer;transition:background 0.15s}
+.sc-act-btn{flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:40px;border-radius:10px;background:transparent;border:1px solid var(--border2);color:var(--muted2);cursor:pointer;transition:background var(--snap)}
 .sc-act-btn:active{background:var(--surface2)}
-.sc-act-btn.saved{color:#4ade80;border-color:rgba(74,222,128,0.3)}
+.sc-act-btn.saved{color:#22c55e;border-color:rgba(34,197,94,0.3)}
 
-/* Stack gesture area */
-.swipe-gesture-hint{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;padding:0 28px 14px;z-index:10;pointer-events:none}
-.gesture-hint-left,.gesture-hint-right{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-family:var(--fb);opacity:0.5}
-
-/* Watchlist CTA bar */
+/* Results footer bar */
 .swipe-bar{flex-shrink:0;padding:10px 20px env(safe-area-inset-bottom,12px);display:flex;gap:8px;position:relative;z-index:2}
 .btn-ghost{flex:1;padding:14px;border-radius:var(--rpill);border:1.5px solid var(--border2);background:transparent;color:var(--text);font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer}
 .btn-ghost:active{background:var(--surface)}
 .btn-red{flex:2;padding:14px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
 .btn-red:active{opacity:0.88}
 
-/* Watchlist count badge */
-.watchlist-badge{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);right:20px;z-index:200;background:var(--red);color:#fff;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;font-weight:800;box-shadow:0 4px 16px rgba(229,9,20,0.5);cursor:pointer;transition:transform 0.2s,opacity 0.2s;opacity:0;pointer-events:none;transform:scale(0.7)}
-.watchlist-badge.visible{opacity:1;pointer-events:auto;transform:scale(1)}
-.watchlist-badge:active{transform:scale(0.92)}
+/* Watchlist badge */
+.watchlist-badge{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);right:20px;z-index:200;background:var(--red);color:#fff;border-radius:var(--rpill);padding:0 14px;height:36px;display:flex;align-items:center;font-family:var(--fd);font-size:13px;font-weight:800;box-shadow:0 4px 16px rgba(229,9,20,0.45);cursor:pointer;transition:transform 0.22s var(--reveal),opacity var(--snap);opacity:0;pointer-events:none;transform:scale(0.7) translateY(8px);gap:6px;letter-spacing:0.02em}
+.watchlist-badge.visible{opacity:1;pointer-events:auto;transform:scale(1) translateY(0)}
+.watchlist-badge:active{transform:scale(0.94)}
+
+/* All-done */
+.alldone-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:36px 24px;text-align:center;margin:20px}
+.alldone-icon{margin-bottom:16px;display:flex;align-items:center;justify-content:center}
+.alldone-title{font-family:var(--fd);font-size:21px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-0.02em}
+.alldone-body{font-size:13px;color:var(--muted2);line-height:1.7}
+
+/* Error */
+.error-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rcard);padding:36px 24px;text-align:center;margin:20px}
+.error-icon{margin-bottom:14px;display:flex;align-items:center;justify-content:center}
+.error-title{font-family:var(--fd);font-size:19px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-0.01em}
+.error-body{font-size:13px;color:var(--muted2);line-height:1.7;margin-bottom:20px}
+.error-retry{padding:13px 28px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:13px;font-weight:800;cursor:pointer}
+
+/* Skeleton */
+.skel{background:linear-gradient(90deg,var(--surface2) 0%,var(--surface3) 50%,var(--surface2) 100%);background-size:200% 100%;animation:skelShimmer 2s ease infinite;border-radius:6px}
+@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Toast */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(28,28,30,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border2);color:var(--text);font-size:13px;font-weight:500;padding:10px 20px;border-radius:var(--rpill);opacity:0;transition:all 0.22s;z-index:999;white-space:nowrap;pointer-events:none;font-family:var(--fb)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Sheets */
+.sheet-overlay{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s}
+.sheet-overlay.active{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:460px;background:var(--surface);border:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;padding:22px 22px calc(env(safe-area-inset-bottom,16px)+16px);transform:translateY(24px);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);max-height:88dvh;overflow-y:auto}
+.sheet-overlay.active .sheet{transform:translateY(0)}
+.sheet-grip{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 18px}
+.sheet-title{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--text);margin-bottom:18px;letter-spacing:-0.01em}
+.sheet-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;display:block;font-family:var(--fb)}
+.sheet .name-input{margin-bottom:0}
+.sheet-choice-row{display:flex;flex-direction:column;gap:8px}
+.sheet-choice{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:12px;border:1.5px solid var(--border2);background:var(--bg);cursor:pointer;transition:all var(--snap);font-family:var(--fb);font-size:14px;font-weight:600;color:var(--text)}
+.sheet-choice.selected{border-color:var(--red);background:var(--surface2)}
+.sheet-choice .chk{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--snap)}
+.sheet-choice.selected .chk{background:var(--red);border-color:var(--red)}
+.sheet-choice.selected .chk::after{content:'';display:block;width:6px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px)}
+.sheet-save{width:100%;padding:15px;margin-top:24px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer}
+.sheet-reset{width:100%;text-align:center;background:none;border:none;color:var(--muted);font-size:12px;padding:18px 0 2px;cursor:pointer}
+.sheet-reset.confirming{color:var(--red);font-weight:700}
 
 /* Watchlist sheet */
-.wl-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,16px) + 16px);max-height:75dvh;overflow-y:auto}
-.wl-grip{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 16px}
+.wl-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,16px)+16px);max-height:78dvh;overflow-y:auto}
+.wl-grip{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 18px}
 .wl-title{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;letter-spacing:-0.01em}
 .wl-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
 .wl-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
 .wl-item:last-child{border-bottom:none}
 .wl-item-thumb{width:36px;height:54px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--surface2)}
-.wl-item-body{flex:1;min-width:0}
-.wl-item-title{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wl-item-meta{font-size:11px;color:var(--muted);margin-top:2px}
-.wl-item-btn{display:flex;align-items:center;gap:5px;padding:8px 12px;border-radius:8px;background:var(--red);color:#fff;font-family:var(--fd);font-size:11px;font-weight:700;text-decoration:none;flex-shrink:0}
-.wl-item-btn svg{width:8px;height:9px;fill:#fff;flex-shrink:0}
+.wl-item-title{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wl-item-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:var(--red);flex-shrink:0;text-decoration:none}
+.wl-item-btn svg{width:10px;height:11px;fill:#fff}
 .wl-empty{text-align:center;padding:32px 0;color:var(--muted);font-size:14px}
-.wl-share-row{display:flex;gap:8px;margin-top:16px}
+.wl-share-row{display:flex;gap:8px;margin-top:18px}
 
-/* Skeleton */
-.skel-card{border-radius:20px;background:var(--surface);border:1px solid var(--border);overflow:hidden;height:400px}
-.skel{background:linear-gradient(90deg,var(--surface2) 0%,var(--surface3) 50%,var(--surface2) 100%);background-size:200% 100%;animation:skelShimmer 2s ease infinite;border-radius:6px}
-@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-/* Error */
-.error-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rcard);padding:32px 24px;text-align:center;margin:20px}
-.error-icon{font-size:36px;margin-bottom:14px}
-.error-title{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px}
-.error-body{font-size:13px;color:var(--muted2);line-height:1.7;margin-bottom:20px}
-.error-retry{padding:13px 28px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:13px;font-weight:800;cursor:pointer}
-
-/* All-done card */
-.alldone-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px 24px;text-align:center;margin:20px}
-.alldone-icon{font-size:42px;margin-bottom:14px}
-.alldone-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-0.01em}
-.alldone-body{font-size:13px;color:var(--muted2);line-height:1.7;margin-bottom:20px}
-
-/* Toast */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:13px;font-weight:500;padding:10px 20px;border-radius:var(--rpill);opacity:0;transition:all 0.22s;z-index:999;white-space:nowrap;pointer-events:none;font-family:var(--fb)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* Sheets */
-.sheet-overlay{position:fixed;inset:0;z-index:210;background:rgba(0,0,0,0.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s}
-.sheet-overlay.active{opacity:1;pointer-events:auto}
-.sheet{width:100%;max-width:460px;background:var(--surface);border:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;padding:22px 22px calc(env(safe-area-inset-bottom,16px)+16px);transform:translateY(24px);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);max-height:88dvh;overflow-y:auto}
-.sheet-overlay.active .sheet{transform:translateY(0)}
-.sheet-grip{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 16px}
-.sheet-title{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;letter-spacing:-0.01em}
-.sheet-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
-.sheet-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;display:block;font-family:var(--fb)}
-.sheet .name-input{margin-bottom:0}
-.sheet-choice-row{display:flex;flex-direction:column;gap:8px}
-.sheet-choice{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:12px;border:1.5px solid var(--border2);background:var(--bg);cursor:pointer;transition:all 0.15s;font-family:var(--fb);font-size:14px;font-weight:600;color:var(--text)}
-.sheet-choice.selected{border-color:var(--red);background:var(--surface2)}
-.sheet-choice .chk{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0}
-.sheet-choice.selected .chk{background:var(--red);border-color:var(--red)}
-.sheet-save{width:100%;padding:15px;margin-top:24px;border-radius:var(--rpill);border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:800;cursor:pointer}
-.sheet-reset{width:100%;text-align:center;background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;text-underline-offset:3px;padding:18px 0 2px;cursor:pointer}
-.sheet-reset.confirming{color:var(--red);font-weight:700;text-decoration:none}
-
-/* Share popup */
-.share-popup-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.3s ease}
-.share-popup-overlay.active{opacity:1;pointer-events:all}
-.share-popup{width:100%;max-width:340px;background:var(--surface);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:20px;transform:scale(0.9) translateY(12px);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);position:relative}
-.share-popup-overlay.active .share-popup{transform:scale(1) translateY(0)}
-.share-popup-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:var(--surface2);border:none;color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
-.share-popup-icon{font-size:26px;margin-bottom:10px}
-.share-popup-headline{font-family:var(--fd);font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;letter-spacing:-0.01em}
-.share-popup-sub{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:14px}
-.share-link-box{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+/* Share sheet (bottom sheet, not modal) */
+.share-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,16px)+16px)}
+.share-sheet-grip{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 18px}
+.share-sheet-headline{font-family:var(--fd);font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px;letter-spacing:-0.01em}
+.share-sheet-sub{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:18px}
+.share-link-box{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .share-link-text{font-size:12px;color:var(--muted2);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.share-link-copy{font-size:11px;font-weight:700;color:var(--red);cursor:pointer;flex-shrink:0;letter-spacing:0.06em;background:none;border:none}
-.share-popup-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.share-btn-primary{padding:12px;border-radius:10px;background:var(--red);border:none;color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer;width:100%}
-.share-btn-secondary{padding:12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;width:100%}
+.share-link-copy{font-size:12px;font-weight:700;color:var(--red);cursor:pointer;flex-shrink:0;background:none;border:none;letter-spacing:0.04em}
+.share-sheet-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.share-btn-primary{padding:13px;border-radius:12px;background:var(--red);border:none;color:#fff;font-family:var(--fd);font-size:13px;font-weight:700;cursor:pointer;width:100%}
+.share-btn-secondary{padding:13px;border-radius:12px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;width:100%}
 
 ::-webkit-scrollbar{display:none}
 :focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:4px}
@@ -359,180 +275,178 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
 </head>
 <body>
 <div class="toast" id="toast"></div>
-<div class="watchlist-badge" id="wlBadge" role="button" aria-label="View watchlist"></div>
+<div class="watchlist-badge" id="wlBadge" role="button" aria-label="View watchlist">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+  <span id="wlBadgeCount">0</span>
+</div>
 
 <!-- ONBOARDING -->
 <section id="screen-onboard" class="screen active">
-  <div class="onboard-marquee-wrap" aria-hidden="true">
-    <div class="poster-track">
-      <span class="poster-chip pc1"></span><span class="poster-chip pc2"></span><span class="poster-chip pc3"></span><span class="poster-chip pc4"></span><span class="poster-chip pc5"></span><span class="poster-chip pc6"></span><span class="poster-chip pc7"></span><span class="poster-chip pc8"></span><span class="poster-chip pc1"></span><span class="poster-chip pc2"></span><span class="poster-chip pc3"></span><span class="poster-chip pc4"></span><span class="poster-chip pc5"></span><span class="poster-chip pc6"></span><span class="poster-chip pc7"></span><span class="poster-chip pc8"></span>
-    </div>
+  <div class="onboard-bg"></div>
+  <div class="onboard-vignette"></div>
+  <div class="onboard-hero">
+    <h1 class="onboard-headline" id="onboardHero"><span id="onboardHeroTime">Tonight,</span><em>find something<br>worth it.</em></h1>
   </div>
-  <div class="onboard-top">
-    <div class="onboard-eyebrow" id="stepLabel">First things first</div>
-    <h1 class="onboard-headline" id="onboardHeadline">Stop scrolling.<br><em>Start watching.</em></h1>
-    <p class="onboard-sub" id="onboardSub">Tell us your name. We'll handle the rest.</p>
-    <div class="progress-row" id="progressRow">
-      <div class="prog-dot active"></div><div class="prog-dot"></div>
+  <div class="onboard-form-wrap" id="onboardFormWrap">
+    <div class="onboard-form-card">
+      <div id="onboardForm">
+        <input class="name-input" id="nameInput" type="text" placeholder="Name" maxlength="24"
+          autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+        <div class="avoid-row" id="avoidRow">
+          <button class="avoid-chip" data-avoid="Horror. Hard no.">Horror. Hard no.</button>
+          <button class="avoid-chip" data-avoid="Romance please no">Romance please no</button>
+          <button class="avoid-chip selected" data-avoid="I watch everything">I watch everything</button>
+        </div>
+        <button class="primary-btn" id="onboardNext" disabled>Let's watch</button>
+        <div class="skip-link" id="skipLink">Skip</div>
+      </div>
     </div>
-  </div>
-  <div class="onboard-form" id="onboardForm">
-    <input class="name-input" id="nameInput" type="text" placeholder="Your first name" maxlength="24"
-      autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
-    <button class="primary-btn" id="onboardNext" disabled>Continue <span>→</span></button>
-    <div class="skip-link" id="skipLink">Skip setup</div>
   </div>
 </section>
 
 <!-- PICK SCREEN -->
 <section id="screen-pick" class="screen">
   <div class="pick-header">
-    <div class="logotype-row">
-      <div class="logotype" id="pickWordmark">OYA WATCH</div>
+    <div class="logotype" id="pickWordmark">OYA WATCH</div>
+    <div class="header-right">
       <span class="netflix-pill">Netflix</span>
+      <button class="settings-btn" id="settingsBtn" aria-label="Preferences">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
     </div>
-    <h1 class="pick-greeting" id="pickGreeting">What are you<br>watching <em>tonight?</em></h1>
   </div>
-  <div class="type-toggle">
-    <button class="type-btn active" data-mode="movies">Movies</button>
-    <button class="type-btn" data-mode="tv">TV Shows</button>
+  <div class="type-toggle-wrap">
+    <div class="type-toggle">
+      <button class="type-btn active" data-mode="movies">Movies</button>
+      <button class="type-btn" data-mode="tv">Series</button>
+    </div>
   </div>
-  <div class="search-section">
+  <div class="search-wrap">
     <div class="search-inner">
-      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <input class="search-input" id="similarInput" type="text" placeholder="Something like…" autocorrect="off" autocomplete="off" spellcheck="false">
-      <button class="search-go" id="similarGo" disabled>Go</button>
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" id="similarInput" type="text" autocorrect="off" autocomplete="off" spellcheck="false">
+      <button class="search-go" id="similarGo">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
     </div>
   </div>
-  <span class="mood-label">Or pick a mood</span>
-  <div class="mood-scroll-outer">
-    <div class="mood-scroll" id="moodScroll">
+  <div class="mood-reel-outer">
+    <div class="mood-reel" id="moodReel">
       <!-- MOVIES -->
-      <div class="mood-grid" id="moviesGrid">
-        <div class="mood-card mood-no-wahala" data-mood="No Wahala" data-tag="Relaxed" data-genres="18|10751" data-sort="vote_average.desc" data-vote-min="100" data-peek="Forrest Gump, Soul, The Secret Life of Walter Mitty">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Relaxed</span><span class="card-name">No Wahala</span></div>
+      <div id="moviesReel">
+        <div class="mood-panel" data-mood="No Wahala" data-genres="18|10751" data-sort="vote_average.desc" data-vote-min="100" data-size="hero">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/4997840/pexels-photo-4997840.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Feel good</span><span class="mood-panel-name">No Wahala</span></div>
         </div>
-        <div class="mood-card mood-e-choke" data-mood="E Choke!" data-tag="Intense" data-genres="18|53" data-sort="vote_average.desc" data-vote-min="200" data-peek="Parasite, Prisoners, Gone Girl">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Intense</span><span class="card-name">E Choke!</span></div>
+        <div class="mood-panel" data-mood="E Choke!" data-genres="18|53" data-sort="vote_average.desc" data-vote-min="200" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/3756165/pexels-photo-3756165.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Intense</span><span class="mood-panel-name">E Choke!</span></div>
         </div>
-        <div class="mood-card mood-chop-breakfast" data-mood="Chop Bfast" data-tag="Romance" data-genres="10749|18" data-sort="vote_average.desc" data-vote-min="100" data-peek="Before Sunrise, Normal People, La La Land">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Romance</span><span class="card-name">Chop Bfast</span></div>
+        <div class="mood-panel" data-mood="Vawulence" data-genres="53|80|28" data-sort="vote_average.desc" data-vote-min="200" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/3052361/pexels-photo-3052361.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Thriller</span><span class="mood-panel-name">Vawulence</span></div>
         </div>
-        <div class="mood-card mood-dey-play" data-mood="Dey Play" data-tag="Comedy" data-genres="35" data-sort="vote_average.desc" data-vote-min="150" data-peek="Game Night, The Grand Budapest Hotel, Superbad">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Comedy</span><span class="card-name">Dey Play</span></div>
+        <div class="mood-panel" data-mood="Chop Bfast" data-genres="10749|18" data-sort="vote_average.desc" data-vote-min="100" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Romance</span><span class="mood-panel-name">Chop Bfast</span></div>
         </div>
-        <div class="mood-card mood-vawulence" data-mood="Vawulence" data-tag="Thriller" data-genres="53|80|28" data-sort="vote_average.desc" data-vote-min="200" data-peek="No Country for Old Men, Heat, Sicario">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Thriller</span><span class="card-name">Vawulence</span></div>
+        <div class="mood-panel" data-mood="Dey Play" data-genres="35" data-sort="vote_average.desc" data-vote-min="150" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Comedy</span><span class="mood-panel-name">Dey Play</span></div>
         </div>
-        <div class="mood-card mood-after-dark" data-mood="After Dark" data-tag="Horror" data-genres="27|9648" data-sort="vote_average.desc" data-vote-min="100" data-peek="Get Out, Hereditary, A Quiet Place">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Horror</span><span class="card-name">After Dark</span></div>
+        <div class="mood-panel" data-mood="After Dark" data-genres="27|9648" data-sort="vote_average.desc" data-vote-min="100" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/3617457/pexels-photo-3617457.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Horror</span><span class="mood-panel-name">After Dark</span></div>
         </div>
-        <div class="mood-card mood-lights-down" data-mood="Lights Down" data-tag="Cinematic" data-genres="28|12|878" data-sort="vote_average.desc" data-vote-min="300" data-peek="Interstellar, Mad Max: Fury Road, Dune">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Cinematic</span><span class="card-name">Lights Down</span></div>
+        <div class="mood-panel" data-mood="Lights Down" data-genres="28|12|878" data-sort="vote_average.desc" data-vote-min="300" data-size="hero">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/1117132/pexels-photo-1117132.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Cinematic</span><span class="mood-panel-name">Lights Down</span></div>
         </div>
-        <div class="mood-card mood-deep-feels" data-mood="Deep Feels" data-tag="Drama" data-genres="18" data-sort="vote_average.desc" data-vote-min="500" data-peek="Manchester by the Sea, Moonlight, Marriage Story">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Drama</span><span class="card-name">Deep Feels</span></div>
+        <div class="mood-panel" data-mood="Deep Feels" data-genres="18" data-sort="vote_average.desc" data-vote-min="500" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/1172207/pexels-photo-1172207.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Drama</span><span class="mood-panel-name">Deep Feels</span></div>
+        </div>
+        <div class="mood-panel-surprise" id="surpriseBtn" role="button" tabindex="0" aria-label="Feeling lucky">
+          <span class="mood-panel-surprise-text">Feeling lucky?</span>
         </div>
       </div>
-      <!-- TV -->
-      <div class="mood-grid" id="tvGrid" style="display:none">
-        <div class="mood-card mood-binge-worthy" data-mood="Binge It" data-tag="Can't Stop" data-genres="18|80" data-sort="vote_average.desc" data-vote-min="200" data-peek="Breaking Bad, The Wire, Ozark">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Can't Stop</span><span class="card-name">Binge It</span></div>
+      <!-- SERIES -->
+      <div id="tvReel" style="display:none">
+        <div class="mood-panel" data-mood="Binge It" data-genres="18|80" data-sort="vote_average.desc" data-vote-min="200" data-size="hero">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/6899764/pexels-photo-6899764.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Can't stop</span><span class="mood-panel-name">Binge It</span></div>
         </div>
-        <div class="mood-card mood-addicted" data-mood="Addicted" data-tag="Thriller" data-genres="80|9648|53" data-sort="vote_average.desc" data-vote-min="150" data-peek="Black Mirror, You, Mindhunter">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Thriller</span><span class="card-name">Addicted</span></div>
+        <div class="mood-panel" data-mood="Addicted" data-genres="80|9648|53" data-sort="vote_average.desc" data-vote-min="150" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/2873486/pexels-photo-2873486.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Thriller</span><span class="mood-panel-name">Addicted</span></div>
         </div>
-        <div class="mood-card mood-heartstrings" data-mood="Heartstrings" data-tag="Romance" data-genres="10749|18|10766" data-sort="vote_average.desc" data-vote-min="100" data-peek="Normal People, Sex Education, Bridgerton">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Romance</span><span class="card-name">Heartstrings</span></div>
+        <div class="mood-panel" data-mood="Whodunit" data-genres="9648|80|18" data-sort="vote_average.desc" data-vote-min="100" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/8369648/pexels-photo-8369648.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Mystery</span><span class="mood-panel-name">Whodunit</span></div>
         </div>
-        <div class="mood-card mood-laugh-track" data-mood="Laugh Track" data-tag="Comedy" data-genres="35|10751" data-sort="vote_average.desc" data-vote-min="100" data-peek="Schitt's Creek, What We Do in the Shadows, Abbott Elementary">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Comedy</span><span class="card-name">Laugh Track</span></div>
+        <div class="mood-panel" data-mood="Heartstrings" data-genres="10749|18|10766" data-sort="vote_average.desc" data-vote-min="100" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/5617699/pexels-photo-5617699.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Romance</span><span class="mood-panel-name">Heartstrings</span></div>
         </div>
-        <div class="mood-card mood-whodunit" data-mood="Whodunit" data-tag="Mystery" data-genres="9648|80|18" data-sort="vote_average.desc" data-vote-min="100" data-peek="True Detective, The Sinner, Broadchurch">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Mystery</span><span class="card-name">Whodunit</span></div>
+        <div class="mood-panel" data-mood="Laugh Track" data-genres="35|10751" data-sort="vote_average.desc" data-vote-min="100" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/7015034/pexels-photo-7015034.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Comedy</span><span class="mood-panel-name">Laugh Track</span></div>
         </div>
-        <div class="mood-card mood-night-mode" data-mood="Night Mode" data-tag="Dark Drama" data-genres="18|27" data-sort="vote_average.desc" data-vote-min="100" data-peek="Dark, The Haunting of Hill House, Squid Game">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Dark Drama</span><span class="card-name">Night Mode</span></div>
+        <div class="mood-panel" data-mood="Night Mode" data-genres="18|27" data-sort="vote_average.desc" data-vote-min="100" data-size="hero">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/1820770/pexels-photo-1820770.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Dark drama</span><span class="mood-panel-name">Night Mode</span></div>
         </div>
-        <div class="mood-card mood-docu" data-mood="Real Talk" data-tag="Documentary" data-genres="99" data-sort="vote_average.desc" data-vote-min="80" data-peek="Making a Murderer, The Last Dance, Wild Wild Country">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Documentary</span><span class="card-name">Real Talk</span></div>
+        <div class="mood-panel" data-mood="Real Talk" data-genres="99" data-sort="vote_average.desc" data-vote-min="80" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/3568520/pexels-photo-3568520.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Documentary</span><span class="mood-panel-name">Real Talk</span></div>
         </div>
-        <div class="mood-card mood-comfort-tv" data-mood="Comfort TV" data-tag="Feel Good" data-genres="18|10751|10766" data-sort="vote_average.desc" data-vote-min="80" data-peek="Parks & Rec, New Girl, Brooklyn Nine-Nine">
-          <div class="card-img"></div><div class="card-wash"></div><div class="card-dark"></div><div class="card-gradient"></div>
-          <div class="card-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-          <div class="card-peek"><div class="peek-label">You might see</div><div class="peek-titles"></div></div>
-          <div class="card-content"><span class="card-pill">Feel Good</span><span class="card-name">Comfort TV</span></div>
+        <div class="mood-panel" data-mood="Comfort TV" data-genres="18|10751|10766" data-sort="vote_average.desc" data-vote-min="80" data-size="normal">
+          <div class="mood-panel-img" style="background-image:url('https://images.pexels.com/photos/4997840/pexels-photo-4997840.jpeg?auto=compress&cs=tinysrgb&w=600&fit=crop')"></div>
+          <div class="mood-panel-gradient"></div>
+          <div class="mood-panel-content"><span class="mood-panel-tag">Feel good</span><span class="mood-panel-name">Comfort TV</span></div>
+        </div>
+        <div class="mood-panel-surprise" id="surpriseBtnTV" role="button" tabindex="0" aria-label="Feeling lucky">
+          <span class="mood-panel-surprise-text">Feeling lucky?</span>
         </div>
       </div>
     </div>
     <div class="mood-fade" id="moodFade"></div>
   </div>
-  <div class="sticky-cta">
-    <button class="spin-btn" id="spinBtn" disabled>
-      <span id="spinBtnText">Pick a mood to continue</span>
-      <span class="spin-btn-arrow" id="spinBtnArrow" style="display:none">→</span>
+  <div class="sticky-cta hidden" id="stickyCta">
+    <button class="spin-btn" id="spinBtn">
+      <span id="spinBtnText">Find my picks</span>
+      <span>→</span>
     </button>
   </div>
 </section>
 
 <!-- WHEEL -->
 <section id="screen-wheel" class="screen">
-  <div class="wheel-wrap">
-    <div class="wheel-eyebrow" id="wheelEyebrow">Finding your picks</div>
+  <div class="wheel-bg" id="wheelBg"></div>
+  <div class="wheel-content">
+    <div class="wheel-eyebrow" id="wheelEyebrow">Vawulence</div>
     <div class="wheel-pointer-wrap">
       <div class="wheel-tri"></div>
       <canvas id="wheelCanvas" width="300" height="300"></canvas>
       <div class="wheel-hub"></div>
     </div>
-    <div class="wheel-caption" id="wheelCaption">Scanning the vault...</div>
-    <div class="wheel-skip">tap to skip</div>
+    <div class="wheel-caption" id="wheelCaption">Going through the vault…</div>
+    <div class="wheel-skip" id="wheelSkip">tap to skip</div>
   </div>
 </section>
 
@@ -543,7 +457,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
     <div class="curtain-right" id="curtainRight"></div>
     <div class="curtain-center">
       <div class="curtain-label" id="curtainLabel">Oya Watch</div>
-      <div class="curtain-msg" id="curtainMsg">Your picks are ready.</div>
+      <div class="curtain-msg" id="curtainMsg">Ready.</div>
     </div>
   </div>
 </section>
@@ -553,31 +467,23 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
   <div class="results-ambient" id="resultsAmbient"></div>
   <div class="results-header">
     <div class="results-logotype" id="resultsWordmark">OYA WATCH</div>
-    <div class="results-mood-pill" id="resultsMoodPill">Tonight on Netflix</div>
-    <h2 class="results-headline" id="resultsHeadline">Tonight's picks</h2>
+    <div class="results-mood-pill" id="resultsMoodPill">On Netflix</div>
   </div>
   <div class="swipe-stage" id="swipeStage">
-    <div class="swipe-hint" id="swipeHint">
-      <div class="swipe-hint-icon">🎬</div>
-      <div class="swipe-hint-text">All done</div>
-    </div>
     <div class="swipe-card-wrap" id="swipeCardWrap"></div>
   </div>
   <div class="swipe-bar">
-    <button class="btn-ghost" id="btnAgain">Change mood</button>
-    <button class="btn-red" id="btnRespin">
-      <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M10.5 2.5L7 6h3.5v4.5a4 4 0 01-8 0V6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Spin again
-    </button>
+    <button class="btn-ghost" id="btnAgain">Moods</button>
+    <button class="btn-red" id="btnRespin">New picks</button>
   </div>
 </section>
 
 <!-- WATCHLIST SHEET -->
 <div class="sheet-overlay" id="wlOverlay">
-  <div class="sheet wl-sheet" role="dialog" aria-modal="true" aria-label="Your watchlist">
+  <div class="sheet wl-sheet" role="dialog" aria-modal="true" aria-label="Watchlist">
     <div class="wl-grip"></div>
-    <div class="wl-title">Tonight's list</div>
-    <div class="wl-sub" id="wlSubtitle">Things you saved</div>
+    <div class="wl-title" id="wlTitle">Tonight's list</div>
+    <div class="wl-sub" id="wlSubtitle">Nothing saved yet.</div>
     <div id="wlItems"></div>
     <div class="wl-share-row">
       <button class="btn-ghost" style="flex:1" id="wlClose">Close</button>
@@ -588,36 +494,34 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--fb);min-heigh
 
 <!-- SETTINGS SHEET -->
 <div class="sheet-overlay" id="settingsOverlay">
-  <div class="sheet" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Preferences">
     <div class="sheet-grip"></div>
-    <div class="sheet-title">Your settings</div>
-    <div class="sheet-sub">Update your name or what to avoid.</div>
+    <div class="sheet-title">Preferences</div>
     <label class="sheet-label" for="setName">Name</label>
     <input class="name-input" id="setName" type="text" placeholder="Your first name" maxlength="24" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
     <label class="sheet-label">Never show me</label>
     <div class="sheet-choice-row" id="setAvoid">
-      <div class="sheet-choice" data-avoid="Horror — hard no" role="button" tabindex="0"><span>Horror — hard no</span><span class="chk">✓</span></div>
-      <div class="sheet-choice" data-avoid="Romance please no" role="button" tabindex="0"><span>Romance please no</span><span class="chk">✓</span></div>
-      <div class="sheet-choice" data-avoid="I watch everything" role="button" tabindex="0"><span>I watch everything</span><span class="chk">✓</span></div>
+      <div class="sheet-choice" data-avoid="Horror. Hard no." role="button" tabindex="0"><span>Horror. Hard no.</span><span class="chk"></span></div>
+      <div class="sheet-choice" data-avoid="Romance please no" role="button" tabindex="0"><span>Romance please no</span><span class="chk"></span></div>
+      <div class="sheet-choice" data-avoid="I watch everything" role="button" tabindex="0"><span>I watch everything</span><span class="chk"></span></div>
     </div>
     <button class="sheet-save" id="setSave">Save</button>
-    <button class="sheet-reset" id="setReset">Reset &amp; start over</button>
+    <button class="sheet-reset" id="setReset">Reset everything</button>
   </div>
 </div>
 
-<!-- SHARE POPUP -->
-<div class="share-popup-overlay" id="shareOverlay">
-  <div class="share-popup">
-    <button class="share-popup-close" id="sharePopupClose">&#x2715;</button>
-    <div class="share-popup-icon" id="popupIcon">🍿</div>
-    <div class="share-popup-headline" id="popupHeadline">Watching with someone?</div>
-    <div class="share-popup-sub" id="popupSub">Send the picks before they choose something terrible.</div>
+<!-- SHARE SHEET -->
+<div class="sheet-overlay" id="shareOverlay">
+  <div class="sheet share-sheet" role="dialog" aria-modal="true">
+    <div class="share-sheet-grip"></div>
+    <div class="share-sheet-headline" id="shareHeadline">Watching with someone?</div>
+    <div class="share-sheet-sub" id="shareSub">Send them the picks before they choose something terrible.</div>
     <div class="share-link-box">
       <span class="share-link-text">oyawatch.vercel.app</span>
-      <button class="share-link-copy" id="shareLinkCopy">COPY</button>
+      <button class="share-link-copy" id="shareLinkCopy">Copy</button>
     </div>
-    <div class="share-popup-btns">
-      <button class="share-btn-primary" id="sharePopupShare">Share picks</button>
+    <div class="share-sheet-btns">
+      <button class="share-btn-primary" id="sharePopupShare">Share</button>
       <button class="share-btn-secondary" id="sharePopupCopy">Copy link</button>
     </div>
   </div>
@@ -635,12 +539,6 @@ const NETFLIX_URL='https://www.netflix.com/search?q=';
   try{const L='tmplug_v6';if(!localStorage.getItem(STORAGE_KEY)&&localStorage.getItem(L)){localStorage.setItem(STORAGE_KEY,localStorage.getItem(L));const s=localStorage.getItem(L+'_seen');if(s)localStorage.setItem(STORAGE_KEY+'_seen',s);}}catch{}
 })();
 
-const STEPS=[
-  {label:'First things first',headline:'Stop scrolling.<br><em>Start watching.</em>',sub:"Tell us your name. We'll handle the rest.",type:'text',cta:'Continue'},
-  {label:'One last thing{name}',headline:'Anything you<br><em>never watch?</em>',sub:"We'll keep it far away from your picks.",type:'options',options:['Horror — hard no','Romance please no','I watch everything'],key:'avoid',cta:"Let's watch"},
-];
-const WHEEL_COPY=['Checking what\'s worth your night…','Skipping the mediocre…','Finding something unforgettable…','Curating your lineup…','Asking the critics…'];
-const WHEEL_EMOJIS=['🎬','🍿','🎭','📽️','🎞️','🏆','⭐','🎥'];
 const MOOD_COLORS={
   'No Wahala':['#1a4030','#2d6a4f','#1a4030','#0d2b1a'],
   'E Choke!':['#4a1800','#b84c00','#4a1800','#1a0800'],
@@ -660,12 +558,56 @@ const MOOD_COLORS={
   'Comfort TV':['#1a4030','#2d6a4f','#1a4030','#0d2b1a'],
 };
 const AVOID_GENRE={Horror:27,Romance:10749};
-const VERDICTS=[
-  [9.0,'A film people rewatch.'],
-  [8.0,'Stays with you.'],
-  [7.0,'Worth the night.'],
-  [0,'A gamble. Could be good.'],
-];
+const VERDICTS=[[9.0,'A film people rewatch.'],[8.0,'Stays with you.'],[7.0,'Worth the night.'],[0,'A gamble. Could be good.']];
+const WHEEL_COPY=['Going through the vault…','Checking what\'s worth your night…','Skipping the mediocre…','Finding something unforgettable…','Asking the critics…'];
+const WHEEL_EMOJIS=['🎬','🍿','🎭','📽️','🎞️','🏆','⭐','🎥'];
+const MOOD_BG_IMGS={
+  'No Wahala':'https://images.pexels.com/photos/4997840/pexels-photo-4997840.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'E Choke!':'https://images.pexels.com/photos/3756165/pexels-photo-3756165.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Chop Bfast':'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Dey Play':'https://images.pexels.com/photos/3807517/pexels-photo-3807517.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Vawulence':'https://images.pexels.com/photos/3052361/pexels-photo-3052361.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'After Dark':'https://images.pexels.com/photos/3617457/pexels-photo-3617457.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Lights Down':'https://images.pexels.com/photos/1117132/pexels-photo-1117132.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Deep Feels':'https://images.pexels.com/photos/1172207/pexels-photo-1172207.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Binge It':'https://images.pexels.com/photos/6899764/pexels-photo-6899764.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Addicted':'https://images.pexels.com/photos/2873486/pexels-photo-2873486.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Heartstrings':'https://images.pexels.com/photos/5617699/pexels-photo-5617699.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Laugh Track':'https://images.pexels.com/photos/7015034/pexels-photo-7015034.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Whodunit':'https://images.pexels.com/photos/8369648/pexels-photo-8369648.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Night Mode':'https://images.pexels.com/photos/1820770/pexels-photo-1820770.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Real Talk':'https://images.pexels.com/photos/3568520/pexels-photo-3568520.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+  'Comfort TV':'https://images.pexels.com/photos/4997840/pexels-photo-4997840.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop',
+};
+const ALL_MOODS=['No Wahala','E Choke!','Chop Bfast','Dey Play','Vawulence','After Dark','Lights Down','Deep Feels','Binge It','Addicted','Heartstrings','Laugh Track','Whodunit','Night Mode','Real Talk','Comfort TV'];
+
+// Time-aware copy
+function getTimePeriod(){const h=new Date().getHours();if(h>=5&&h<12)return'morning';if(h>=12&&h<17)return'afternoon';if(h>=17&&h<21)return'evening';return'night';}
+const TIME_COPY={
+  morning:{hero:'This morning,',watchlistTitle:"This morning's list",pickLabel:'this morning',sharePrefix:'This morning on Netflix:',cardBadge:"This morning's pick"},
+  afternoon:{hero:'This afternoon,',watchlistTitle:"This afternoon's list",pickLabel:'this afternoon',sharePrefix:'This afternoon on Netflix:',cardBadge:"This afternoon's pick"},
+  evening:{hero:'This evening,',watchlistTitle:"This evening's list",pickLabel:'this evening',sharePrefix:'This evening on Netflix:',cardBadge:"This evening's pick"},
+  night:{hero:'Tonight,',watchlistTitle:"Tonight's list",pickLabel:'tonight',sharePrefix:'Tonight on Netflix:',cardBadge:"Tonight's pick"},
+};
+function tc(){return TIME_COPY[getTimePeriod()];}
+
+// Search placeholders — rotating by time
+const SEARCH_PLACEHOLDERS={
+  morning:['Loved Parasite? Start there.','Something like The Menu…','If you liked Get Out…','A good one for this morning…'],
+  afternoon:['Something like Interstellar…','If you liked Knives Out…','A good afternoon watch…','Something like Marriage Story…'],
+  evening:['If you liked Succession…','Something for this evening…','Loved Squid Game? Start there.','Something like The Bear…'],
+  night:['Loved Parasite? Start there.','Something like Interstellar…','If you liked Get Out…','Another one like The Menu…'],
+};
+let _placeholderIdx=0,_placeholderTimer=null;
+function startPlaceholderCycle(){
+  const inp=document.getElementById('similarInput');if(!inp)return;
+  const list=SEARCH_PLACEHOLDERS[getTimePeriod()];
+  _placeholderIdx=0;
+  const next=()=>{inp.placeholder=list[_placeholderIdx%list.length];_placeholderIdx++;};
+  next();clearInterval(_placeholderTimer);_placeholderTimer=setInterval(next,4000);
+}
+function stopPlaceholderCycle(){clearInterval(_placeholderTimer);}
+
 const TMDB_HOST='https://api.themoviedb.org/3';
 const _cache=new Map();
 function _sig(ms){try{return AbortSignal.timeout(ms);}catch{return undefined;}}
@@ -673,19 +615,15 @@ function tmdbUrl(path,params){const q=new URLSearchParams(params||{});q.set('api
 async function tmdbGet(path,params,timeout){
   const url=tmdbUrl(path,params);
   if(_cache.has(url))return _cache.get(url);
-  try{const r=await fetch(url,{signal:_sig(timeout||8000)});if(!r.ok)return null;const d=await r.json();_cache.set(url,d);return d;}
-  catch{return null;}
+  try{const r=await fetch(url,{signal:_sig(timeout||8000)});if(!r.ok)return null;const d=await r.json();_cache.set(url,d);return d;}catch{return null;}
 }
-function resolveRegion(){const ls=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'en-US'];for(const l of ls){const p=(l||'').split('-');if(p[1])return p[1].toUpperCase();}return 'US';}
+function resolveRegion(){const ls=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'en-US'];for(const l of ls){const p=(l||'').split('-');if(p[1])return p[1].toUpperCase();}return'US';}
 function getVerdict(v){for(const[min,txt]of VERDICTS){if(Number(v)>=min)return txt;}return VERDICTS[VERDICTS.length-1][1];}
 async function fetchProviders(type,id,region){const d=await tmdbGet(`/${type}/${id}/watch/providers`,{},5000);if(!d||!d.results)return null;return d.results[region]||d.results.US||null;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function unesc(s){return String(s).replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");}
 function $(id){return document.getElementById(id);}
 function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
-function getHour(){return new Date().getHours();}
-function getTimeGreeting(){const h=getHour();return h>=5&&h<12?'this morning':h>=12&&h<17?'this afternoon':'tonight';}
-function getTimeLabel(){const h=getHour();return h>=5&&h<12?'Morning':h>=12&&h<17?'Afternoon':h>=17&&h<21?'Evening':'Late night';}
 function loadProfile(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');}catch{return null;}}
 function saveProfile(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}catch{}}
 function clearProfile(){try{localStorage.removeItem(STORAGE_KEY);}catch{}}
@@ -694,11 +632,11 @@ function addSeen(id){try{const s=loadSeen();if(!s.includes(id)){s.push(id);if(s.
 function clearSeen(){try{localStorage.removeItem(STORAGE_KEY+'_seen');}catch{}}
 function loadWatchlist(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY+'_wl')||'[]');}catch{return[];}}
 function saveWatchlist(wl){try{localStorage.setItem(STORAGE_KEY+'_wl',JSON.stringify(wl));}catch{}}
+function vibrate(p){try{navigator.vibrate&&navigator.vibrate(p);}catch{}}
 
 const state={
   profile:null,selectedMood:null,selectedCard:null,currentMode:'movies',
-  region:'US',allPicks:[],pickIdx:0,wheelAngle:0,
-  onboardStep:0,tempProfile:{},fetchingResults:false,watchlist:[],
+  region:'US',allPicks:[],pickIdx:0,wheelAngle:0,fetchingResults:false,watchlist:[],
 };
 
 function showScreen(id){
@@ -706,141 +644,134 @@ function showScreen(id){
   const el=$(id);if(el)el.classList.add('active');
   window.scrollTo(0,0);
 }
+function showToast(msg){const t=$('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+
 window.addEventListener('popstate',()=>{
-  const s=$('settingsOverlay'),w=$('wlOverlay'),p=$('shareOverlay');
-  if(s&&s.classList.contains('active')){closeSettings();history.pushState(null,'',location.href);return;}
-  if(w&&w.classList.contains('active')){closeWL();history.pushState(null,'',location.href);return;}
-  if(p&&p.classList.contains('active')){hideSharePopup();history.pushState(null,'',location.href);return;}
+  const sheets=['settingsOverlay','wlOverlay','shareOverlay'];
+  for(const id of sheets){const el=$(id);if(el&&el.classList.contains('active')){el.classList.remove('active');history.pushState(null,'',location.href);return;}}
   const active=document.querySelector('.screen.active');
-  const deep=active&&['screen-wheel','screen-curtain','screen-results'].includes(active.id);
-  if(deep){history.pushState(null,'',location.href);resetMoodSelection();initPickScreen();return;}
+  if(active&&['screen-wheel','screen-curtain','screen-results'].includes(active.id)){history.pushState(null,'',location.href);resetMoodSelection();initPickScreen();}
 });
 history.pushState(null,'',window.location.href);
 
-function showToast(msg){const t=$('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
-function vibrate(p){try{navigator.vibrate&&navigator.vibrate(p);}catch{}}
-
 // ── ONBOARDING
-function renderOnboardStep(step){
-  const s=STEPS[step];if(!s)return;
-  const nm=(state.tempProfile&&state.tempProfile.name)||(state.profile&&state.profile.name)||'';
-  const withName=str=>String(str).replace(/\{name\}/g,nm?(', '+nm):'');
-  const lb=$('stepLabel'),hd=$('onboardHeadline'),sub=$('onboardSub'),pr=$('progressRow'),fm=$('onboardForm');
-  if(lb)lb.textContent=withName(s.label);
-  if(hd)hd.innerHTML=s.headline;
-  if(sub)sub.textContent=withName(s.sub);
-  if(pr){pr.innerHTML='';for(let i=0;i<STEPS.length;i++){const d=document.createElement('div');d.className='prog-dot'+(i<step?' done':i===step?' active':'');pr.appendChild(d);}}
-  if(!fm)return;
-  if(s.type==='text'){
-    fm.innerHTML=`<input class="name-input" id="nameInput" type="text" placeholder="Your first name" maxlength="24" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false"><button class="primary-btn" id="onboardNext" disabled>${esc(s.cta)} <span>→</span></button><div class="skip-link" id="skipLink">Skip setup</div>`;
-    const inp=$('nameInput'),nxt=$('onboardNext');
-    if(inp){const chk=()=>{if(nxt)nxt.disabled=inp.value.trim().length<2;};inp.addEventListener('input',chk);inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&inp.value.trim().length>=2)advanceOnboard();});chk();setTimeout(()=>inp.focus(),100);}
-  }else{
-    const opts=s.options;
-    fm.innerHTML=`<div class="option-grid">${opts.map((o,i)=>`<button class="option-btn" data-key="${s.key}" data-val="${i}"><span>${esc(o)}</span><span class="option-check"></span></button>`).join('')}</div><button class="primary-btn" id="onboardNext" disabled>${esc(s.cta)} <span>→</span></button><div class="skip-link" id="skipLink">Skip this step</div>`;
-    fm.querySelectorAll('.option-btn').forEach(btn=>{btn.addEventListener('click',()=>{fm.querySelectorAll('.option-btn').forEach(b=>{b.classList.remove('selected');const c=b.querySelector('.option-check');if(c)c.textContent='';});btn.classList.add('selected');const c=btn.querySelector('.option-check');if(c)c.textContent='✓';state.tempProfile[btn.dataset.key]=opts[parseInt(btn.dataset.val)];const nxt=$('onboardNext');if(nxt)nxt.disabled=false;});});
+(function wireOnboard(){
+  const heroTime=$('onboardHeroTime');
+  if(heroTime)heroTime.textContent=tc().hero;
+  const inp=$('nameInput'),nxt=$('onboardNext');
+  if(inp&&nxt){
+    inp.addEventListener('input',()=>{nxt.disabled=inp.value.trim().length<2;});
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&inp.value.trim().length>=2)finishOnboard();});
   }
-}
-function advanceOnboard(){
-  if(state.onboardStep===0){const inp=$('nameInput');if(!inp)return;const v=inp.value.trim();if(v.length<2)return;state.tempProfile.name=v.charAt(0).toUpperCase()+v.slice(1);}
-  state.onboardStep++;
-  if(state.onboardStep>=STEPS.length)finishOnboard();
-  else renderOnboardStep(state.onboardStep);
-}
-function skipOnboard(){finishOnboard();}
+  document.querySelectorAll('#avoidRow .avoid-chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      document.querySelectorAll('#avoidRow .avoid-chip').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+  });
+})();
+
 function finishOnboard(){
-  state.profile={...state.tempProfile,platform:'netflix'};
+  const inp=$('nameInput');
+  const nameRaw=inp?inp.value.trim():'';
+  const name=nameRaw?nameRaw.charAt(0).toUpperCase()+nameRaw.slice(1):'';
+  const selectedChip=document.querySelector('#avoidRow .avoid-chip.selected');
+  const avoid=selectedChip?selectedChip.dataset.avoid:'I watch everything';
+  state.profile={name,avoid,platform:'netflix'};
   saveProfile(state.profile);
   initPickScreen();
 }
 
+document.addEventListener('click',function(e){
+  if(e.target&&e.target.id==='onboardNext'){finishOnboard();return;}
+  if(e.target&&e.target.id==='skipLink'){state.profile={name:'',avoid:'I watch everything',platform:'netflix'};saveProfile(state.profile);initPickScreen();return;}
+});
+document.addEventListener('input',function(e){
+  if(e.target&&e.target.id==='nameInput'){const nxt=$('onboardNext');if(nxt)nxt.disabled=e.target.value.trim().length<2;}
+});
+
 // ── PICK SCREEN
 function initPickScreen(){
-  const name=state.profile&&state.profile.name?state.profile.name:'';
-  const t=getTimeGreeting();
-  const g=$('pickGreeting');
-  if(g)g.innerHTML=name?`What are you<br>watching <em>${t}, ${esc(name)}?</em>`:`What are you<br>watching <em>${t}?</em>`;
+  startPlaceholderCycle();
   syncModeUI();
   const sinp=$('similarInput'),sgo=$('similarGo');
   if(sinp&&sgo&&!sinp._wired){
-    sinp._wired=true;sinp.value='';sgo.disabled=true;
-    sinp.addEventListener('input',()=>{sgo.disabled=sinp.value.trim().length<2;});
+    sinp._wired=true;
+    sinp.addEventListener('input',()=>{sgo.classList.toggle('visible',sinp.value.trim().length>=2);});
+    sinp.addEventListener('focus',stopPlaceholderCycle);
+    sinp.addEventListener('blur',()=>{if(!sinp.value.trim())startPlaceholderCycle();});
     sgo.addEventListener('click',()=>{if(sinp.value.trim().length>=2)runSimilarSearch(sinp.value.trim());});
     sinp.addEventListener('keydown',e=>{if(e.key==='Enter'&&sinp.value.trim().length>=2)runSimilarSearch(sinp.value.trim());});
   }
   showScreen('screen-pick');
 }
+
 function syncModeUI(){
   const m=state.currentMode;
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
-  const mg=$('moviesGrid'),tg=$('tvGrid');
-  if(mg)mg.style.display=m==='movies'?'grid':'none';
-  if(tg)tg.style.display=m==='tv'?'grid':'none';
-  const sinp=$('similarInput');
-  if(sinp)sinp.placeholder=m==='tv'?'Something like…':'Something like…';
+  const mr=$('moviesReel'),tr=$('tvReel');
+  if(mr)mr.style.display=m==='movies'?'block':'none';
+  if(tr)tr.style.display=m==='tv'?'block':'none';
 }
+
 document.querySelectorAll('.type-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{state.currentMode=btn.dataset.mode;resetMoodSelection();syncModeUI();});
 });
 
-// ── LONG-PRESS PEEK
-document.querySelectorAll('.mood-card').forEach(card=>{
-  const peekEl=card.querySelector('.card-peek');
-  const titlesEl=peekEl&&peekEl.querySelector('.peek-titles');
-  const peekData=(card.dataset.peek||'').split(',').map(s=>s.trim()).filter(Boolean);
-  if(titlesEl&&peekData.length){titlesEl.innerHTML=peekData.map(t=>`<div class="peek-title">${esc(t)}</div>`).join('');}
-  let peekTimer=null;
-  const showPeek=()=>{if(peekEl)peekEl.classList.add('visible');};
-  const hidePeek=()=>{if(peekEl)peekEl.classList.remove('visible');};
-  card.addEventListener('pointerdown',()=>{peekTimer=setTimeout(showPeek,300);});
-  card.addEventListener('pointerup',()=>{clearTimeout(peekTimer);setTimeout(hidePeek,500);});
-  card.addEventListener('pointerleave',()=>{clearTimeout(peekTimer);hidePeek();});
-});
-
-// ── MOOD SCROLL FADE
-const moodScrollEl=$('moodScroll'),moodFadeEl=$('moodFade');
-if(moodScrollEl&&moodFadeEl){moodScrollEl.addEventListener('scroll',()=>{const atBottom=moodScrollEl.scrollHeight-moodScrollEl.scrollTop-moodScrollEl.clientHeight<40;moodFadeEl.classList.toggle('hidden',atBottom);},{passive:true});}
-
-// ── MOOD SELECTION
-function resetMoodSelection(){
-  document.querySelectorAll('.mood-card').forEach(c=>{c.classList.remove('selected');c.setAttribute('aria-pressed','false');});
-  document.querySelectorAll('.mood-grid').forEach(g=>g.classList.remove('has-sel'));
-  state.selectedMood=null;state.selectedCard=null;
-  const btn=$('spinBtn'),txt=$('spinBtnText'),arr=$('spinBtnArrow');
-  if(btn)btn.disabled=true;if(txt)txt.textContent='Pick a mood to continue';if(arr)arr.style.display='none';
+// ── MOOD REEL SCROLL FADE
+const moodReelEl=$('moodReel'),moodFadeEl=$('moodFade');
+if(moodReelEl&&moodFadeEl){
+  moodReelEl.addEventListener('scroll',()=>{
+    const atBottom=moodReelEl.scrollHeight-moodReelEl.scrollTop-moodReelEl.clientHeight<40;
+    moodFadeEl.classList.toggle('hidden',atBottom);
+  },{passive:true});
 }
-document.querySelectorAll('.mood-card').forEach(card=>{
-  card.setAttribute('role','button');card.setAttribute('tabindex','0');card.setAttribute('aria-pressed','false');
+
+// ── MOOD PANEL SELECTION
+function resetMoodSelection(){
+  document.querySelectorAll('.mood-panel').forEach(p=>{p.classList.remove('selected');});
+  document.querySelectorAll('.mood-reel').forEach(r=>r.classList.remove('has-sel'));
+  state.selectedMood=null;state.selectedCard=null;
+  const cta=$('stickyCta');if(cta)cta.classList.add('hidden');
+}
+
+document.querySelectorAll('.mood-panel').forEach(panel=>{
+  panel.setAttribute('role','button');panel.setAttribute('tabindex','0');
   const select=()=>{
-    const grid=card.closest('.mood-grid');
-    document.querySelectorAll('.mood-card').forEach(c=>{c.classList.remove('selected');c.setAttribute('aria-pressed','false');});
-    document.querySelectorAll('.mood-grid').forEach(g=>g.classList.remove('has-sel'));
-    card.classList.add('selected');card.setAttribute('aria-pressed','true');
-    if(grid)grid.classList.add('has-sel');
-    state.selectedMood=card.dataset.mood;state.selectedCard=card;
-    const btn=$('spinBtn'),txt=$('spinBtnText'),arr=$('spinBtnArrow');
-    if(btn)btn.disabled=false;
-    if(txt)txt.textContent='I\'m feeling '+state.selectedMood;
-    if(arr)arr.style.display='inline';
+    document.querySelectorAll('.mood-panel').forEach(p=>p.classList.remove('selected'));
+    const reel=panel.closest('.mood-reel');
+    if(reel)reel.classList.add('has-sel');
+    panel.classList.add('selected');
+    state.selectedMood=panel.dataset.mood;state.selectedCard=panel;
+    const cta=$('stickyCta'),txt=$('spinBtnText');
+    if(cta)cta.classList.remove('hidden');
+    if(txt)txt.textContent=state.selectedMood;
     vibrate(8);
+    panel.scrollIntoView({behavior:'smooth',block:'nearest'});
   };
-  card.addEventListener('click',select);
-  card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}});
+  panel.addEventListener('click',select);
+  panel.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}});
 });
+
+// Surprise buttons
+['surpriseBtn','surpriseBtnTV'].forEach(id=>{
+  const btn=$(id);if(!btn)return;
+  btn.addEventListener('click',()=>{
+    const moodPanels=[...document.querySelectorAll(`#${state.currentMode==='movies'?'moviesReel':'tvReel'} .mood-panel`)];
+    if(!moodPanels.length)return;
+    const pick=moodPanels[Math.floor(Math.random()*moodPanels.length)];
+    pick.click();
+    setTimeout(()=>startFlow(),300);
+  });
+  btn.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();btn.click();}});
+});
+
 const spinBtnEl=$('spinBtn');
 if(spinBtnEl)spinBtnEl.addEventListener('click',startFlow);
 
-// Triple-tap easter egg on logotype
-let tapCount=0,tapTimer=null;
-document.addEventListener('click',e=>{
-  if(e.target&&(e.target.id==='pickWordmark'||e.target.id==='resultsWordmark')){
-    tapCount++;clearTimeout(tapTimer);
-    tapTimer=setTimeout(()=>{tapCount=0;},500);
-    if(tapCount>=3){tapCount=0;openSettings();return;}
-  }
-});
-
 // ── SETTINGS
+const settingsBtnEl=$('settingsBtn');
+if(settingsBtnEl)settingsBtnEl.addEventListener('click',openSettings);
 let _resetArmed=false;
 function openSettings(){
   const ov=$('settingsOverlay');if(!ov)return;
@@ -848,7 +779,7 @@ function openSettings(){
   const ne=$('setName');if(ne)ne.value=p.name||'';
   const curAvoid=p.avoid||'I watch everything';
   document.querySelectorAll('#setAvoid .sheet-choice').forEach(c=>c.classList.toggle('selected',c.dataset.avoid===curAvoid));
-  _resetArmed=false;const rb=$('setReset');if(rb){rb.textContent='Reset & start over';rb.classList.remove('confirming');}
+  _resetArmed=false;const rb=$('setReset');if(rb){rb.textContent='Reset everything';rb.classList.remove('confirming');}
   ov.classList.add('active');history.pushState(null,'',location.href);
 }
 function closeSettings(){const ov=$('settingsOverlay');if(ov)ov.classList.remove('active');}
@@ -865,46 +796,40 @@ function closeSettings(){const ov=$('settingsOverlay');if(ov)ov.classList.remove
     const name=nr?nr.charAt(0).toUpperCase()+nr.slice(1):'';
     const avoidEl=document.querySelector('#setAvoid .sheet-choice.selected');
     state.profile=Object.assign({},state.profile,{name,platform:'netflix',avoid:avoidEl?avoidEl.dataset.avoid:'I watch everything'});
-    saveProfile(state.profile);
-    const t=getTimeGreeting(),gg=$('pickGreeting');
-    if(gg)gg.innerHTML=name?`What are you<br>watching <em>${t}, ${esc(name)}?</em>`:`What are you<br>watching <em>${t}?</em>`;
-    closeSettings();showToast('Saved');
+    saveProfile(state.profile);closeSettings();showToast('Saved');
   });
   const reset=$('setReset');
   if(reset)reset.addEventListener('click',()=>{
     if(!_resetArmed){_resetArmed=true;reset.textContent='Tap again to confirm';reset.classList.add('confirming');return;}
     clearProfile();clearSeen();saveWatchlist([]);
-    state.profile=null;state.onboardStep=0;state.tempProfile={};state.watchlist=[];
-    closeSettings();renderOnboardStep(0);showScreen('screen-onboard');
+    state.profile=null;state.watchlist=[];
+    closeSettings();showScreen('screen-onboard');
+    const ht=$('onboardHeroTime');if(ht)ht.textContent=tc().hero;
   });
 })();
 
 // ── WATCHLIST
 function updateWLBadge(){
-  const badge=$('wlBadge');if(!badge)return;
+  const badge=$('wlBadge'),cnt=$('wlBadgeCount');if(!badge||!cnt)return;
   const count=state.watchlist.length;
-  badge.textContent=count>0?'♡ '+count:'';
+  cnt.textContent=count;
   badge.classList.toggle('visible',count>0);
 }
-function openWL(){
-  const ov=$('wlOverlay');if(!ov)return;
-  renderWLItems();ov.classList.add('active');history.pushState(null,'',location.href);
-}
+function openWL(){const ov=$('wlOverlay');if(!ov)return;renderWLItems();ov.classList.add('active');history.pushState(null,'',location.href);}
 function closeWL(){const ov=$('wlOverlay');if(ov)ov.classList.remove('active');}
 function renderWLItems(){
-  const container=$('wlItems'),sub=$('wlSubtitle');if(!container)return;
+  const container=$('wlItems'),sub=$('wlSubtitle'),title=$('wlTitle');if(!container)return;
   const wl=state.watchlist;
-  if(sub)sub.textContent=wl.length?`${wl.length} pick${wl.length>1?'s':''} for tonight`:'Nothing saved yet';
-  if(!wl.length){container.innerHTML='<div class="wl-empty">Swipe right on picks to save them here.</div>';return;}
+  const t=tc();
+  if(title)title.textContent=t.watchlistTitle;
+  if(sub)sub.textContent=wl.length?`${wl.length} pick${wl.length>1?'s':''} for ${t.pickLabel}`:'Swipe right on anything you like.';
+  if(!wl.length){container.innerHTML='<div class="wl-empty">Nothing saved yet.</div>';return;}
   container.innerHTML=wl.map(item=>`
     <div class="wl-item">
       ${item.poster?`<img class="wl-item-thumb" src="${TMDB_IMG}${item.poster}" alt="${esc(item.title)}" loading="lazy">`:'<div class="wl-item-thumb"></div>'}
-      <div class="wl-item-body">
-        <div class="wl-item-title">${esc(item.title)}</div>
-        <div class="wl-item-meta">${item.year?item.year+' · ':''}</div>
-      </div>
-      <a class="wl-item-btn" href="${NETFLIX_URL+encodeURIComponent(item.title)}" target="_blank" rel="noopener">
-        <svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg> Watch
+      <div class="wl-item-title">${esc(item.title)}</div>
+      <a class="wl-item-btn" href="${NETFLIX_URL+encodeURIComponent(item.title)}" target="_blank" rel="noopener" aria-label="Watch ${esc(item.title)} on Netflix">
+        <svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg>
       </a>
     </div>`).join('');
 }
@@ -915,9 +840,10 @@ if(wlCloseEl)wlCloseEl.addEventListener('click',closeWL);
 if(wlOvEl)wlOvEl.addEventListener('click',e=>{if(e.target===wlOvEl)closeWL();});
 if(wlShareEl)wlShareEl.addEventListener('click',()=>{
   const wl=state.watchlist;if(!wl.length){showToast('Nothing saved yet');return;}
-  const text='Tonight on Netflix:\n'+wl.map((i,n)=>`${n+1}. ${i.title}`).join('\n')+'\n\nFind yours at oyawatch.vercel.app';
-  if(navigator.share)navigator.share({title:'Tonight on Netflix',text,url:window.location.href}).catch(()=>{});
-  else{copyText(text,()=>showToast('List copied!'));}
+  const t=tc();
+  const text=t.sharePrefix+'\n'+wl.map((i,n)=>`${n+1}. ${i.title}`).join('\n')+'\n\nFind your picks at oyawatch.vercel.app';
+  if(navigator.share)navigator.share({title:t.watchlistTitle,text,url:window.location.href}).catch(()=>{});
+  else copyText(text,()=>showToast('List copied!'));
   closeWL();
 });
 
@@ -931,19 +857,20 @@ function drawWheel(angle){
   for(let i=0;i<segs;i++){
     const st=angle+i*arc,en=st+arc;
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,st,en);ctx.closePath();
-    ctx.fillStyle=colors[i%colors.length];ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=2;ctx.stroke();
+    const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    grad.addColorStop(0,colors[(i+1)%colors.length]);grad.addColorStop(1,colors[i%colors.length]);
+    ctx.fillStyle=grad;ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=1.5;ctx.stroke();
   }
-  ctx.save();
   for(let i=0;i<segs;i++){
     const mid=angle+i*arc+arc/2;
     const tx=cx+r*0.62*Math.cos(mid),ty=cy+r*0.62*Math.sin(mid);
     ctx.font=`${Math.round(s*0.088)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(WHEEL_EMOJIS[i],tx,ty);
   }
-  ctx.restore();
-  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=2;ctx.stroke();
-  ctx.beginPath();ctx.arc(cx,cy,s*0.055,0,Math.PI*2);ctx.fillStyle='#080808';ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,s*0.055,0,Math.PI*2);ctx.fillStyle='#080808';ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1.5;ctx.stroke();
 }
 function spinWheel(onDone){
   let vel=0.28+Math.random()*0.1;const dec=0.991;
@@ -960,75 +887,67 @@ function showCurtain(msg,onOpen){
   if(L)L.classList.remove('open');if(R)R.classList.remove('open');
   requestAnimationFrame(()=>{
     setTimeout(()=>{if(lbl)lbl.classList.add('show');if(msgEl)msgEl.classList.add('show');},60);
-    setTimeout(()=>{if(L)L.classList.add('open');if(R)R.classList.add('open');setTimeout(onOpen,680);},780);
+    setTimeout(()=>{if(L)L.classList.add('open');if(R)R.classList.add('open');setTimeout(onOpen,700);},800);
   });
 }
 
-// ── AMBIENT COLOR EXTRACTION
+// ── AMBIENT COLOR
 function extractColor(imgEl){
   try{
-    const canvas=document.createElement('canvas');canvas.width=canvas.height=1;
-    const ctx=canvas.getContext('2d');ctx.drawImage(imgEl,0,0,1,1);
+    const c=document.createElement('canvas');c.width=c.height=1;
+    const ctx=c.getContext('2d');ctx.drawImage(imgEl,0,0,1,1);
     const d=ctx.getImageData(0,0,1,1).data;
     return `rgb(${d[0]},${d[1]},${d[2]})`;
   }catch{return null;}
 }
 
 // ── SWIPE STACK
-let _swipeState={dragging:false,startX:0,startY:0,curX:0,card:null};
 function buildSwipeCard(pick,idx){
   const div=document.createElement('div');div.className='swipe-card';div.dataset.idx=idx;
   const title=pick.title||pick.name||'Untitled';
   const year=(pick.release_date||pick.first_air_date||'').slice(0,4);
   const type=pick.mediaType==='movie'?'Film':'Series';
-  const score=pick.vote_average?Number(pick.vote_average).toFixed(1):'—';
+  const score=pick.vote_average?Number(pick.vote_average).toFixed(1):'';
   const verdict=pick.vote_average?getVerdict(pick.vote_average):'';
-  const synopsis=pick.overview||'';
   const isTop=idx===0;
+  const t=tc();
   div.innerHTML=`
     <div class="swipe-intent swipe-intent-yes">SAVE ♡</div>
     <div class="swipe-intent swipe-intent-no">SKIP ✕</div>
     ${pick.poster_path
       ?`<img class="sc-poster" src="${TMDB_IMG}${pick.poster_path}" alt="${esc(title)}" loading="${idx<2?'eager':'lazy'}" crossorigin="anonymous">`
-      :`<div class="sc-poster-ph"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div>`}
+      :`<div class="sc-poster-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div>`}
     <div class="sc-ambient-glow" id="glow${idx}"></div>
     <div class="sc-body">
-      ${isTop?`<div class="sc-top-badge">Tonight's pick</div>`:''}
+      ${isTop?`<div class="sc-top-badge">${esc(t.cardBadge)}</div>`:''}
       <div class="sc-title">${esc(title)}</div>
       <div class="sc-meta">${esc(year)}${year?' · ':''}${esc(type)}</div>
-      <div class="sc-score">
-        <span class="sc-score-num">${esc(score)}</span>
-        <span class="sc-score-denom">/10</span>
-      </div>
+      ${score?`<div class="sc-score-row"><span class="sc-score-num">${esc(score)}</span><span style="font-size:13px;color:var(--muted);font-weight:500;margin-left:2px">/10</span></div>`:''}
       ${verdict?`<div class="sc-verdict">"${esc(verdict)}"</div>`:''}
-      ${synopsis?`<div class="sc-synopsis">${esc(synopsis)}</div>`:''}
-      <a class="sc-watch-btn checking" id="scwatch${idx}" data-title="${esc(title)}" data-id="${pick.id}" data-mtype="${pick.mediaType}" data-verified="${pick.verified?1:0}" href="#" rel="noopener">
+      ${pick.overview?`<div class="sc-synopsis">${esc(pick.overview)}</div>`:''}
+      <a class="sc-watch-btn checking" data-title="${esc(title)}" data-id="${pick.id}" data-mtype="${pick.mediaType}" data-verified="${pick.verified?1:0}" href="#" rel="noopener">
         <svg width="10" height="12" viewBox="0 0 10 12" fill="white"><polygon points="0,0 10,6 0,12"/></svg>
-        <span>Checking Netflix…</span>
+        <span>Watch on Netflix</span>
       </a>
       <div class="sc-actions">
-        <button class="sc-act-btn sc-trailer" data-id="${pick.id}" data-mtype="${pick.mediaType}">
-          <svg width="13" height="10" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="1" width="22" height="16" rx="3"/><polygon points="9.5,5.5 17,9 9.5,12.5" fill="currentColor" stroke="none"/></svg>
-          Trailer
+        <button class="sc-act-btn sc-trailer" data-id="${pick.id}" data-mtype="${pick.mediaType}" aria-label="Watch trailer">
+          <svg width="16" height="12" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="1" width="22" height="16" rx="3"/><polygon points="9.5,5.5 17,9 9.5,12.5" fill="currentColor" stroke="none"/></svg>
         </button>
-        <button class="sc-act-btn sc-share" data-title="${esc(title)}" data-score="${esc(score)}">
-          <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          Share
+        <button class="sc-act-btn sc-share" data-title="${esc(title)}" data-score="${esc(score)}" aria-label="Share">
+          <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
         </button>
-        <button class="sc-act-btn sc-save" data-idx="${idx}">
-          <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-          Save
+        <button class="sc-act-btn sc-save" data-idx="${idx}" aria-label="Save to list">
+          <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" class="save-icon"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         </button>
       </div>
     </div>`;
-  // Ambient glow from poster
   if(pick.poster_path){
     const img=div.querySelector('.sc-poster');
     if(img)img.addEventListener('load',()=>{
       const color=extractColor(img);
-      const glowEl=$('glow'+idx);
-      if(color&&glowEl)glowEl.style.background=`linear-gradient(to bottom,${color}55,transparent)`;
-      if(color&&idx===0){const ambEl=$('resultsAmbient');if(ambEl)ambEl.style.background=`radial-gradient(ellipse at 50% 0%,${color}55,transparent 70%)`;}
+      const glowEl=div.querySelector(`#glow${idx}`)||div.querySelector('.sc-ambient-glow');
+      if(color&&glowEl)glowEl.style.background=`linear-gradient(to bottom,${color}66,transparent)`;
+      if(color&&idx===0){const ambEl=$('resultsAmbient');if(ambEl)ambEl.style.background=`radial-gradient(ellipse at 50% 0%,${color}66,transparent 70%)`;}
     },{once:true});
   }
   return div;
@@ -1037,124 +956,109 @@ function buildSwipeCard(pick,idx){
 function renderSwipeStack(){
   const wrap=$('swipeCardWrap');if(!wrap)return;
   wrap.innerHTML='';
-  const hint=$('swipeHint');if(hint)hint.classList.remove('visible');
-  const picks=state.allPicks;
-  if(!picks||!picks.length){showAlldone();return;}
-  const visible=picks.slice(state.pickIdx,state.pickIdx+4);
+  if(!state.allPicks||!state.allPicks.length){showAlldone();return;}
+  const visible=state.allPicks.slice(state.pickIdx,state.pickIdx+4);
   if(!visible.length){showAlldone();return;}
   visible.forEach((p,offset)=>{
     const realIdx=state.pickIdx+offset;
     const card=buildSwipeCard(p,realIdx);
-    const nth=offset+1;
-    card.classList.add(`swipe-card-nth-${Math.min(nth,4)}`);
+    card.classList.add(`swipe-card-nth-${Math.min(offset+1,4)}`);
     wrap.appendChild(card);
-    if(offset===0){
-      wireTopCard(card,p,realIdx);
-      verifyWatch(card);
-    }
+    if(offset===0){wireTopCard(card,p,realIdx);verifyWatch(card);}
   });
 }
 
 function wireTopCard(card,pick,realIdx){
-  let startX=0,startY=0,curX=0,isDragging=false,hasMoved=false;
+  let startX=0,curX=0,isDragging=false,hasMoved=false;
   const W=card.offsetWidth||300;
   const yesLabel=card.querySelector('.swipe-intent-yes');
   const noLabel=card.querySelector('.swipe-intent-no');
   const move=dx=>{
-    const rot=dx/W*18;
-    card.style.transform=`translateX(${dx}px) rotate(${rot}deg)`;
+    card.style.transform=`translateX(${dx}px) rotate(${dx/W*18}deg)`;
     const pct=Math.min(Math.abs(dx)/(W*0.3),1);
     if(yesLabel)yesLabel.style.opacity=dx>0?pct:0;
     if(noLabel)noLabel.style.opacity=dx<0?pct:0;
-    const THRESH=W*0.3;
-    if(Math.abs(dx)>THRESH&&dx>0){vibrate(6);}
+    if(Math.abs(dx)>W*0.3&&dx>0)vibrate(6);
   };
   const settle=dx=>{
-    const THRESH=W*0.32;
-    if(dx>THRESH){flyOut(card,'right',pick,realIdx);}
-    else if(dx<-THRESH){flyOut(card,'left',pick,realIdx);}
+    const T=W*0.32;
+    if(dx>T)flyOut(card,'right',pick,realIdx);
+    else if(dx<-T)flyOut(card,'left',pick,realIdx);
     else{card.style.transition='transform 0.35s cubic-bezier(0.34,1.56,0.64,1)';card.style.transform='';setTimeout(()=>{card.style.transition='';},350);}
   };
   const onPD=e=>{
     if(e.target.closest('a')||e.target.closest('button'))return;
     isDragging=true;hasMoved=false;
     startX=e.type==='touchstart'?e.touches[0].clientX:e.clientX;
-    startY=e.type==='touchstart'?e.touches[0].clientY:e.clientY;
     card.classList.add('is-dragging');
   };
   const onPM=e=>{
     if(!isDragging)return;
     const cx=e.type==='touchmove'?e.touches[0].clientX:e.clientX;
     const cy=e.type==='touchmove'?e.touches[0].clientY:e.clientY;
-    const dx=cx-startX,dy=cy-startY;
-    if(!hasMoved&&Math.abs(dy)>Math.abs(dx)*1.2){isDragging=false;card.classList.remove('is-dragging');return;}
+    const dx=cx-startX;
+    if(!hasMoved&&Math.abs(cy-(e.type==='touchmove'?e.touches[0].clientY:cy))>Math.abs(dx)*1.2){isDragging=false;card.classList.remove('is-dragging');return;}
     if(Math.abs(dx)>4)hasMoved=true;
     if(hasMoved){if(e.cancelable)e.preventDefault();curX=dx;move(dx);}
   };
-  const onPU=()=>{
-    if(!isDragging)return;isDragging=false;card.classList.remove('is-dragging');
-    settle(hasMoved?curX:0);
-  };
+  const onPU=()=>{if(!isDragging)return;isDragging=false;card.classList.remove('is-dragging');settle(hasMoved?curX:0);};
   card.addEventListener('touchstart',onPD,{passive:true});
   card.addEventListener('touchmove',onPM,{passive:false});
   card.addEventListener('touchend',onPU,{passive:true});
   card.addEventListener('mousedown',onPD);
-  document.addEventListener('mousemove',onPM,{once:false});
+  document.addEventListener('mousemove',onPM);
   document.addEventListener('mouseup',()=>{if(isDragging){isDragging=false;card.classList.remove('is-dragging');settle(curX);}},{once:true});
 
-  // Trailer
   card.querySelector('.sc-trailer')&&card.querySelector('.sc-trailer').addEventListener('click',async e=>{
     e.stopPropagation();
     const btn=e.currentTarget,w=window.open('about:blank','_blank');
-    const orig=btn.innerHTML;btn.textContent='Loading…';btn.disabled=true;
+    const orig=btn.innerHTML;btn.innerHTML='<svg width="16" height="12" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="9" r="6" opacity="0.4"/></svg>';btn.disabled=true;
     const url=await fetchTrailer(pick.id,pick.mediaType);
     btn.innerHTML=orig;btn.disabled=false;
     if(url){if(w)w.location.href=url;else window.open(url,'_blank');}
-    else{if(w)w.close();btn.textContent='No trailer';setTimeout(()=>{btn.innerHTML=orig;},1800);}
+    else{if(w)w.close();showToast('No trailer available.');}
   });
-  // Share
   card.querySelector('.sc-share')&&card.querySelector('.sc-share').addEventListener('click',e=>{
     e.stopPropagation();
     const title=unesc(e.currentTarget.dataset.title),score=e.currentTarget.dataset.score;
-    const text=`${title} — ${score}/10 on Netflix. Found on Oya Watch: ${window.location.href}`;
+    const text=`${title}${score?' '+score+'/10':''} on Netflix. Found on Oya Watch: ${window.location.href}`;
     if(navigator.share)navigator.share({title:'Oya Watch',text,url:window.location.href}).catch(()=>{});
     else copyText(text,()=>showToast('Copied!'));
   });
-  // Save
   card.querySelector('.sc-save')&&card.querySelector('.sc-save').addEventListener('click',e=>{
     e.stopPropagation();
     const btn=e.currentTarget;
-    const already=state.watchlist.some(w=>w.id===pick.id);
-    if(already){showToast('Already saved');return;}
-    addToWatchlist(pick);btn.classList.add('saved');btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="#4ade80"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> Saved';
-    vibrate([10,30,10]);showToast('Saved to tonight\'s list');
+    if(state.watchlist.some(w=>w.id===pick.id)){showToast('Already saved');return;}
+    addToWatchlist(pick);btn.classList.add('saved');
+    btn.querySelector('.save-icon').setAttribute('fill','#22c55e');
+    vibrate([10,30,10]);showToast('Saved ♡');
   });
 }
 
 function flyOut(card,dir,pick,realIdx){
   card.classList.add(dir==='right'?'fly-right':'fly-left');
   if(dir==='right'){addToWatchlist(pick);vibrate([10,20,10]);showToast('Saved ♡');}
-  else{vibrate(8);}
+  else vibrate(8);
   card.addEventListener('animationend',()=>{
     state.pickIdx=realIdx+1;
     renderSwipeStack();
-    if(!popupShownThisSession&&state.watchlist.length>=2)setTimeout(()=>showSharePopup(),600);
+    if(!popupShownThisSession&&state.watchlist.length>=2)setTimeout(showSharePopup,700);
   },{once:true});
 }
 
 function addToWatchlist(pick){
-  const already=state.watchlist.some(w=>w.id===pick.id);if(already)return;
-  const item={id:pick.id,title:pick.title||pick.name||'',year:(pick.release_date||pick.first_air_date||'').slice(0,4),poster:pick.poster_path||null,mediaType:pick.mediaType};
-  state.watchlist.push(item);saveWatchlist(state.watchlist);updateWLBadge();
+  if(state.watchlist.some(w=>w.id===pick.id))return;
+  state.watchlist.push({id:pick.id,title:pick.title||pick.name||'',year:(pick.release_date||pick.first_air_date||'').slice(0,4),poster:pick.poster_path||null,mediaType:pick.mediaType});
+  saveWatchlist(state.watchlist);updateWLBadge();
 }
 
 function showAlldone(){
   const wrap=$('swipeCardWrap');if(!wrap)return;
-  const hint=$('swipeHint');if(hint){hint.querySelector('.swipe-hint-icon').textContent='🎬';hint.querySelector('.swipe-hint-text').textContent=state.watchlist.length?'Swipe right to spin again':'';hint.classList.add('visible');}
+  const iconSVG=`<svg width="40" height="32" viewBox="0 0 40 32" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.35"><rect x="1" y="5" width="24" height="22" rx="3"/><rect x="15" y="1" width="24" height="22" rx="3"/></svg>`;
   wrap.innerHTML=`<div class="alldone-card">
-    <div class="alldone-icon">${state.watchlist.length?'🍿':'🎬'}</div>
-    <div class="alldone-title">${state.watchlist.length?`You've got ${state.watchlist.length} pick${state.watchlist.length>1?'s':''}.`:'All out of picks.'}</div>
-    <div class="alldone-body">${state.watchlist.length?'Tap the ♡ badge to see your list. Or spin again for more.':"Try a different mood — or spin again for a new batch."}</div>
+    <div class="alldone-icon">${iconSVG}</div>
+    <div class="alldone-title">${state.watchlist.length?`You have ${state.watchlist.length} pick${state.watchlist.length>1?'s':''}.`:'That\'s the batch.'}</div>
+    <div class="alldone-body">${state.watchlist.length?'Tap the list below. Or get new picks.':'Pick a different mood, or try again.'}</div>
   </div>`;
 }
 
@@ -1163,11 +1067,10 @@ async function verifyWatch(cardEl){
   const title=unesc(btn.dataset.title||''),id=btn.dataset.id,type=btn.dataset.mtype;
   const verified=btn.dataset.verified==='1';
   const setOn=()=>{btn.className='sc-watch-btn';btn.href=NETFLIX_URL+encodeURIComponent(title);btn.target='_blank';btn.querySelector('span').textContent='Watch on Netflix';};
-  const setOff=()=>{btn.className='sc-watch-btn elsewhere';btn.href=`https://www.themoviedb.org/${type==='movie'?'movie':'tv'}/${id}/watch`;btn.target='_blank';btn.querySelector('span').textContent='Find where to watch';};
+  const setOff=()=>{btn.className='sc-watch-btn elsewhere';btn.href=`https://www.themoviedb.org/${type==='movie'?'movie':'tv'}/${id}/watch`;btn.target='_blank';btn.querySelector('span').textContent='Where to watch →';};
   if(verified){setOn();return;}
   const r=await fetchProviders(type,id,state.region);
-  const flat=(r&&r.flatrate)||[];
-  flat.map(f=>f.provider_id).includes(NETFLIX_ID)?setOn():setOff();
+  (r&&r.flatrate||[]).map(f=>f.provider_id).includes(NETFLIX_ID)?setOn():setOff();
 }
 
 async function fetchTrailer(id,type){
@@ -1181,16 +1084,20 @@ let pendingDeliver=null;
 function wireSkip(){
   ['screen-wheel','screen-curtain'].forEach(id=>{
     const el=$(id);
-    if(el&&!el._skipWired){el._skipWired=true;el.style.cursor='pointer';el.addEventListener('click',()=>{if(pendingDeliver)pendingDeliver();});}
+    if(el&&!el._skipWired){el._skipWired=true;el.style.cursor='pointer';el.addEventListener('click',e=>{if(e.target.id==='wheelSkip'||!e.target.closest('button')){if(pendingDeliver)pendingDeliver();}});}
   });
+  const ws=$('wheelSkip');
+  if(ws&&!ws._wired){ws._wired=true;ws.addEventListener('click',e=>{e.stopPropagation();if(pendingDeliver)pendingDeliver();});}
 }
+
 function startFlow(){
   if(!state.selectedMood||state.fetchingResults)return;
   wireSkip();
   state.pickIdx=0;state.watchlist=loadWatchlist();updateWLBadge();
-  const ew=$('wheelEyebrow'),cap=$('wheelCaption');
-  if(ew)ew.textContent=state.selectedMood+' picks';
+  const ew=$('wheelEyebrow'),cap=$('wheelCaption'),wb=$('wheelBg');
+  if(ew)ew.textContent=state.selectedMood.toUpperCase();
   if(cap)cap.textContent=rand(WHEEL_COPY);
+  if(wb){const img=MOOD_BG_IMGS[state.selectedMood];if(img)wb.style.backgroundImage=`url('${img}')`;}
   showScreen('screen-wheel');drawWheel(0);
   state.fetchingResults=true;
   const fp=fetchTMDB();
@@ -1199,20 +1106,24 @@ function startFlow(){
   const deliver=()=>{
     if(delivered)return;delivered=true;pendingDeliver=null;
     showScreen('screen-results');
-    const pill=$('resultsMoodPill'),hl=$('resultsHeadline');
+    const pill=$('resultsMoodPill');
     if(pill)pill.textContent=state.selectedMood+' on Netflix';
-    if(hl)hl.textContent=name?`${getTimeLabel()}, ${name}.`:`${getTimeLabel()} picks.`;
     renderSwipeCard_skeleton();
-    fp.then(p=>{state.fetchingResults=false;if(p&&p.length){state.allPicks=p;renderSwipeStack();}else{renderError('no-results');}})
+    fp.then(p=>{state.fetchingResults=false;if(p&&p.length){state.allPicks=p;renderSwipeStack();}else renderError('no-results');})
       .catch(()=>{state.fetchingResults=false;renderError('network');});
   };
   pendingDeliver=deliver;
-  spinWheel(()=>{if(!delivered)showCurtain(name?name+', your picks are ready.':'Your picks are ready.',deliver);});
+  spinWheel(()=>{
+    if(!delivered){
+      const curtainMsg=name?`${name}.`:'Ready.';
+      showCurtain(curtainMsg,deliver);
+    }
+  });
 }
 
 function renderSwipeCard_skeleton(){
   const wrap=$('swipeCardWrap');if(!wrap)return;
-  wrap.innerHTML=`<div class="swipe-card swipe-card-nth-1 skel-card" style="background:var(--surface);border:1px solid var(--border)"><div class="skel" style="height:52%;border-radius:0"></div><div style="padding:16px"><div class="skel" style="height:22px;width:70%;margin-bottom:10px"></div><div class="skel" style="height:14px;width:40%;margin-bottom:14px"></div><div class="skel" style="height:40px;margin-bottom:10px"></div><div class="skel" style="height:44px"></div></div></div>`;
+  wrap.innerHTML=`<div class="swipe-card swipe-card-nth-1" style="background:var(--surface);border:1px solid var(--border)"><div class="skel" style="height:56%;border-radius:0"></div><div style="padding:14px"><div class="skel" style="height:22px;width:68%;margin-bottom:8px"></div><div class="skel" style="height:13px;width:36%;margin-bottom:12px"></div><div class="skel" style="height:36px;margin-bottom:12px"></div><div class="skel" style="height:46px"></div></div></div>`;
 }
 
 async function fetchTMDB(){
@@ -1256,42 +1167,38 @@ function dedupe(arr){const s=new Set();return arr.filter(i=>{const id=i.mediaTyp
 
 async function runSimilarSearch(query){
   if(state.fetchingResults)return;
-  state.fetchingResults=true;
-  state.pickIdx=0;
+  state.fetchingResults=true;state.pickIdx=0;
   showScreen('screen-results');
-  const pill=$('resultsMoodPill'),hl=$('resultsHeadline');
-  if(pill)pill.textContent='Similar picks on Netflix';
-  if(hl)hl.textContent='Finding something similar…';
+  const pill=$('resultsMoodPill');if(pill)pill.textContent='Similar on Netflix';
   renderSwipeCard_skeleton();
-  const sgo=$('similarGo');if(sgo){sgo.textContent='…';sgo.disabled=true;}
+  const sgo=$('similarGo');if(sgo)sgo.classList.remove('visible');
   try{
     const sd=await tmdbGet('/search/multi',{query,page:1},6000);
     const match=(sd&&sd.results||[]).find(r=>r.media_type==='movie'||r.media_type==='tv');
-    if(!match){showToast("Couldn't find that title");state.fetchingResults=false;if(sgo){sgo.textContent='Go';sgo.disabled=false;}initPickScreen();return;}
+    if(!match){showToast("Couldn't find that title");state.fetchingResults=false;initPickScreen();return;}
     const mtype=match.media_type;
     const[simD,recD]=await Promise.all([tmdbGet(`/${mtype}/${match.id}/similar`,{page:1},6000),tmdbGet(`/${mtype}/${match.id}/recommendations`,{page:1},6000)]);
     const combined=dedupe([...((recD&&recD.results)||[]).map(r=>({...r,mediaType:mtype,verified:false})),...((simD&&simD.results)||[]).map(r=>({...r,mediaType:mtype,verified:false}))]);
     const seen=loadSeen();
     const fresh=combined.filter(r=>!seen.includes(`${r.mediaType}-${r.id}`)&&r.vote_average>6&&r.vote_count>50);
     const pool=fresh.length>=4?fresh:combined.filter(r=>r.vote_average>6);
-    if(!pool.length){showToast('No similar titles found');state.fetchingResults=false;if(sgo){sgo.textContent='Go';sgo.disabled=false;}return;}
+    if(!pool.length){showToast('Nothing matched. Try another.');state.fetchingResults=false;return;}
     const out=dedupe([[...pool].sort((a,b)=>b.vote_average-a.vote_average)[0],...[...pool].sort(()=>Math.random()-0.5)]).slice(0,12).filter(Boolean);
     out.forEach(p=>addSeen(`${p.mediaType}-${p.id}`));
-    if(hl)hl.textContent=`Similar to "${esc(match.title||match.name)}"`;
+    if(pill)pill.textContent=`Like "${esc(match.title||match.name)}"`;
     state.allPicks=out;state.fetchingResults=false;
-    if(sgo){sgo.textContent='Go';sgo.disabled=false;}
     renderSwipeStack();startPopupTimer();
   }catch{
-    showToast('Something went wrong');state.fetchingResults=false;
-    if(sgo){sgo.textContent='Go';sgo.disabled=false;}
+    showToast('Try that again.');state.fetchingResults=false;
     renderError('network');
   }
 }
 
 function renderError(type){
   const wrap=$('swipeCardWrap');if(!wrap)return;
-  const msg=type==='no-results'?'Nothing matched on Netflix. Try a different mood.':'Check your connection and try again.';
-  wrap.innerHTML=`<div class="error-box"><div class="error-icon">🎬</div><div class="error-title">${type==='no-results'?'Nothing here':'Something went sideways'}</div><div class="error-body">${msg}</div><button class="error-retry" id="errorRetry">Try again</button></div>`;
+  const iconSVG=`<svg width="36" height="28" viewBox="0 0 36 28" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><rect x="1" y="4" width="22" height="20" rx="3"/><rect x="13" y="1" width="22" height="20" rx="3"/></svg>`;
+  const msg=type==='no-results'?'Nothing matched on Netflix. Pick a different mood.':'Check your connection and try again.';
+  wrap.innerHTML=`<div class="error-box"><div class="error-icon">${iconSVG}</div><div class="error-title">${type==='no-results'?'Not on Netflix tonight.':'Something went sideways'}</div><div class="error-body">${msg}</div><button class="error-retry" id="errorRetry">Try again</button></div>`;
   const retry=$('errorRetry');if(retry)retry.addEventListener('click',()=>{resetMoodSelection();initPickScreen();});
 }
 
@@ -1300,58 +1207,42 @@ if(btnAgain)btnAgain.addEventListener('click',()=>{resetMoodSelection();initPick
 if(btnRespin)btnRespin.addEventListener('click',startFlow);
 document.querySelectorAll('.results-logotype').forEach(el=>{el.style.cursor='pointer';el.addEventListener('click',()=>{resetMoodSelection();initPickScreen();});});
 
-// ── SHARE POPUP
-const POPUP_VARIANTS=[
-  {icon:'🍿',headline:n=>`Watching with someone${n?', '+n:''}?`,sub:'Send them the picks before they choose something terrible.'},
-  {icon:'🎬',headline:n=>`Share tonight's lineup${n?', '+n:''}?`,sub:'One tap and you\'re both sorted.'},
+// ── SHARE SHEET
+const SHARE_VARIANTS=[
+  {headline:n=>`Watching with someone${n?', '+n:''}?`,sub:'Send them the picks before they choose something terrible.'},
+  {headline:n=>`Share tonight${n?', '+n:''}?`,sub:"One tap and you're both sorted."},
 ];
 let popupTimer=null,popupDismissTimer=null,popupShownThisSession=false;
-const POPUP_DELAY_MS=14000;
 function showSharePopup(){
-  const overlay=$('shareOverlay');if(!overlay)return;
-  const variant=POPUP_VARIANTS[Math.floor(Math.random()*POPUP_VARIANTS.length)];
+  const ov=$('shareOverlay');if(!ov)return;
+  const v=SHARE_VARIANTS[Math.floor(Math.random()*SHARE_VARIANTS.length)];
   const name=state.profile&&state.profile.name?state.profile.name:'';
-  const icon=$('popupIcon'),headline=$('popupHeadline'),sub=$('popupSub');
-  if(icon)icon.textContent=variant.icon;
-  if(headline)headline.textContent=variant.headline(name);
-  if(sub)sub.textContent=variant.sub;
-  overlay.classList.add('active');popupShownThisSession=true;
-  clearTimeout(popupDismissTimer);popupDismissTimer=setTimeout(hideSharePopup,9000);
+  const h=$('shareHeadline'),s=$('shareSub');
+  if(h)h.textContent=v.headline(name);if(s)s.textContent=v.sub;
+  ov.classList.add('active');popupShownThisSession=true;
+  clearTimeout(popupDismissTimer);popupDismissTimer=setTimeout(hideSharePopup,10000);
+  history.pushState(null,'',location.href);
 }
 function hideSharePopup(){const ov=$('shareOverlay');if(ov)ov.classList.remove('active');clearTimeout(popupDismissTimer);}
-function startPopupTimer(){if(popupShownThisSession)return;clearTimeout(popupTimer);popupTimer=setTimeout(showSharePopup,POPUP_DELAY_MS);}
+function startPopupTimer(){if(popupShownThisSession)return;clearTimeout(popupTimer);popupTimer=setTimeout(showSharePopup,14000);}
 
-document.addEventListener('click',function(e){
-  if(e.target&&e.target.id==='onboardNext'){advanceOnboard();return;}
-  if(e.target&&e.target.id==='skipLink'){skipOnboard();return;}
-  const overlay=$('shareOverlay');
-  if(!overlay||!overlay.classList.contains('active'))return;
-  if(e.target===overlay){hideSharePopup();return;}
-  if(e.target.id==='sharePopupClose'||e.target.closest('#sharePopupClose')){hideSharePopup();return;}
-  if(e.target.id==='sharePopupShare'||e.target.closest('#sharePopupShare')){
-    const url=window.location.href;const name=state.profile&&state.profile.name||'';
-    const text=(name?name+' found':'Found')+' picks on Oya Watch: '+url;
-    if(navigator.share)navigator.share({title:'Oya Watch',text,url}).catch(()=>{});
-    else copyText(url,()=>showToast('Link copied!'));
-    hideSharePopup();return;
-  }
-  if(e.target.id==='sharePopupCopy'||e.target.closest('#sharePopupCopy')){
-    copyText(window.location.href,()=>{showToast('Link copied!');});hideSharePopup();return;
-  }
-  if(e.target.id==='shareLinkCopy'||e.target.closest('#shareLinkCopy')){
-    e.stopPropagation();copyText(window.location.href,()=>showToast('Link copied!'));return;
-  }
+const shareOvEl=$('shareOverlay');
+if(shareOvEl)shareOvEl.addEventListener('click',e=>{if(e.target===shareOvEl)hideSharePopup();});
+const shareShareBtn=$('sharePopupShare'),shareCopyBtn=$('sharePopupCopy'),shareLinkCopyBtn=$('shareLinkCopy');
+if(shareShareBtn)shareShareBtn.addEventListener('click',()=>{
+  const url=window.location.href,name=state.profile&&state.profile.name||'';
+  const text=(name?name+' found':'Found')+' picks on Oya Watch: '+url;
+  if(navigator.share)navigator.share({title:'Oya Watch',text,url}).catch(()=>{});
+  else copyText(url,()=>showToast('Copied!'));
+  hideSharePopup();
 });
-document.addEventListener('input',function(e){
-  if(e.target&&e.target.id==='nameInput'){const nxt=$('onboardNext');if(nxt)nxt.disabled=e.target.value.trim().length<2;}
-});
+if(shareCopyBtn)shareCopyBtn.addEventListener('click',()=>{copyText(window.location.href,()=>showToast('Copied!'));hideSharePopup();});
+if(shareLinkCopyBtn)shareLinkCopyBtn.addEventListener('click',()=>copyText(window.location.href,()=>showToast('Copied!')));
+
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible'&&state.profile){
-    const active=document.querySelector('.screen.active');
-    if(active&&active.id==='screen-pick'){
-      const name=state.profile.name||'',t=getTimeGreeting(),el=$('pickGreeting');
-      if(el)el.innerHTML=name?`What are you<br>watching <em>${t}, ${esc(name)}?</em>`:`What are you<br>watching <em>${t}?</em>`;
-    }
+    const ht=$('onboardHeroTime');if(ht)ht.textContent=tc().hero;
+    const wt=$('wlTitle');if(wt&&$('wlOverlay')&&$('wlOverlay').classList.contains('active'))wt.textContent=tc().watchlistTitle;
   }
 });
 
@@ -1367,7 +1258,10 @@ state.profile=loadProfile();
 state.watchlist=loadWatchlist();
 updateWLBadge();
 if(state.profile)initPickScreen();
-else{renderOnboardStep(0);showScreen('screen-onboard');}
+else{
+  const ht=$('onboardHeroTime');if(ht)ht.textContent=tc().hero;
+  showScreen('screen-onboard');
+}
 </script>
 </body>
 </html>

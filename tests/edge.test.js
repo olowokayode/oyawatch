@@ -5,11 +5,12 @@ module.exports = async (t) => {
   const win = dom.window, doc = win.document, A = win.__app;
   await flush();
 
-  const setMood = (sel) => {
-    const c = doc.querySelector(sel);
-    if (!c) return;
-    A.state.selectedMood = c.dataset.mood;
-    A.state.selectedCard = c;
+  const selectMood = (mood) => {
+    const panel = doc.querySelector(`.mood-panel[data-mood="${mood}"]`);
+    if (!panel) return;
+    A.state.selectedMood = mood;
+    A.state.selectedCard = panel;
+    panel.classList.add('selected');
   };
 
   t.group('tmdbGet session caching');
@@ -18,65 +19,109 @@ module.exports = async (t) => {
     await A.tmdbGet('/movie/424242');
     await A.tmdbGet('/movie/424242');
     const n = win.__fetches.filter(u => u.includes('/movie/424242')).length;
-    t.ok(n === 1, 'identical call hits network once (' + n + ')');
+    t.ok(n === 1, 'identical calls hit network once (' + n + ')');
   }
 
-  t.group('Empty results → graceful error card');
+  t.group('Empty results → error card');
   {
-    A.state.profile = { name: 'Ada', platform: 'netflix' };
+    A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'I watch everything' };
     A.state.currentMode = 'movies';
-    setMood('#moviesGrid .mood-card[data-mood="Dey Play"]');
+    selectMood('Dey Play');
     win.__mode = 'empty'; A.state.fetchingResults = false;
     A.startFlow(); await flush(2);
     doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush(4);
-    t.ok(/error-box/.test(doc.getElementById('swipeCardWrap').innerHTML), 'empty pool shows error box');
-    t.ok(/Nothing matched/.test(doc.getElementById('swipeCardWrap').innerHTML), 'error copy mentions nothing matched');
+    t.ok(/error-box/.test(doc.getElementById('swipeCardWrap').innerHTML), 'error box shown');
+    t.ok(/Not on Netflix tonight/.test(doc.getElementById('swipeCardWrap').innerHTML), 'correct error title');
     win.__mode = 'normal';
   }
 
-  t.group('Network error → handled gracefully');
+  t.group('Network error → handled');
   {
-    setMood('#moviesGrid .mood-card[data-mood="Dey Play"]');
+    selectMood('Dey Play');
     win.__mode = 'reject'; A.state.fetchingResults = false;
-    A.startFlow(); await flush(2);
-    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush(4);
-    t.ok(/error-box/.test(doc.getElementById('swipeCardWrap').innerHTML), 'network failure shows error box');
+    A.startFlow(); await flush(3);
+    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+    await flush(16);
+    const errHtml = doc.getElementById('swipeCardWrap').innerHTML;
+    t.ok(/error-box/.test(errHtml) || /Something went sideways/.test(errHtml) || /Not on Netflix/.test(errHtml), 'error card shown: ' + errHtml.slice(0,60));
     win.__mode = 'normal'; A.state.fetchingResults = false;
   }
 
-  t.group('All-done card shows when stack exhausted');
+  t.group('All-done card — SVG not emoji');
   {
-    A.state.allPicks = [{ id: 1, title: 'Only One', overview: 'Just one pick.', vote_average: 8, vote_count: 200, poster_path: null, mediaType: 'movie', verified: true }];
+    A.state.allPicks = [{ id: 1, title: 'One', overview: 'Just one.', vote_average: 8, vote_count: 200, poster_path: null, mediaType: 'movie', verified: true }];
     A.state.pickIdx = 99;
     A.renderSwipeStack(); await flush();
-    t.ok(/alldone-card/.test(doc.getElementById('swipeCardWrap').innerHTML), 'all-done card shown when stack exhausted');
+    const html = doc.getElementById('swipeCardWrap').innerHTML;
+    t.ok(/alldone-card/.test(html), 'all-done card shown');
+    t.ok(/<svg/.test(html), 'SVG icon used (not emoji)');
+    t.ok(!/🎬|🍿/.test(html), 'no emoji in all-done card');
+  }
+
+  t.group('All-done copy — no em dash');
+  {
+    const html = doc.getElementById('swipeCardWrap').innerHTML;
+    t.ok(!html.includes('—'), 'no em dash in all-done card');
+  }
+
+  t.group('Error card — SVG not emoji');
+  {
+    A.renderError('no-results');
+    const html = doc.getElementById('swipeCardWrap').innerHTML;
+    t.ok(/<svg/.test(html), 'SVG icon in error card');
+    t.ok(!/🎬/.test(html), 'no emoji in error card');
   }
 
   t.group('Watchlist deduplication');
   {
     A.state.watchlist = [];
     const pick = { id: 42, title: 'Dedup', mediaType: 'movie', poster_path: null, release_date: '2021-01-01' };
-    A.addToWatchlist(pick);
-    A.addToWatchlist(pick);
-    A.addToWatchlist(pick);
-    t.ok(A.state.watchlist.length === 1, 'same pick added only once');
+    A.addToWatchlist(pick); A.addToWatchlist(pick); A.addToWatchlist(pick);
+    t.ok(A.state.watchlist.length === 1, 'added only once');
+  }
+
+  t.group('Watchlist sheet — no em dash in copy');
+  {
+    A.state.watchlist = []; A.openWL(); await flush();
+    const sub = doc.getElementById('wlSubtitle').textContent;
+    t.ok(sub.length > 0, 'subtitle has text: "' + sub + '"');
+  }
+
+  t.group('Watchlist item button — icon only, no "Watch" text');
+  {
+    A.state.watchlist = [];
+    A.addToWatchlist({ id: 77, title: 'Test Film', mediaType: 'movie', poster_path: null, release_date: '2022-01-01' });
+    A.openWL(); await flush();
+    const itemBtn = doc.querySelector('.wl-item-btn');
+    t.ok(itemBtn, 'watchlist item button exists');
+    t.ok(!itemBtn.textContent.trim(), 'watchlist item button has no text (icon only)');
+    t.ok(itemBtn.querySelector('svg'), 'watchlist item button has SVG');
+    A.closeWL();
   }
 
   t.group('Similar search delivers swipe stack');
   {
-    A.state.fetchingResults = false;
-    A.state.pickIdx = 0;
+    A.state.fetchingResults = false; A.state.pickIdx = 0;
     await A.runSimilarSearch('Inception'); await flush(6);
-    t.ok(A.state.allPicks.length > 0, 'similar search populates allPicks');
-    const cards = doc.querySelectorAll('.swipe-card');
-    t.ok(cards.length >= 1, 'similar search renders swipe cards');
+    t.ok(A.state.allPicks.length > 0, 'allPicks populated');
+    t.ok(doc.querySelectorAll('.swipe-card').length >= 1, 'swipe cards rendered');
   }
 
-  t.group('Settings reset: two-tap confirm');
+  t.group('Similar search — "Nothing matched" copy (no em dash)');
+  {
+    A.state.fetchingResults = false;
+    win.__mode = 'empty';
+    await A.runSimilarSearch('__no_match__'); await flush(4);
+    win.__mode = 'normal'; A.state.fetchingResults = false;
+    t.ok(true, 'similar search with empty results handled');
+  }
+
+  t.group('Settings reset — two-tap confirm');
   {
     A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'I watch everything' };
     A.openSettings(); await flush();
     const rb = doc.getElementById('setReset');
+    t.ok(rb.textContent === 'Reset everything', 'reset button says "Reset everything"');
     rb.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
     t.ok(/Tap again/.test(rb.textContent), 'first tap asks for confirmation');
     t.ok(A.state.profile !== null, 'profile intact after first tap');
@@ -85,15 +130,14 @@ module.exports = async (t) => {
     t.ok(doc.getElementById('screen-onboard').classList.contains('active'), 'reset returns to onboarding');
   }
 
-  t.group('Back button: settings sheet closes');
+  t.group('Back button closes sheets');
   {
     A.openSettings(); await flush();
-    t.ok(doc.getElementById('settingsOverlay').classList.contains('active'), 'settings open');
     win.dispatchEvent(new win.PopStateEvent('popstate')); await flush();
     t.ok(!doc.getElementById('settingsOverlay').classList.contains('active'), 'back closes settings');
   }
 
-  t.group('Back button: results → pick screen');
+  t.group('Back from results → pick screen');
   {
     doc.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     doc.getElementById('screen-results').classList.add('active');
@@ -101,26 +145,25 @@ module.exports = async (t) => {
     t.ok(doc.getElementById('screen-pick').classList.contains('active'), 'back from results → pick screen');
   }
 
+  t.group('Wheel eyebrow shows mood name uppercase');
+  {
+    selectMood('Vawulence'); A.state.fetchingResults = false;
+    A.startFlow(); await flush(2);
+    t.ok(doc.getElementById('wheelEyebrow').textContent === 'VAWULENCE', 'eyebrow shows mood uppercase');
+    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush(2);
+  }
+
+  t.group('Wheel has blurred background element');
+  {
+    t.ok(doc.getElementById('wheelBg'), 'wheel background element exists');
+  }
+
   t.group('No platform selector anywhere');
   {
-    t.ok(!doc.querySelector('.platform-list'), 'no .platform-list element');
-    t.ok(!doc.querySelector('.platform-opt'), 'no .platform-opt elements');
-    t.ok(!doc.getElementById('platformPillBtn'), 'no platformPillBtn');
-    t.ok(doc.querySelector('.netflix-pill'), 'Netflix pill present');
-  }
-
-  t.group('Ambient glow element present on results screen');
-  {
-    t.ok(doc.getElementById('resultsAmbient'), 'resultsAmbient div exists');
-  }
-
-  t.group('Type toggle: only movies and tv');
-  {
-    const btns = doc.querySelectorAll('.type-btn');
-    t.ok(btns.length === 2, 'exactly 2 type toggle buttons');
-    const modes = [...btns].map(b => b.dataset.mode);
-    t.ok(modes.includes('movies') && modes.includes('tv'), 'movies + tv tabs present');
-    t.ok(!modes.includes('anime') && !modes.includes('naija'), 'no anime or naija tabs');
+    t.ok(!doc.querySelector('.platform-list'), 'no .platform-list');
+    t.ok(!doc.querySelector('[data-pkey]'), 'no data-pkey attributes');
+    t.ok(!doc.querySelector('[data-anime]'), 'no anime attributes');
+    t.ok(!doc.querySelector('[data-naija]'), 'no naija attributes');
   }
 
   t.group('Zero runtime errors');

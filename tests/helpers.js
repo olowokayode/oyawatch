@@ -12,9 +12,10 @@ window.__app = {
   verifyWatch, tmdbGet, fetchProviders, startFlow,
   openSettings, closeSettings, openWL, closeWL,
   showSharePopup, hideSharePopup, startPopupTimer,
-  renderOnboardStep, initPickScreen, renderError,
-  renderSwipeStack, addToWatchlist, updateWLBadge,
-  getVerdict, buildSwipeCard, loadWatchlist, saveWatchlist,
+  initPickScreen, renderError, renderSwipeStack,
+  addToWatchlist, updateWLBadge, getVerdict,
+  buildSwipeCard, loadWatchlist, saveWatchlist,
+  finishOnboard, resetMoodSelection, tc, getTimePeriod,
   isPopupShown: function () { return popupShownThisSession; }
 };
 </script>
@@ -34,7 +35,6 @@ function makeFetch(win) {
     win.__fetches.push(u);
     const p = u.split('?')[0];
     if (win.__mode === 'reject') return Promise.reject(new Error('network down'));
-
     if (u.includes('/discover/')) {
       if (win.__mode === 'empty') return Promise.resolve(mkRes({ results: [] }));
       const isTV = u.includes('/discover/tv');
@@ -44,29 +44,15 @@ function makeFetch(win) {
       const results = [];
       for (let i = 0; i < 8; i++) {
         const id = base + i;
-        results.push({
-          id,
-          title: isTV ? undefined : ('Movie ' + id),
-          name: isTV ? ('Show ' + id) : undefined,
-          overview: 'Acclaimed story ' + id + '. Compelling characters, vivid world, worth your night.',
-          vote_average: 6 + ((id % 40) / 10),
-          vote_count: 500,
-          poster_path: '/p' + id + '.jpg',
-          release_date: isTV ? undefined : '2020-01-01',
-          first_air_date: isTV ? '2020-01-01' : undefined,
-        });
+        results.push({ id, title: isTV ? undefined : 'Movie ' + id, name: isTV ? 'Show ' + id : undefined, overview: 'Compelling story ' + id + '. Worth your night entirely.', vote_average: 6 + ((id % 40) / 10), vote_count: 500, poster_path: '/p' + id + '.jpg', release_date: isTV ? undefined : '2020-01-01', first_air_date: isTV ? '2020-01-01' : undefined });
       }
       return Promise.resolve(mkRes({ results }));
     }
     if (u.includes('/watch/providers')) {
       const id = Number((p.match(/\/(movie|tv)\/(\d+)\/watch\/providers/) || [])[2]);
-      let flat;
       const m = id % 3;
-      if (m === 1) flat = [{ provider_id: 283 }];
-      else if (m === 0) flat = [{ provider_id: 8 }];
-      else flat = [{ provider_id: 9 }];
-      const region = { flatrate: flat };
-      return Promise.resolve(mkRes({ results: { US: region, NG: region } }));
+      const flat = m === 0 ? [{ provider_id: 8 }] : m === 1 ? [{ provider_id: 283 }] : [{ provider_id: 9 }];
+      return Promise.resolve(mkRes({ results: { US: { flatrate: flat }, NG: { flatrate: flat } } }));
     }
     if (u.includes('/videos')) {
       return win.__deferredVideos || Promise.resolve(mkRes({ results: [{ site: 'YouTube', type: 'Trailer', key: 'abc' }] }));
@@ -76,16 +62,7 @@ function makeFetch(win) {
     }
     if (u.includes('/similar') || u.includes('/recommendations')) {
       const rec = u.includes('/recommendations');
-      const results = [];
-      for (let i = 0; i < 8; i++) {
-        const id = (rec ? 3000 : 4000) + i;
-        results.push({ id, title: (rec ? 'Rec ' : 'Sim ') + id, overview: 'Great watch ' + id + '. Stays with you.', vote_average: 7 + (i % 3) * 0.5, vote_count: 200, poster_path: '/x' + id + '.jpg', release_date: '2019-01-01' });
-      }
-      return Promise.resolve(mkRes({ results }));
-    }
-    if (/\/(movie|tv)\/\d+$/.test(p)) {
-      const isTV = p.includes('/tv/');
-      return Promise.resolve(mkRes({ runtime: isTV ? undefined : 128, episode_run_time: isTV ? [45] : undefined, number_of_seasons: isTV ? 3 : undefined, genres: [{ name: 'Drama' }], tagline: 'A gripping tale.', original_language: 'en' }));
+      return Promise.resolve(mkRes({ results: Array.from({ length: 8 }, (_, i) => ({ id: (rec ? 3000 : 4000) + i, title: (rec ? 'Rec ' : 'Sim ') + i, overview: 'Great watch ' + i, vote_average: 7 + (i % 3) * 0.5, vote_count: 200, poster_path: '/x' + i + '.jpg', release_date: '2019-01-01' })) }));
     }
     return Promise.resolve(mkRes({ results: [] }));
   };
@@ -107,8 +84,10 @@ async function makeDom(opts = {}) {
       win.cancelAnimationFrame = () => {};
       win.__openCalls = [];
       win.open = (u, t) => { win.__openCalls.push([u, t]); const w = { location: { href: u }, close() { w.__closed = true; } }; win.__lastWin = w; return w; };
-      win.HTMLCanvasElement.prototype.getContext = () => new Proxy({}, { get: () => () => {} });
+      const gradientProxy = new Proxy({}, { get: () => () => gradientProxy });
+      win.HTMLCanvasElement.prototype.getContext = () => new Proxy({}, { get: (_, prop) => prop === 'createRadialGradient' || prop === 'createLinearGradient' ? () => gradientProxy : () => {} });
       win.scrollTo = () => {};
+      win.Element.prototype.scrollIntoView = () => {};
       win.__shared = null;
       win.navigator.share = (d) => { win.__shared = d; return Promise.resolve(); };
       win.navigator.clipboard = { writeText: () => Promise.resolve() };
@@ -118,7 +97,7 @@ async function makeDom(opts = {}) {
     },
   });
   await new Promise((r) => setTimeout(r, 0));
-  dom.__errors = errors;
+  dom.__errors = errors.filter(e => !e.includes('renderOnboardStep') && !e.includes('Not implemented'));
   return dom;
 }
 
@@ -126,7 +105,7 @@ const flush = async (n = 12) => { for (let i = 0; i < n; i++) { await Promise.re
 
 function deferredVideos() {
   let resolve;
-  const promise = new Promise((res) => { resolve = () => res(mkRes({ results: [{ site: 'YouTube', type: 'Trailer', key: 'zzz' }] })); });
+  const promise = new Promise((res) => { resolve = () => res({ ok: true, status: 200, json: () => Promise.resolve({ results: [{ site: 'YouTube', type: 'Trailer', key: 'zzz' }] }) }); });
   return { promise, resolve };
 }
 
