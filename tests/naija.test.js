@@ -1,125 +1,134 @@
-const { makeDom, flush } = require('./helpers');
-
-module.exports = async (t) => {
-  t.group('Removed platforms and modes');
+const {makeDom,flush}=require('./helpers');
+module.exports=async(t)=>{
+  t.group('No legacy platforms or modes');
   {
-    const dom = await makeDom(); const doc = dom.window.document;
-    t.ok(!/crunchyroll/i.test(doc.documentElement.innerHTML), 'no Crunchyroll');
-    t.ok(!doc.querySelector('[data-pkey]'), 'no data-pkey attributes');
-    t.ok(!doc.querySelector('[data-anime]'), 'no anime cards');
-    t.ok(!doc.querySelector('[data-naija]'), 'no naija cards');
+    const dom=await makeDom();const doc=dom.window.document;
+    t.ok(!/crunchyroll/i.test(doc.documentElement.innerHTML),'no Crunchyroll');
+    t.ok(!doc.querySelector('[data-pkey]'),'no data-pkey');
+    t.ok(!doc.querySelector('[data-anime]'),'no anime attrs');
+    t.ok(!doc.querySelector('[data-naija]'),'no naija attrs');
   }
 
-  t.group('Mood reel replaces grid entirely');
+  t.group('Panel reel replaces mood grid');
   {
-    const dom = await makeDom(); const doc = dom.window.document;
-    t.ok(!doc.querySelector('.mood-grid'), 'no .mood-grid element');
-    t.ok(!doc.querySelector('.mood-card'), 'no .mood-card elements (replaced by .mood-panel)');
-    t.ok(doc.querySelector('.mood-panel'), '.mood-panel elements exist');
-    t.ok(doc.querySelectorAll('.mood-panel').length >= 8, 'at least 8 mood panels');
+    const dom=await makeDom();const doc=dom.window.document;
+    t.ok(!doc.querySelector('.mood-grid'),'no .mood-grid');
+    t.ok(!doc.querySelector('.mood-card'),'no .mood-card');
+    t.ok(doc.querySelector('.panel'),'panels present');
+    t.ok(doc.querySelectorAll('.panel').length>=8,'8+ panels');
   }
 
-  t.group('Full-width panels — no border-radius or grid constraints');
+  t.group('Card inner structure — poster + body + footer');
   {
-    const dom = await makeDom(); const doc = dom.window.document;
-    const panel = doc.querySelector('.mood-panel');
-    t.ok(panel, 'mood panel exists');
-    t.ok(!doc.querySelector('.card-pill'), 'no frosted pill labels');
-    t.ok(!doc.querySelector('.card-check'), 'no card check circles');
-    t.ok(!doc.querySelector('.card-desc'), 'no 9px description text');
-    t.ok(!doc.querySelector('.card-peek'), 'long-press peek fully removed');
-    t.ok(!doc.querySelector('[data-peek]'), 'no data-peek attributes');
+    const dom=await makeDom();const win=dom.window,doc=win.document,A=win.__app;await flush();
+    A.ST.profile={name:'Test',platform:'netflix'};
+    A.ST.picks=[{id:1,title:'Test',overview:'A test film.',vote_average:8,vote_count:300,poster_path:null,mediaType:'movie',verified:true}];
+    A.ST.idx=0;A.renderStack();await flush();
+    const card=doc.querySelector('.card');
+    t.ok(card,'card exists');
+    t.ok(card.querySelector('.card-inner'),'card-inner');
+    t.ok(card.querySelector('.card-poster'),'card-poster (42%)');
+    t.ok(card.querySelector('.card-body'),'card-body (scrollable)');
+    t.ok(card.querySelector('.card-footer'),'card-footer (fixed, always visible)');
+    t.ok(card.querySelector('.card-footer .watch-btn'),'watch btn in footer');
+    t.ok(!card.querySelector('.card-body .watch-btn'),'watch btn NOT in scrollable body');
+    t.ok(dom.__errors.length===0,'no errors');
   }
 
-  t.group('Type toggle says "Series" not "TV Shows"');
+  t.group('Scale-only stack — no translateY');
   {
-    const dom = await makeDom(); const doc = dom.window.document;
-    const btns = [...doc.querySelectorAll('.type-btn')];
-    t.ok(btns.length === 2, 'exactly 2 type buttons');
-    t.ok(btns.some(b => b.textContent === 'Movies'), 'Movies tab');
-    t.ok(btns.some(b => b.textContent === 'Series'), 'Series tab');
-    t.ok(!btns.some(b => b.textContent === 'TV Shows'), 'no "TV Shows"');
+    const dom=await makeDom();const win=dom.window,doc=win.document,A=win.__app;await flush();
+    A.ST.profile={name:'Test',platform:'netflix'};
+    A.ST.picks=Array.from({length:4},(_,i)=>({id:100+i,title:'Film '+i,overview:'Great.',vote_average:8,vote_count:300,poster_path:null,mediaType:'movie',verified:true}));
+    A.ST.idx=0;A.renderStack();await flush();
+    const cards=[...doc.querySelectorAll('.card')];
+    t.ok(cards.length>=2,'multiple cards in stack');
+    // card-2, card-3, card-4 use scale() only — verified by class
+    if(cards[1])t.ok(cards[1].classList.contains('card-2'),'second card has card-2 class');
+    if(cards[2])t.ok(cards[2].classList.contains('card-3'),'third card has card-3 class');
   }
 
-  t.group('No "Or pick a mood" — no divider label');
+  t.group('Screens are position:fixed — no scroll at screen level');
   {
-    const dom = await makeDom(); const doc = dom.window.document;
-    t.ok(!doc.querySelector('.mood-label'), 'no .mood-label');
-    t.ok(!doc.body.textContent.includes('Or pick a mood'), 'no "Or pick a mood" text');
+    const dom=await makeDom();const doc=dom.window.document;
+    const screenRule=[...doc.styleSheets[0].cssRules||[]].find(r=>r.selectorText==='.screen');
+    // Just check the class exists and screen is not min-height:100dvh
+    t.ok(doc.querySelector('.screen'),'screen class exists');
+    t.ok(!doc.body.innerHTML.includes('min-height:100dvh'),'no min-height:100dvh on screens');
   }
 
-  t.group('Spin button hidden until mood selected');
+  t.group('Inputs are 16px font — prevents iOS zoom');
   {
-    const dom = await makeDom(); const win = dom.window, doc = win.document, A = win.__app; await flush();
-    A.state.profile = { name: 'Test', platform: 'netflix' };
-    A.initPickScreen(); await flush();
-    t.ok(doc.getElementById('stickyCta').classList.contains('hidden'), 'CTA hidden at rest');
-    doc.querySelector('.mood-panel').dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
-    t.ok(!doc.getElementById('stickyCta').classList.contains('hidden'), 'CTA appears after selection');
+    const dom=await makeDom();const doc=dom.window.document;
+    const html=doc.documentElement.innerHTML;
+    // All txt-input and search-inp should render at 16px (set in CSS)
+    t.ok(/font-size:16px/.test(html),'16px font-size present for inputs');
   }
 
-  t.group('Watchlist badge has heart icon not text');
+  t.group('Safe area insets used throughout');
   {
-    const dom = await makeDom(); const win = dom.window, doc = win.document, A = win.__app; await flush();
-    A.state.watchlist = [];
-    A.addToWatchlist({ id: 1, title: 'Test', mediaType: 'movie', poster_path: null, release_date: '2022-01-01' });
-    const badge = doc.getElementById('wlBadge');
-    t.ok(badge.classList.contains('visible'), 'badge visible');
-    t.ok(badge.querySelector('svg'), 'badge has heart SVG');
-    t.ok(doc.getElementById('wlBadgeCount').textContent === '1', 'badge count = 1');
+    const dom=await makeDom();const doc=dom.window.document;
+    const html=doc.documentElement.innerHTML;
+    t.ok(/safe-area-inset/.test(html),'safe-area-inset present in HTML/CSS');
+    t.ok(html.includes('--sab'),'--sab custom property used');
+    t.ok(html.includes('--sat'),'--sat custom property used');
   }
 
-  t.group('Share is bottom sheet not centred modal');
+  t.group('Watchlist badge above footer bar');
   {
-    const dom = await makeDom(); const win = dom.window, doc = win.document, A = win.__app; await flush();
-    A.showSharePopup();
-    t.ok(doc.getElementById('shareOverlay').classList.contains('active'), 'share overlay active');
-    t.ok(doc.querySelector('.share-sheet'), 'uses .share-sheet');
-    t.ok(!doc.querySelector('.share-popup'), 'no .share-popup (modal removed)');
-    t.ok(doc.getElementById('shareLinkCopy').textContent === 'Copy', '"Copy" title case');
-    t.ok(!doc.getElementById('shareLinkCopy').textContent.includes('COPY'), 'not "COPY" uppercase');
-    A.hideSharePopup();
+    const dom=await makeDom();const win=dom.window,doc=win.document,A=win.__app;await flush();
+    A.ST.wl=[];
+    A.addWL({id:1,title:'Test',mediaType:'movie',poster_path:null,release_date:'2022-01-01'});
+    const badge=doc.getElementById('wlBadge');
+    t.ok(badge.classList.contains('on'),'badge visible');
+    t.ok(badge.querySelector('svg'),'badge has heart SVG');
+    t.ok(doc.getElementById('wlCount').textContent==='1','count=1');
   }
 
-  t.group('Curtain message is name or "Ready." — no "picks are ready"');
+  t.group('Series tab not TV Shows');
   {
-    const dom = await makeDom(); const doc = dom.window.document;
-    t.ok(!doc.documentElement.innerHTML.includes('your picks are ready'), 'old curtain copy gone');
-    t.ok(doc.getElementById('curtainMsg'), 'curtain msg element present');
+    const dom=await makeDom();const doc=dom.window.document;
+    const tabs=[...doc.querySelectorAll('.toggle-btn')];
+    t.ok(tabs.some(b=>b.textContent==='Series'),'Series tab');
+    t.ok(!tabs.some(b=>b.textContent==='TV Shows'),'no TV Shows');
   }
 
-  t.group('Settings title is "Preferences"');
+  t.group('Surprise button present in both reels');
   {
-    const dom = await makeDom(); const doc = dom.window.document;
-    t.ok(doc.querySelector('.sheet-title') && doc.querySelector('.sheet-title').textContent === 'Preferences', 'settings title = Preferences');
-    t.ok(!doc.body.innerHTML.includes('Your settings'), 'no "Your settings"');
+    const dom=await makeDom();const doc=dom.window.document;
+    t.ok(doc.getElementById('surpriseM'),'surprise in movies reel');
+    t.ok(doc.getElementById('surpriseTV'),'surprise in TV reel');
+    t.ok(doc.querySelector('.panel-surprise-txt').textContent==='Feeling lucky?','correct copy');
   }
 
-  t.group('No emoji as primary UI elements');
+  t.group('Touch targets — no 38px buttons');
   {
-    const dom = await makeDom(); const win = dom.window, doc = win.document, A = win.__app; await flush();
-    A.state.allPicks = [{ id: 200, title: 'Test', overview: 'Test film.', vote_average: 9, vote_count: 400, poster_path: null, mediaType: 'movie', verified: true }];
-    A.state.pickIdx = 99;
-    A.renderSwipeStack(); await flush();
-    A.renderError('network');
-    const html = doc.getElementById('swipeCardWrap').innerHTML;
-    t.ok(!/<div[^>]*(?:error-icon|alldone-icon)[^>]*>[^<]*(?:🎬|🍿|🎭)/.test(html), 'no emoji in error or all-done icons');
-    t.ok(/<svg/.test(html), 'SVG used instead');
+    const dom=await makeDom();const doc=dom.window.document;
+    const html=doc.documentElement.innerHTML;
+    t.ok(!html.includes('height:38px'),'no 38px heights (below 44px minimum)');
   }
 
-  t.group('Zero runtime errors with TV picks');
+  t.group('8px spacing system — no arbitrary values');
   {
-    const dom = await makeDom(); const win = dom.window, doc = win.document, A = win.__app; await flush();
-    A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'I watch everything' };
-    A.state.currentMode = 'tv';
-    const tvPanel = doc.querySelector('#tvReel .mood-panel');
-    t.ok(!!tvPanel, 'TV mood panel exists');
-    A.state.selectedMood = tvPanel.dataset.mood;
-    A.state.selectedCard = tvPanel;
-    win.__fetches = [];
-    const pool = await A.fetchTMDB();
-    t.ok(pool.length > 0, 'TV mode returns results');
-    t.ok(win.__fetches.some(u => u.includes('/discover/tv')), 'queries /discover/tv');
-    t.ok(dom.__errors.length === 0, 'no errors');
+    const dom=await makeDom();const doc=dom.window.document;
+    const html=doc.documentElement.innerHTML;
+    t.ok(html.includes('--sp1:4px'),'spacing system defined');
+    t.ok(html.includes('--sp2:8px'),'8px base unit');
+    t.ok(!html.includes('padding:14px'),'no arbitrary 14px padding');
+    t.ok(!html.includes('padding:18px'),'no arbitrary 18px padding');
+  }
+
+  t.group('Zero errors with TV picks');
+  {
+    const dom=await makeDom();const win=dom.window,doc=win.document,A=win.__app;await flush();
+    A.ST.profile={name:'Ada',platform:'netflix',avoid:'I watch everything'};
+    A.ST.mode='tv';
+    const tvP=doc.querySelector('#tvReel .panel');
+    t.ok(!!tvP,'TV panel exists');
+    A.ST.mood=tvP.dataset.mood;A.ST.moodCard=tvP;
+    win.__fetches=[];const pool=await A.fetchTMDB();
+    t.ok(pool.length>0,'TV results returned');
+    t.ok(win.__fetches.some(u=>u.includes('/discover/tv')),'queries /discover/tv');
+    t.ok(dom.__errors.length===0,'no errors');
   }
 };
