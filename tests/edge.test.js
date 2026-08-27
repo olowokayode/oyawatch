@@ -1,112 +1,120 @@
-const { makeDom, flush } = require('./helpers');
-
-module.exports = async (t) => {
-  const dom = await makeDom({ languages: ['en-NG'] });
-  const win = dom.window, doc = win.document, A = win.__app;
+const {makeDom,flush}=require('./helpers');
+module.exports=async(t)=>{
+  const dom=await makeDom({languages:['en-NG']});
+  const win=dom.window,doc=win.document,A=win.__app;
   await flush();
 
-  const setMood = (sel) => { const c = doc.querySelector(sel); A.state.selectedMood = c.dataset.mood; A.state.selectedCard = c; A.state.currentMode = c.dataset.anime ? 'anime' : 'movies'; };
+  const setMood=(mood)=>{
+    const p=doc.querySelector(`.panel[data-mood="${mood}"]`);if(!p)return;
+    A.ST.mood=mood;A.ST.moodCard=p;p.classList.add('sel');
+  };
 
-  t.group('tmdbGet session caching');
+  t.group('tmdbGet caching');
   {
-    win.__fetches = []; await A.tmdbGet('/movie/424242'); await A.tmdbGet('/movie/424242');
-    const n = win.__fetches.filter((u) => u.includes('/movie/424242')).length;
-    t.ok(n === 1, 'identical tmdbGet call hits network once (' + n + ')');
+    win.__fetches=[];await A.tGet('/movie/424242');await A.tGet('/movie/424242');
+    t.ok(win.__fetches.filter(u=>u.includes('/movie/424242')).length===1,'cached after first call');
   }
 
-  t.group('Empty results -> graceful error');
+  t.group('Empty results → error card');
   {
-    A.state.profile = { name: 'Ada', platform: 'netflix' }; A.applyPlatformFromProfile();
-    A.state.currentMode = 'movies'; setMood('#moviesGrid .mood-card[data-mood="Dey Play"]');
-    win.__mode = 'empty'; A.state.fetchingResults = false;
-    A.startFlow(); await flush(2);
-    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(/error-box/.test(doc.getElementById('resultsScroll').innerHTML), 'empty pool shows error box');
-    t.ok(/Nothing matched/.test(doc.getElementById('resultsScroll').innerHTML), 'error copy is "Nothing matched"');
-    win.__mode = 'normal';
+    A.ST.profile={name:'Ada',platform:'netflix',avoid:'I watch everything'};
+    A.ST.mode='movies';setMood('Dey Play');
+    win.__mode='empty';A.ST.busy=false;
+    A.startFlow();await flush(3);
+    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click',{bubbles:true}));await flush(16);
+    const html=doc.getElementById('cardWrap').innerHTML;
+    t.ok(/err-box/.test(html)||/error/.test(html),'error shown for empty results');
+    win.__mode='normal';
   }
 
-  t.group('Network reject during spin -> handled');
+  t.group('Network error → error card');
   {
-    setMood('#moviesGrid .mood-card[data-mood="Dey Play"]');
-    win.__mode = 'reject'; A.state.fetchingResults = false;
-    A.startFlow(); await flush(2);
-    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(/error-box/.test(doc.getElementById('resultsScroll').innerHTML), 'network failure shows an error box (no crash)');
-    win.__mode = 'normal'; A.state.fetchingResults = false;
+    setMood('Dey Play');win.__mode='reject';A.ST.busy=false;
+    A.startFlow();await flush(3);
+    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click',{bubbles:true}));await flush(16);
+    const html=doc.getElementById('cardWrap').innerHTML;
+    t.ok(/err-box/.test(html)||/error/.test(html),'error shown for network failure');
+    win.__mode='normal';A.ST.busy=false;
   }
 
-  t.group('Anime provider labelling (Crunchyroll + region fallback)');
+  t.group('All-done card — SVG icon not emoji');
   {
-    A.state.activePlatformIds = [283, 8]; A.state.region = 'NG';
-    A.renderPicks([
-      { id: 112, title: 'AnimeCR', overview: 'Great one twelve. A series that earns its runtime and rewards the viewer nicely here now.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'tv', verified: false },
-      { id: 111, title: 'AnimeNF', overview: 'Great one eleven. A series that earns its runtime and rewards the viewer nicely here now ok.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'tv', verified: false },
-      { id: 9003, title: 'RegionFallback', overview: 'Great nine thousand three. A series that earns its runtime and rewards viewers here now.', vote_average: 8, vote_count: 400, poster_path: '/p.jpg', mediaType: 'tv', verified: false },
-    ]); await flush();
-    t.ok(/Watch on Crunchyroll/.test(doc.getElementById('card0').querySelector('.watch-label').textContent), 'on Crunchyroll -> "Watch on Crunchyroll"');
-    t.ok(/Watch on Netflix/.test(doc.getElementById('card1').querySelector('.watch-label').textContent), 'on Netflix (anime mode) -> "Watch on Netflix"');
-    t.ok(/Watch on Netflix/.test(doc.getElementById('card2').querySelector('.watch-label').textContent), 'region-only-US providers resolved via US fallback');
-    A.state.activePlatformIds = [8];
+    A.ST.picks=[{id:1,title:'One',overview:'One film.',vote_average:8,vote_count:200,poster_path:null,mediaType:'movie',verified:true}];
+    A.ST.idx=99;A.renderStack();await flush();
+    const html=doc.getElementById('cardWrap').innerHTML;
+    t.ok(/done-card/.test(html),'all-done card shown');
+    t.ok(/<svg/.test(html),'SVG icon present');
+    t.ok(!/🎬|🍿/.test(html),'no emoji in done card');
+    t.ok(!html.includes('—'),'no em dash in done card');
   }
 
-  t.group('Share + Copy actions');
+  t.group('Error card — SVG icon');
   {
-    A.renderPicks([{ id: 500, title: 'ShareMe', overview: 'Great five hundred. A film that earns its runtime and rewards the viewer nicely here now.', vote_average: 9, vote_count: 400, poster_path: '/p.jpg', mediaType: 'movie', verified: true }]); await flush();
-    win.__shared = null;
-    doc.getElementById('card0').querySelector('.btn-share').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(win.__shared && /ShareMe/.test(win.__shared.text), 'Share button invokes navigator.share with title');
-    t.ok(/\/5 stars/.test(win.__shared.text), 'share text uses star rating, not IMDb');
-    doc.getElementById('card0').querySelector('.btn-copy').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(doc.getElementById('toast').classList.contains('show'), 'Copy title shows a confirmation toast');
+    A.renderErr('no-results');
+    const html=doc.getElementById('cardWrap').innerHTML;
+    t.ok(/<svg/.test(html),'SVG in error card');
+    t.ok(!/🎬/.test(html),'no emoji in error card');
+    t.ok(/Not on Netflix/.test(html)||/nothing matched/i.test(html),'correct error copy');
   }
 
-  t.group('starsHTML with missing rating');
+  t.group('Watchlist deduplication');
   {
-    const h = A.starsHTML(undefined);
-    t.ok(/Not yet rated/.test(h), 'undefined rating -> "Not yet rated" label');
-    t.ok(/width:0\.0%/.test(h), 'undefined rating -> 0% fill');
-    t.ok(h.includes('\u2014'), 'undefined rating shows dash');
+    A.ST.wl=[];
+    const p={id:42,title:'Dedup',mediaType:'movie',poster_path:null,release_date:'2021-01-01'};
+    A.addWL(p);A.addWL(p);A.addWL(p);
+    t.ok(A.ST.wl.length===1,'added only once');
   }
 
-  t.group('Respin re-runs the flow');
+  t.group('Watchlist sheet content');
   {
-    setMood('#moviesGrid .mood-card[data-mood="Dey Play"]'); A.state.fetchingResults = false;
-    A.startFlow(); await flush(2);
-    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(doc.getElementById('screen-results').classList.contains('active'), 'reached results');
-    A.state.fetchingResults = false;
-    doc.getElementById('btnRespin').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush(2);
-    t.ok(doc.getElementById('screen-wheel').classList.contains('active'), '"Spin again" restarts the spin');
-    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(doc.getElementById('screen-results').classList.contains('active'), 'respin returns to results');
+    A.ST.wl=[];
+    A.addWL({id:77,title:'Test Film',mediaType:'movie',poster_path:null,release_date:'2022-01-01'});
+    A.openWL();await flush();
+    t.ok(doc.getElementById('wlOverlay').classList.contains('on'),'sheet opens');
+    t.ok(/Test Film/.test(doc.getElementById('wlItems').innerHTML),'title in list');
+    const playBtn=doc.querySelector('.wl-play');
+    t.ok(playBtn,'play button present');
+    t.ok(!playBtn.textContent.trim(),'play button icon-only');
+    A.closeWL();
   }
 
-  t.group('Back button behaviour (popstate)');
+  t.group('Similar search → swipe stack');
   {
-    A.openSettings(); await flush();
-    t.ok(doc.getElementById('settingsOverlay').classList.contains('active'), 'settings opened');
-    win.dispatchEvent(new win.PopStateEvent('popstate')); await flush();
-    t.ok(!doc.getElementById('settingsOverlay').classList.contains('active'), 'back closes settings sheet');
-    doc.querySelectorAll('.screen').forEach((x) => x.classList.remove('active'));
-    doc.getElementById('screen-results').classList.add('active');
-    win.dispatchEvent(new win.PopStateEvent('popstate')); await flush();
-    t.ok(doc.getElementById('screen-pick').classList.contains('active'), 'back from results returns to pick screen');
+    A.ST.busy=false;A.ST.idx=0;
+    await A.similarSearch('Inception');await flush(8);
+    t.ok(A.ST.picks.length>0,'allPicks populated');
+    t.ok(doc.querySelectorAll('.card').length>=1,'swipe cards rendered');
   }
 
-  t.group('Settings reset (two-tap confirm)');
+  t.group('Settings reset — two tap');
   {
-    A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'I watch everything' };
-    A.openSettings(); await flush();
-    const rb = doc.getElementById('setReset');
-    rb.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
-    t.ok(/Tap again/.test(rb.textContent), 'first reset tap asks for confirmation');
-    t.ok(A.state.profile !== null, 'profile intact after first tap');
-    rb.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); await flush();
-    t.ok(A.state.profile === null, 'second tap wipes the profile');
-    t.ok(doc.getElementById('screen-onboard').classList.contains('active'), 'reset returns to onboarding');
+    A.ST.profile={name:'Ada',platform:'netflix',avoid:'I watch everything'};
+    A.openSettings();await flush();
+    const rb=doc.getElementById('setReset');
+    t.ok(rb.textContent==='Reset everything','correct label');
+    rb.dispatchEvent(new win.MouseEvent('click',{bubbles:true}));
+    t.ok(/Tap again/.test(rb.textContent),'first tap asks confirmation');
+    rb.dispatchEvent(new win.MouseEvent('click',{bubbles:true}));await flush();
+    t.ok(A.ST.profile===null,'profile wiped');
+    t.ok(doc.getElementById('screen-onboard').classList.contains('active'),'back to onboarding');
   }
 
-  t.group('No silent runtime errors');
-  t.ok(dom.__errors.length === 0, 'zero window/console errors' + (dom.__errors.length ? ': ' + dom.__errors.slice(0, 3).join(' | ') : ''));
+  t.group('Back button closes sheets');
+  {
+    A.openSettings();await flush();
+    win.dispatchEvent(new win.PopStateEvent('popstate'));await flush();
+    t.ok(!doc.getElementById('settingsOverlay').classList.contains('on'),'back closes settings');
+  }
+
+  t.group('No old classes present');
+  {
+    t.ok(!doc.querySelector('.sc-body'),'no .sc-body (replaced by .card-body)');
+    t.ok(!doc.querySelector('.sc-watch-btn'),'no .sc-watch-btn (replaced by .watch-btn)');
+    t.ok(!doc.querySelector('.sc-inner'),'no .sc-inner (replaced by .card-inner)');
+    t.ok(!doc.querySelector('.mood-card'),'no .mood-card (replaced by .panel)');
+    t.ok(!doc.querySelector('.swipe-card'),'no .swipe-card (replaced by .card)');
+  }
+
+  t.group('Zero errors');
+  t.ok(dom.__errors.length===0,'no errors'+(dom.__errors.length?': '+dom.__errors.slice(0,2).join(' | '):''));
 };

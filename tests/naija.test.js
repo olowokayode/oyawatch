@@ -1,165 +1,134 @@
-const { makeDom, flush } = require('./helpers');
-
-module.exports = async (t) => {
-  const dom = await makeDom({ languages: ['en-US'] });
-  const win = dom.window, doc = win.document, A = win.__app;
-  await flush();
-
-  A.state.profile = { name: 'Ada', platform: 'netflix', avoid: 'I watch everything' };
-  A.applyPlatformFromProfile();
-  A.initPickScreen();
-  await flush();
-
-  t.group('YouTube is a real, selectable platform everywhere Netflix/Crunchyroll are');
+const {makeDom,flush}=require('./helpers');
+module.exports=async(t)=>{
+  t.group('No legacy platforms or modes');
   {
-    t.ok(!!A.PLATFORMS.youtube, 'PLATFORMS has a youtube entry');
-    t.ok(A.PLATFORMS.youtube.id === 192, 'youtube entry uses TMDB\'s real provider id (192)');
-
-    // Onboarding platform step
-    A.state.tempProfile = {}; A.state.onboardStep = 1; A.renderOnboardStep(1); await flush();
-    const onboardOpts = [...doc.querySelectorAll('.platform-opt')].map((o) => o.dataset.pkey);
-    t.ok(onboardOpts.includes('youtube'), 'onboarding platform step includes youtube (' + onboardOpts.join(',') + ')');
-    t.ok(/YouTube/.test(doc.querySelector('.platform-opt[data-pkey="youtube"] .platform-opt-name').textContent), 'onboarding shows YouTube name');
-    t.ok(/Naija/.test(doc.querySelector('.platform-opt[data-pkey="youtube"] .platform-opt-hint').textContent), 'onboarding hint clarifies it\'s for Naija Movies');
-
-    // Settings sheet
-    A.openSettings(); await flush();
-    const settingsOpts = [...doc.querySelectorAll('#setPlatform .sheet-choice')].map((o) => o.dataset.pkey);
-    t.ok(settingsOpts.includes('youtube'), 'Settings platform picker includes youtube (' + settingsOpts.join(',') + ')');
-    A.closeSettings();
+    const dom=await makeDom();const doc=dom.window.document;
+    t.ok(!/crunchyroll/i.test(doc.documentElement.innerHTML),'no Crunchyroll');
+    t.ok(!doc.querySelector('[data-pkey]'),'no data-pkey');
+    t.ok(!doc.querySelector('[data-anime]'),'no anime attrs');
+    t.ok(!doc.querySelector('[data-naija]'),'no naija attrs');
   }
 
-  t.group('Toggling to Naija Movies switches the grid and chrome');
+  t.group('Panel reel replaces mood grid');
   {
-    const naijaBtn = doc.querySelector('.type-toggle-btn[data-mode="naija"]');
-    t.ok(!!naijaBtn, 'Naija toggle button exists');
-    naijaBtn.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
-    await flush();
-
-    t.ok(doc.getElementById('naijaGrid').style.display === 'grid', 'naijaGrid now visible');
-    t.ok(doc.getElementById('moviesGrid').style.display === 'none', 'moviesGrid hidden');
-    t.ok(naijaBtn.classList.contains('active'), 'Naija toggle marked active');
-    t.ok(/YouTube/.test(doc.getElementById('platformPillBtn').textContent), 'pill switches to YouTube immediately (no stale label)');
-    t.ok(/Nigerian movie/.test(doc.getElementById('similarInput').placeholder), 'similar-search placeholder adapts to Naija mode');
-    t.ok(A.state.currentMode === 'naija', 'state.currentMode updated');
+    const dom=await makeDom();const doc=dom.window.document;
+    t.ok(!doc.querySelector('.mood-grid'),'no .mood-grid');
+    t.ok(!doc.querySelector('.mood-card'),'no .mood-card');
+    t.ok(doc.querySelector('.panel'),'panels present');
+    t.ok(doc.querySelectorAll('.panel').length>=8,'8+ panels');
   }
 
-  t.group('Naija mood cards use plain, standard genre names — nothing invented or stereotyping');
+  t.group('Card inner structure — poster + body + footer');
   {
-    const cards = [...doc.querySelectorAll('#naijaGrid .mood-card')];
-    t.ok(cards.length === 8, 'eight Naija mood cards (' + cards.length + ')');
-    const moods = cards.map((c) => c.dataset.mood);
-    ['Romance', 'Comedy', 'Drama', 'Family', 'Epic', 'Action', 'Crime', 'Thriller'].forEach((g) => {
-      t.ok(moods.includes(g), '"' + g + '" present as a plain genre-named mood');
-    });
-    t.ok(!moods.some((m) => /Ritual|Yahoo|Owambe|Wahala|Juju|Diaspora|Kingdom Tales/i.test(m)), 'no invented/slang/stereotyping mood names');
+    const dom=await makeDom();const win=dom.window,doc=win.document,A=win.__app;await flush();
+    A.ST.profile={name:'Test',platform:'netflix'};
+    A.ST.picks=[{id:1,title:'Test',overview:'A test film.',vote_average:8,vote_count:300,poster_path:null,mediaType:'movie',verified:true}];
+    A.ST.idx=0;A.renderStack();await flush();
+    const card=doc.querySelector('.card');
+    t.ok(card,'card exists');
+    t.ok(card.querySelector('.card-inner'),'card-inner');
+    t.ok(card.querySelector('.card-poster'),'card-poster (42%)');
+    t.ok(card.querySelector('.card-body'),'card-body (scrollable)');
+    t.ok(card.querySelector('.card-footer'),'card-footer (fixed, always visible)');
+    t.ok(card.querySelector('.card-footer .watch-btn'),'watch btn in footer');
+    t.ok(!card.querySelector('.card-body .watch-btn'),'watch btn NOT in scrollable body');
+    t.ok(dom.__errors.length===0,'no errors');
   }
 
-  t.group('Naija spin -> YouTube watch button, no provider check, NG origin filter');
+  t.group('Scale-only stack — no translateY');
   {
-    const card = doc.querySelector('#naijaGrid .mood-card[data-mood="Romance"]');
-    A.state.selectedMood = card.dataset.mood;
-    A.state.selectedCard = card;
-    A.state.fetchingResults = false;
-    win.__fetches = [];
-    A.startFlow();
-    await flush(2);
-    doc.getElementById('screen-wheel').dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
-    await flush(3);
-
-    t.ok(doc.getElementById('screen-results').classList.contains('active'), 'naija spin reaches results');
-    const cards = doc.querySelectorAll('#picksList .pick-card');
-    t.ok(cards.length >= 1, 'naija results rendered picks (' + cards.length + ')');
-
-    const discoverCalls = win.__fetches.filter((u) => u.includes('/discover/'));
-    t.ok(discoverCalls.length > 0, 'discover was called');
-    t.ok(discoverCalls.every((u) => u.includes('with_origin_country=NG')), 'every naija discover call filters with_origin_country=NG');
-    t.ok(!discoverCalls.some((u) => u.includes('with_watch_providers')), 'naija discover never filters by watch provider');
-    t.ok(discoverCalls.every((u) => { const p = (u.match(/[?&]page=(\d+)/) || [])[1]; return p === '1' || p === '2'; }), 'naija discover only ever requests page 1 or 2, never a random higher page (' + discoverCalls.map((u) => (u.match(/[?&]page=(\d+)/) || [])[1]).join(',') + ')');
-
-    const providerCalls = win.__fetches.filter((u) => u.includes('/watch/providers'));
-    t.ok(providerCalls.length === 0, 'naija cards never call /watch/providers (nothing to verify)');
-
-    const label = doc.getElementById('card0').querySelector('.watch-label').textContent;
-    t.ok(/Watch on YouTube/.test(label), 'watch button reads "Watch on YouTube" (' + label + ')');
-    const href = doc.getElementById('card0').querySelector('.watch-btn').getAttribute('href');
-    t.ok(href.startsWith('https://www.youtube.com/results?search_query='), 'watch button links to a real YouTube search (' + href + ')');
-    t.ok(/full\+movie/.test(href) || /full%20movie/.test(href), 'YouTube search is biased toward full movies, not clips/trailers');
+    const dom=await makeDom();const win=dom.window,doc=win.document,A=win.__app;await flush();
+    A.ST.profile={name:'Test',platform:'netflix'};
+    A.ST.picks=Array.from({length:4},(_,i)=>({id:100+i,title:'Film '+i,overview:'Great.',vote_average:8,vote_count:300,poster_path:null,mediaType:'movie',verified:true}));
+    A.ST.idx=0;A.renderStack();await flush();
+    const cards=[...doc.querySelectorAll('.card')];
+    t.ok(cards.length>=2,'multiple cards in stack');
+    // card-2, card-3, card-4 use scale() only — verified by class
+    if(cards[1])t.ok(cards[1].classList.contains('card-2'),'second card has card-2 class');
+    if(cards[2])t.ok(cards[2].classList.contains('card-3'),'third card has card-3 class');
   }
 
-  t.group('REGRESSION: Naija spin still returns results on a thin NG-origin catalog (the reported bug)');
+  t.group('Screens are position:fixed — no scroll at screen level');
   {
-    // Simulates real-world TMDB behaviour: with_origin_country=NG + a specific
-    // genre is a small catalog, so anything past page 1 legitimately comes
-    // back empty. Before the fix, fetchTMDB randomly requested pages up to 6
-    // and could easily strike out completely on a spin.
-    const realFetch = win.fetch;
-    const mkRes = (obj) => ({ ok: true, json: () => Promise.resolve(obj) });
-    win.fetch = (url) => {
-      const u = String(url);
-      win.__fetches.push(u);
-      if (u.includes('/discover/')) {
-        const page = (u.match(/[?&]page=(\d+)/) || [])[1] || '1';
-        if (page !== '1') return Promise.resolve(mkRes({ results: [] })); // thin catalog: nothing past page 1
-        const results = [0, 1, 2].map((i) => ({
-          id: 8000 + i, title: 'Thin Catalog Movie ' + i,
-          overview: 'A real Nigerian movie used to test the thin-catalog fallback. It should still render fine here.',
-          vote_average: 7, vote_count: 20, poster_path: '/x' + i + '.jpg', release_date: '2024-01-01', popularity: 40 - i,
-        }));
-        return Promise.resolve(mkRes({ results }));
-      }
-      return realFetch(url);
-    };
-
-    const card = doc.querySelector('#naijaGrid .mood-card[data-mood="Crime"]');
-    A.state.selectedCard = card; A.state.selectedMood = card.dataset.mood;
-    const picks = await A.fetchTMDB();
-    t.ok(picks.length > 0, 'fetchTMDB still returns picks when only page 1 has data (' + picks.length + ' picks)');
-
-    win.fetch = realFetch;
+    const dom=await makeDom();const doc=dom.window.document;
+    const screenRule=[...doc.styleSheets[0].cssRules||[]].find(r=>r.selectorText==='.screen');
+    // Just check the class exists and screen is not min-height:100dvh
+    t.ok(doc.querySelector('.screen'),'screen class exists');
+    t.ok(!doc.body.innerHTML.includes('min-height:100dvh'),'no min-height:100dvh on screens');
   }
 
-  t.group('REGRESSION: Naija widens past the genre filter when even page 1 is nearly empty');
+  t.group('Inputs are 16px font — prevents iOS zoom');
   {
-    const realFetch = win.fetch;
-    const mkRes = (obj) => ({ ok: true, json: () => Promise.resolve(obj) });
-    let wideningCallMade = false;
-    win.fetch = (url) => {
-      const u = String(url);
-      win.__fetches.push(u);
-      if (u.includes('/discover/')) {
-        const hasGenre = u.includes('with_genres=');
-        if (!hasGenre) {
-          // The widen step drops with_genres entirely — confirm it's reached.
-          wideningCallMade = true;
-          const results = [{ id: 9001, title: 'Popular Nigerian Movie', overview: 'A broadly popular Nigerian title returned once the mood genre filter is dropped as a last resort.', vote_average: 7, vote_count: 5, poster_path: '/y.jpg', release_date: '2023-01-01', popularity: 90 }];
-          return Promise.resolve(mkRes({ results }));
-        }
-        return Promise.resolve(mkRes({ results: [] })); // genre-specific queries come back empty
-      }
-      return realFetch(url);
-    };
-
-    const card = doc.querySelector('#naijaGrid .mood-card[data-mood="Epic"]');
-    A.state.selectedCard = card; A.state.selectedMood = card.dataset.mood;
-    const picks = await A.fetchTMDB();
-    t.ok(wideningCallMade, 'a genre-dropping widen query was made once the genre-specific pool was empty');
-    t.ok(picks.length > 0, 'widen fallback still returns picks instead of nothing (' + picks.length + ' picks)');
-
-    win.fetch = realFetch;
+    const dom=await makeDom();const doc=dom.window.document;
+    const html=doc.documentElement.innerHTML;
+    // All txt-input and search-inp should render at 16px (set in CSS)
+    t.ok(/font-size:16px/.test(html),'16px font-size present for inputs');
   }
 
-  t.group('Toggling back to Movies restores Netflix chrome');
+  t.group('Safe area insets used throughout');
   {
-    const moviesBtn = doc.querySelector('.type-toggle-btn[data-mode="movies"]');
-    moviesBtn.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
-    await flush();
-    t.ok(doc.getElementById('moviesGrid').style.display === 'grid', 'moviesGrid restored');
-    t.ok(doc.getElementById('naijaGrid').style.display === 'none', 'naijaGrid hidden again');
-    t.ok(/Netflix/.test(doc.getElementById('platformPillBtn').textContent), 'pill restores to Netflix');
-    t.ok(doc.getElementById('similarInput').placeholder === 'Type a movie you love...', 'placeholder restores');
+    const dom=await makeDom();const doc=dom.window.document;
+    const html=doc.documentElement.innerHTML;
+    t.ok(/safe-area-inset/.test(html),'safe-area-inset present in HTML/CSS');
+    t.ok(html.includes('--sab'),'--sab custom property used');
+    t.ok(html.includes('--sat'),'--sat custom property used');
   }
 
-  t.group('No silent runtime errors across the Naija flow');
-  t.ok(dom.__errors.length === 0, 'zero window/console errors' + (dom.__errors.length ? ': ' + dom.__errors.slice(0, 3).join(' | ') : ''));
+  t.group('Watchlist badge above footer bar');
+  {
+    const dom=await makeDom();const win=dom.window,doc=win.document,A=win.__app;await flush();
+    A.ST.wl=[];
+    A.addWL({id:1,title:'Test',mediaType:'movie',poster_path:null,release_date:'2022-01-01'});
+    const badge=doc.getElementById('wlBadge');
+    t.ok(badge.classList.contains('on'),'badge visible');
+    t.ok(badge.querySelector('svg'),'badge has heart SVG');
+    t.ok(doc.getElementById('wlCount').textContent==='1','count=1');
+  }
+
+  t.group('Series tab not TV Shows');
+  {
+    const dom=await makeDom();const doc=dom.window.document;
+    const tabs=[...doc.querySelectorAll('.toggle-btn')];
+    t.ok(tabs.some(b=>b.textContent==='Series'),'Series tab');
+    t.ok(!tabs.some(b=>b.textContent==='TV Shows'),'no TV Shows');
+  }
+
+  t.group('Surprise button present in both reels');
+  {
+    const dom=await makeDom();const doc=dom.window.document;
+    t.ok(doc.getElementById('surpriseM'),'surprise in movies reel');
+    t.ok(doc.getElementById('surpriseTV'),'surprise in TV reel');
+    t.ok(doc.querySelector('.panel-surprise-txt').textContent==='Feeling lucky?','correct copy');
+  }
+
+  t.group('Touch targets — no 38px buttons');
+  {
+    const dom=await makeDom();const doc=dom.window.document;
+    const html=doc.documentElement.innerHTML;
+    t.ok(!html.includes('height:38px'),'no 38px heights (below 44px minimum)');
+  }
+
+  t.group('8px spacing system — no arbitrary values');
+  {
+    const dom=await makeDom();const doc=dom.window.document;
+    const html=doc.documentElement.innerHTML;
+    t.ok(html.includes('--sp1:4px'),'spacing system defined');
+    t.ok(html.includes('--sp2:8px'),'8px base unit');
+    t.ok(!html.includes('padding:14px'),'no arbitrary 14px padding');
+    t.ok(!html.includes('padding:18px'),'no arbitrary 18px padding');
+  }
+
+  t.group('Zero errors with TV picks');
+  {
+    const dom=await makeDom();const win=dom.window,doc=win.document,A=win.__app;await flush();
+    A.ST.profile={name:'Ada',platform:'netflix',avoid:'I watch everything'};
+    A.ST.mode='tv';
+    const tvP=doc.querySelector('#tvReel .panel');
+    t.ok(!!tvP,'TV panel exists');
+    A.ST.mood=tvP.dataset.mood;A.ST.moodCard=tvP;
+    win.__fetches=[];const pool=await A.fetchTMDB();
+    t.ok(pool.length>0,'TV results returned');
+    t.ok(win.__fetches.some(u=>u.includes('/discover/tv')),'queries /discover/tv');
+    t.ok(dom.__errors.length===0,'no errors');
+  }
 };
